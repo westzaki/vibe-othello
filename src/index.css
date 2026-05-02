@@ -1,6 +1,6 @@
 :root {
-  color: #1f2933;
-  background: #f7f7f2;
+  color: #f7f5ef;
+  background: #151713;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
@@ -12,16 +12,118 @@
 
 body {
   margin: 0;
+  min-width: 320px;
 }
 
 .app {
   display: grid;
   min-height: 100vh;
   place-items: center;
+  padding: 32px 20px;
+  background:
+    radial-gradient(circle at top left, rgba(216, 169, 92, 0.24), transparent 32rem),
+    linear-gradient(135deg, #171814 0%, #24251d 48%, #111310 100%);
+}
+
+.game-shell {
+  display: grid;
+  gap: 24px;
+  justify-items: center;
+  width: min(100%, 720px);
+}
+
+.game-heading {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #d6b36a;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 h1 {
   margin: 0;
-  font-size: 2.5rem;
+  color: #fffaf0;
+  font-size: 2.75rem;
   font-weight: 700;
+  letter-spacing: 0;
+}
+
+.board-frame {
+  width: min(84vw, 560px);
+  aspect-ratio: 1;
+  padding: clamp(12px, 2.8vw, 22px);
+  border: 1px solid rgba(255, 244, 214, 0.24);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, #7b4f2c, #3a2417 42%, #9a6840 100%);
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -16px 24px rgba(0, 0, 0, 0.22);
+}
+
+.board-grid {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  overflow: hidden;
+  border: 2px solid #111d16;
+  border-radius: 4px;
+  background: #0f2418;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 18px 36px rgba(255, 255, 255, 0.06);
+}
+
+.board-square {
+  position: relative;
+  aspect-ratio: 1;
+  border-right: 1px solid rgba(10, 32, 20, 0.86);
+  border-bottom: 1px solid rgba(10, 32, 20, 0.86);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.08), transparent 44%),
+    #1f8a53;
+}
+
+.board-square:nth-child(8n) {
+  border-right: 0;
+}
+
+.board-square:nth-last-child(-n + 8) {
+  border-bottom: 0;
+}
+
+.board-square::after {
+  position: absolute;
+  inset: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(11, 39, 24, 0.42);
+  content: "";
+  transform: translate(-50%, -50%);
+}
+
+@media (max-width: 520px) {
+  .app {
+    padding: 24px 14px;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  .board-frame {
+    width: min(92vw, 560px);
+  }
 }
