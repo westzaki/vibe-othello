@@ -1,26 +1,14 @@
 import type { DiscColor } from "../game/othello";
-import type { CpuLevel, PlayerSettings, PlayerType } from "../game/players";
-
-const discs: DiscColor[] = ["black", "white"];
-const playerTypes: PlayerType[] = ["human", "cpu"];
-const cpuLevels: CpuLevel[] = [
-  "level1",
-  "level2",
-  "level3",
-  "level4",
-  "level5",
-];
-const cpuLevelLabels: Record<CpuLevel, string> = {
-  level1: "Beginner",
-  level2: "Casual",
-  level3: "Normal",
-  level4: "Expert",
-  level5: "Master",
-};
-const playerTypeLabels: Record<PlayerType, string> = {
-  cpu: "CPU",
-  human: "Human",
-};
+import {
+  cpuLevelLabels,
+  cpuLevels,
+  discColors,
+  playerTypeLabels,
+  playerTypes,
+  type CpuLevel,
+  type PlayerSettings,
+  type PlayerType,
+} from "../game/players";
 
 type PlayerControlsProps = {
   disabled: boolean;
@@ -43,7 +31,7 @@ export function PlayerControls({
       ].join(" ")}
       aria-label="Player controls"
     >
-      {discs.map((disc) => (
+      {discColors.map((disc) => (
         <div className="player-control" key={disc}>
           <span
             className={`player-control__label player-control__label--${disc}`}

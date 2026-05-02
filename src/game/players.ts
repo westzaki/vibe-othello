@@ -8,6 +8,29 @@ export type PlayerConfig = {
 };
 export type PlayerSettings = Record<DiscColor, PlayerConfig>;
 
+export const discColors = ["black", "white"] as const satisfies DiscColor[];
+export const playerTypes = ["human", "cpu"] as const satisfies PlayerType[];
+export const cpuLevels = [
+  "level1",
+  "level2",
+  "level3",
+  "level4",
+  "level5",
+] as const satisfies CpuLevel[];
+
+export const cpuLevelLabels: Record<CpuLevel, string> = {
+  level1: "Beginner",
+  level2: "Casual",
+  level3: "Normal",
+  level4: "Expert",
+  level5: "Master",
+};
+
+export const playerTypeLabels: Record<PlayerType, string> = {
+  cpu: "CPU",
+  human: "Human",
+};
+
 export function createDefaultPlayerSettings(): PlayerSettings {
   return {
     black: {
