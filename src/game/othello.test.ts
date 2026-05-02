@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   countDiscs,
+  applyMove,
   createInitialBoard,
   getFlippedSquares,
   getLegalMoves,
@@ -42,6 +43,16 @@ describe("Othello rules", () => {
     expect(nextBoard[27]).toBe("black");
   });
 
+  it("applies a move and returns the flipped squares", () => {
+    const board = createInitialBoard();
+    const result = applyMove(board, 19, "black");
+
+    expect(result?.board).not.toBe(board);
+    expect(result?.board[19]).toBe("black");
+    expect(result?.board[27]).toBe("black");
+    expect(result?.flippedSquares).toEqual([27]);
+  });
+
   it("returns flipped squares for a legal move", () => {
     const board = createInitialBoard();
 
@@ -52,6 +63,7 @@ describe("Othello rules", () => {
     const board = createInitialBoard();
 
     expect(placeDisc(board, 0, "black")).toBe(board);
+    expect(applyMove(board, 0, "black")).toBeNull();
   });
 
   it("flips discs in multiple directions", () => {

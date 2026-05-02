@@ -1,13 +1,12 @@
 import {
+  applyMove,
   countDiscs,
   createInitialBoard,
-  getFlippedSquares,
   getLegalMoves,
   getNextDisc,
   getWinner,
   hasLegalMove,
   isGameOver,
-  placeDisc,
   type Board,
   type DiscCounts,
   type DiscColor,
@@ -95,17 +94,16 @@ export function placeCurrentDisc(
     return { move: null, session };
   }
 
-  const nextBoard = placeDisc(session.board, square, session.currentDisc);
-  const flippedSquares = getFlippedSquares(
-    session.board,
-    square,
-    session.currentDisc,
-  ).sort((firstSquare, secondSquare) => firstSquare - secondSquare);
+  const appliedMove = applyMove(session.board, square, session.currentDisc);
 
-  if (nextBoard === session.board) {
+  if (appliedMove === null) {
     return { move: null, session };
   }
 
+  const nextBoard = appliedMove.board;
+  const flippedSquares = appliedMove.flippedSquares.sort(
+    (firstSquare, secondSquare) => firstSquare - secondSquare,
+  );
   const move: MoveResult = {
     flippedSquares,
     placedSquare: square,

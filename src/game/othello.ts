@@ -3,8 +3,14 @@ export type Cell = DiscColor | null;
 export type Board = Cell[];
 export type DiscCounts = Record<DiscColor, number>;
 export type Winner = DiscColor | "draw";
+export type AppliedMove = {
+  board: Board;
+  flippedSquares: number[];
+};
 
-const boardSize = 8;
+export const BOARD_SIZE = 8;
+export const SQUARE_COUNT = BOARD_SIZE * BOARD_SIZE;
+export const CORNER_SQUARES = [0, 7, 56, 63] as const;
 const directions = [
   { row: -1, column: -1 },
   { row: -1, column: 0 },
@@ -17,7 +23,7 @@ const directions = [
 ];
 
 export function createEmptyBoard(): Board {
-  return Array.from({ length: boardSize * boardSize }, () => null);
+  return Array.from({ length: SQUARE_COUNT }, () => null);
 }
 
 export function createInitialBoard(): Board {
@@ -105,10 +111,18 @@ export function getWinner(board: Board): Winner {
 }
 
 export function placeDisc(board: Board, index: number, disc: DiscColor): Board {
+  return applyMove(board, index, disc)?.board ?? board;
+}
+
+export function applyMove(
+  board: Board,
+  index: number,
+  disc: DiscColor,
+): AppliedMove | null {
   const flippedSquares = getFlippedSquares(board, index, disc);
 
   if (flippedSquares.length === 0) {
-    return board;
+    return null;
   }
 
   const nextBoard = [...board];
@@ -119,7 +133,10 @@ export function placeDisc(board: Board, index: number, disc: DiscColor): Board {
     nextBoard[flipIndex] = disc;
   }
 
-  return nextBoard;
+  return {
+    board: nextBoard,
+    flippedSquares,
+  };
 }
 
 function getDiscsToFlip(
@@ -155,17 +172,17 @@ function getDiscsToFlip(
 }
 
 function getRow(index: number): number {
-  return Math.floor(index / boardSize);
+  return Math.floor(index / BOARD_SIZE);
 }
 
 function getColumn(index: number): number {
-  return index % boardSize;
+  return index % BOARD_SIZE;
 }
 
 function getIndex(row: number, column: number): number {
-  return row * boardSize + column;
+  return row * BOARD_SIZE + column;
 }
 
 function isInsideBoard(row: number, column: number): boolean {
-  return row >= 0 && row < boardSize && column >= 0 && column < boardSize;
+  return row >= 0 && row < BOARD_SIZE && column >= 0 && column < BOARD_SIZE;
 }
