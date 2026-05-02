@@ -1,13 +1,13 @@
 import { useState } from "react";
 import {
-  createEmptyBoard,
+  createInitialBoard,
   getNextDisc,
   placeDisc,
   type Disc,
 } from "./game/othello";
 
 export default function App() {
-  const [board, setBoard] = useState(createEmptyBoard);
+  const [board, setBoard] = useState(createInitialBoard);
   const [currentDisc, setCurrentDisc] = useState<Disc>("black");
 
   function handleSquareClick(square: number) {

@@ -18,6 +18,17 @@ export function createEmptyBoard(): Board {
   return Array.from({ length: boardSize * boardSize }, () => null);
 }
 
+export function createInitialBoard(): Board {
+  const board = createEmptyBoard();
+
+  board[getIndex(3, 3)] = "white";
+  board[getIndex(3, 4)] = "black";
+  board[getIndex(4, 3)] = "black";
+  board[getIndex(4, 4)] = "white";
+
+  return board;
+}
+
 export function getNextDisc(disc: Disc): Disc {
   return disc === "black" ? "white" : "black";
 }
