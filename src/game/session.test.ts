@@ -8,6 +8,7 @@ import {
   type GameSession,
 } from "./session";
 import type { Board } from "./othello";
+import { createBoardFixture } from "../test/boardFixtures";
 
 describe("game session", () => {
   it("creates a not-started session", () => {
@@ -46,6 +47,22 @@ describe("game session", () => {
     expect(getSessionLegalMoves(session)).toEqual([]);
   });
 
+  it("keeps session end state invariants", () => {
+    const abandonedSession = endGame(startNewGame());
+
+    expect(abandonedSession.endReason).toBe("abandoned");
+    expect(abandonedSession.winner).toBeNull();
+
+    const completedBoard = createBoardFixture({ 1: "white", 2: null }, "black");
+    const completedSession = placeCurrentDisc(
+      createPlayingSession(completedBoard, "black"),
+      2,
+    ).session;
+
+    expect(completedSession.endReason).toBe("completed");
+    expect(completedSession.winner).not.toBeNull();
+  });
+
   it("places the current disc and switches turns", () => {
     const session = startNewGame();
     const result = placeCurrentDisc(session, 19);
@@ -73,12 +90,15 @@ describe("game session", () => {
   });
 
   it("passes the turn when the next player has no legal moves", () => {
-    const board: Board = Array.from({ length: 64 }, () => "black");
-
-    board[1] = "white";
-    board[2] = null;
-    board[4] = "white";
-    board[5] = null;
+    const board = createBoardFixture(
+      {
+        1: "white",
+        2: null,
+        4: "white",
+        5: null,
+      },
+      "black",
+    );
 
     const session = createPlayingSession(board, "black");
     const result = placeCurrentDisc(session, 2);
@@ -94,10 +114,7 @@ describe("game session", () => {
   });
 
   it("ends automatically when neither player has legal moves after a move", () => {
-    const board: Board = Array.from({ length: 64 }, () => "black");
-
-    board[1] = "white";
-    board[2] = null;
+    const board = createBoardFixture({ 1: "white", 2: null }, "black");
 
     const session = createPlayingSession(board, "black");
     const result = placeCurrentDisc(session, 2);

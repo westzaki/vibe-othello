@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createInitialBoard, type Board } from "../game/othello";
+import { createInitialBoard } from "../game/othello";
+import { createBoardFixture } from "../test/boardFixtures";
 import { chooseRandomMove } from "./randomCpu";
 
 describe("random CPU", () => {
@@ -12,7 +13,7 @@ describe("random CPU", () => {
   });
 
   it("returns null when there are no legal moves", () => {
-    const board: Board = Array.from({ length: 64 }, () => "black");
+    const board = createBoardFixture({}, "black");
 
     expect(chooseRandomMove(board, "white")).toBeNull();
   });

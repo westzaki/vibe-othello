@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Board } from "../game/othello";
+import { createBoardFixture } from "../test/boardFixtures";
 import { chooseMinimaxMove } from "./minimaxCpu";
 
 describe("minimax CPU", () => {
@@ -89,7 +90,7 @@ describe("minimax CPU", () => {
   });
 
   it("returns null when there are no legal moves", () => {
-    const board: Board = Array.from({ length: 64 }, () => "black");
+    const board = createBoardFixture({}, "black");
 
     expect(chooseMinimaxMove(board, "white")).toBeNull();
   });

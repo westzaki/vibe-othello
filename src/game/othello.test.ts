@@ -10,6 +10,7 @@ import {
   placeDisc,
   type Board,
 } from "./othello";
+import { createBoardFixture } from "../test/boardFixtures";
 
 describe("Othello rules", () => {
   it("creates the standard initial board", () => {
@@ -67,14 +68,14 @@ describe("Othello rules", () => {
   });
 
   it("flips discs in multiple directions", () => {
-    const board: Board = Array.from({ length: 64 }, () => null);
-
-    board[19] = "black";
-    board[27] = "white";
-    board[34] = "black";
-    board[35] = "white";
-    board[36] = "white";
-    board[37] = "black";
+    const board = createBoardFixture({
+      19: "black",
+      27: "white",
+      34: "black",
+      35: "white",
+      36: "white",
+      37: "black",
+    });
 
     const nextBoard = placeDisc(board, 43, "black");
 
@@ -91,15 +92,13 @@ describe("Othello rules", () => {
   });
 
   it("detects game over when neither player has a legal move", () => {
-    const board: Board = Array.from({ length: 64 }, () => "black");
+    const board = createBoardFixture({}, "black");
 
     expect(isGameOver(board)).toBe(true);
   });
 
   it("detects the winner from disc counts", () => {
-    const board: Board = Array.from({ length: 64 }, () => "black");
-
-    board[0] = "white";
+    const board = createBoardFixture({ 0: "white" }, "black");
 
     expect(getWinner(board)).toBe("black");
   });
