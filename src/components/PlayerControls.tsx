@@ -10,6 +10,17 @@ const cpuLevels: CpuLevel[] = [
   "level4",
   "level5",
 ];
+const cpuLevelLabels: Record<CpuLevel, string> = {
+  level1: "Beginner",
+  level2: "Casual",
+  level3: "Normal",
+  level4: "Expert",
+  level5: "Master",
+};
+const playerTypeLabels: Record<PlayerType, string> = {
+  cpu: "CPU",
+  human: "Human",
+};
 
 type PlayerControlsProps = {
   disabled: boolean;
@@ -54,7 +65,7 @@ export function PlayerControls({
                 onClick={() => onPlayerTypeChange(disc, playerType)}
                 type="button"
               >
-                {playerType}
+                {playerTypeLabels[playerType]}
               </button>
             ))}
           </div>
@@ -78,7 +89,7 @@ export function PlayerControls({
                   onClick={() => onCpuLevelChange(disc, cpuLevel)}
                   type="button"
                 >
-                  {cpuLevel}
+                  {cpuLevelLabels[cpuLevel]}
                 </button>
               ))}
             </div>

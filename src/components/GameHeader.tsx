@@ -46,13 +46,13 @@ export function GameHeader({
         winner !== null ? (
           <p className="result-status">{getResultLabel(winner, discCounts)}</p>
         ) : gameStatus === "ended" && endReason === "abandoned" ? (
-          <p className="result-status">Game abandoned</p>
+          <p className="result-status">Match stopped</p>
         ) : (
           <p className="turn-status">
-            Current turn:
             <span className={`turn-disc turn-disc--${currentDisc}`}>
-              {currentDisc}
+              {formatDisc(currentDisc)}
             </span>
+            Turn
           </p>
         )}
       </div>
@@ -64,7 +64,7 @@ export function GameHeader({
       <div className="game-actions" aria-label="Game controls">
         {isPlaying ? (
           <button className="game-action" onClick={onEndGame} type="button">
-            End Game
+            Stop Match
           </button>
         ) : (
           <button
@@ -72,7 +72,7 @@ export function GameHeader({
             onClick={onNewGame}
             type="button"
           >
-            Start Game
+            Start Match
           </button>
         )}
       </div>
@@ -90,17 +90,21 @@ function getResultLabel(winner: Winner, discCounts: DiscCounts): string {
   return `${winner} wins ${score}`;
 }
 
+function formatDisc(disc: DiscColor): string {
+  return disc === "black" ? "Black" : "White";
+}
+
 function getStatusLabel(
   gameStatus: GameStatus,
   endReason: GameEndReason | null,
 ): string {
   if (gameStatus === "playing") {
-    return "Playing";
+    return "In Play";
   }
 
   if (gameStatus === "ended") {
-    return endReason === "completed" ? "Game complete" : "Game stopped";
+    return endReason === "completed" ? "Final Board" : "Stopped";
   }
 
-  return "Ready to start";
+  return "Match Setup";
 }
