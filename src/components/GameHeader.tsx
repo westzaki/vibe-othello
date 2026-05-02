@@ -24,6 +24,16 @@ export function GameHeader({
     <div className="game-heading">
       <p className="eyebrow">Game Session</p>
       <h1 id="game-title">Vibe Othello</h1>
+      <div className="score-row" aria-label="Current score">
+        <span className="score-chip score-chip--black">
+          Black
+          <strong>{discCounts.black}</strong>
+        </span>
+        <span className="score-chip score-chip--white">
+          White
+          <strong>{discCounts.white}</strong>
+        </span>
+      </div>
       <div className="game-status-row">
         <p className="session-status">{getStatusLabel(gameStatus)}</p>
         {gameStatus === "ended" && winner !== null ? (

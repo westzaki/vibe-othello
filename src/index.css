@@ -64,6 +64,51 @@ h1 {
   gap: 10px 16px;
 }
 
+.score-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.score-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 92px;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 6px 12px;
+  color: #ece4d1;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.score-chip::before {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  content: "";
+}
+
+.score-chip strong {
+  color: #fff8e8;
+  font-size: 1rem;
+}
+
+.score-chip--black::before {
+  background:
+    radial-gradient(circle at 35% 28%, #60645e 0%, #20231f 36%, #090a09 100%);
+}
+
+.score-chip--white::before {
+  background:
+    radial-gradient(circle at 35% 28%, #ffffff 0%, #eee6d6 48%, #c8baa1 100%);
+}
+
 .session-status,
 .result-status,
 .turn-status {
