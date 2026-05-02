@@ -1,11 +1,12 @@
 export type DiscColor = "black" | "white";
 export type Cell = DiscColor | null;
+export type SquareIndex = number;
 export type Board = Cell[];
 export type DiscCounts = Record<DiscColor, number>;
 export type Winner = DiscColor | "draw";
 export type AppliedMove = {
   board: Board;
-  flippedSquares: number[];
+  flippedSquares: SquareIndex[];
 };
 
 export const BOARD_SIZE = 8;
@@ -43,7 +44,7 @@ export function getNextDisc(disc: DiscColor): DiscColor {
 
 export function isLegalMove(
   board: Board,
-  index: number,
+  index: SquareIndex,
   disc: DiscColor,
 ): boolean {
   if (board[index] !== null) {
@@ -55,7 +56,7 @@ export function isLegalMove(
   );
 }
 
-export function getLegalMoves(board: Board, disc: DiscColor): number[] {
+export function getLegalMoves(board: Board, disc: DiscColor): SquareIndex[] {
   return board.flatMap((_, index) =>
     isLegalMove(board, index, disc) ? [index] : [],
   );
@@ -63,9 +64,9 @@ export function getLegalMoves(board: Board, disc: DiscColor): number[] {
 
 export function getFlippedSquares(
   board: Board,
-  index: number,
+  index: SquareIndex,
   disc: DiscColor,
-): number[] {
+): SquareIndex[] {
   if (board[index] !== null) {
     return [];
   }
@@ -116,7 +117,7 @@ export function placeDisc(board: Board, index: number, disc: DiscColor): Board {
 
 export function applyMove(
   board: Board,
-  index: number,
+  index: SquareIndex,
   disc: DiscColor,
 ): AppliedMove | null {
   const flippedSquares = getFlippedSquares(board, index, disc);
@@ -141,12 +142,12 @@ export function applyMove(
 
 function getDiscsToFlip(
   board: Board,
-  startIndex: number,
+  startIndex: SquareIndex,
   disc: DiscColor,
   direction: { row: number; column: number },
-): number[] {
+): SquareIndex[] {
   const opponentDisc = getNextDisc(disc);
-  const discsToFlip: number[] = [];
+  const discsToFlip: SquareIndex[] = [];
   let row = getRow(startIndex) + direction.row;
   let column = getColumn(startIndex) + direction.column;
 

@@ -39,6 +39,7 @@ export function createDebugSession(name: DebugFixtureName): GameSession {
     endReason: "completed",
     lastMove: null,
     message: null,
+    moveHistory: [],
     status: "ended",
     winner: getWinner(board),
   };
@@ -79,6 +80,7 @@ function createPassNextSession(): GameSession {
     endReason: null,
     lastMove: null,
     message: null,
+    moveHistory: [],
     status: "playing",
     winner: null,
   };
@@ -97,6 +99,7 @@ function createNearEndSession(): GameSession {
     endReason: null,
     lastMove: null,
     message: null,
+    moveHistory: [],
     status: "playing",
     winner: null,
   };

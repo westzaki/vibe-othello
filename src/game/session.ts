@@ -10,6 +10,7 @@ import {
   type Board,
   type DiscCounts,
   type DiscColor,
+  type SquareIndex,
   type Winner,
 } from "./othello";
 
@@ -23,13 +24,24 @@ export type GameSession = {
   endReason: GameEndReason | null;
   lastMove: number | null;
   message: string | null;
+  moveHistory: MoveRecord[];
   status: GameStatus;
   winner: Winner | null;
 };
 
+export type MoveRecord = {
+  moveNumber: number;
+  disc: DiscColor;
+  square: SquareIndex;
+  boardBefore: Board;
+  boardAfter: Board;
+  flippedSquares: SquareIndex[];
+  legalMovesBefore: SquareIndex[];
+};
+
 export type MoveResult = {
-  flippedSquares: number[];
-  placedSquare: number;
+  flippedSquares: SquareIndex[];
+  placedSquare: SquareIndex;
 };
 
 export type PlaceCurrentDiscResult = {
@@ -47,6 +59,7 @@ export function createGameSession(): GameSession {
     endReason: null,
     lastMove: null,
     message: null,
+    moveHistory: [],
     status: "notStarted",
     winner: null,
   };
@@ -62,6 +75,7 @@ export function startNewGame(): GameSession {
     endReason: null,
     lastMove: null,
     message: null,
+    moveHistory: [],
     status: "playing",
     winner: null,
   };
@@ -88,12 +102,14 @@ export function getSessionLegalMoves(session: GameSession): number[] {
 
 export function placeCurrentDisc(
   session: GameSession,
-  square: number,
+  square: SquareIndex,
 ): PlaceCurrentDiscResult {
   if (session.status !== "playing") {
     return { move: null, session };
   }
 
+  const boardBefore = [...session.board];
+  const legalMovesBefore = getLegalMoves(session.board, session.currentDisc);
   const appliedMove = applyMove(session.board, square, session.currentDisc);
 
   if (appliedMove === null) {
@@ -101,6 +117,7 @@ export function placeCurrentDisc(
   }
 
   const nextBoard = appliedMove.board;
+  const boardAfter = [...nextBoard];
   const flippedSquares = appliedMove.flippedSquares.sort(
     (firstSquare, secondSquare) => firstSquare - secondSquare,
   );
@@ -108,6 +125,18 @@ export function placeCurrentDisc(
     flippedSquares,
     placedSquare: square,
   };
+  const nextMoveHistory: MoveRecord[] = [
+    ...session.moveHistory,
+    {
+      moveNumber: session.moveHistory.length + 1,
+      disc: session.currentDisc,
+      square,
+      boardBefore,
+      boardAfter,
+      flippedSquares,
+      legalMovesBefore,
+    },
+  ];
 
   const discCounts = countDiscs(nextBoard);
 
@@ -121,6 +150,7 @@ export function placeCurrentDisc(
         endReason: "completed",
         lastMove: square,
         message: null,
+        moveHistory: nextMoveHistory,
         status: "ended",
         winner: getWinner(nextBoard),
       },
@@ -144,6 +174,7 @@ export function placeCurrentDisc(
         : `${formatDisc(nextDisc)} has no legal moves. ${formatDisc(
             session.currentDisc,
           )} plays again.`,
+      moveHistory: nextMoveHistory,
     },
   };
 }

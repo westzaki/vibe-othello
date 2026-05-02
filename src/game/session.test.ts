@@ -20,6 +20,7 @@ describe("game session", () => {
     expect(session.endReason).toBeNull();
     expect(session.lastMove).toBeNull();
     expect(session.message).toBeNull();
+    expect(session.moveHistory).toEqual([]);
     expect(session.winner).toBeNull();
     expect(getSessionLegalMoves(session)).toEqual([]);
   });
@@ -33,6 +34,7 @@ describe("game session", () => {
     expect(session.endReason).toBeNull();
     expect(session.lastMove).toBeNull();
     expect(session.message).toBeNull();
+    expect(session.moveHistory).toEqual([]);
     expect(session.winner).toBeNull();
     expect(getSessionLegalMoves(session)).toEqual([19, 26, 37, 44]);
   });
@@ -75,6 +77,20 @@ describe("game session", () => {
     expect(result.session.lastMove).toBe(19);
     expect(result.session.message).toBeNull();
     expect(result.session.currentDisc).toBe("white");
+    expect(result.session.moveHistory).toHaveLength(1);
+    expect(result.session.moveHistory[0]).toEqual({
+      moveNumber: 1,
+      disc: "black",
+      square: 19,
+      boardBefore: session.board,
+      boardAfter: result.session.board,
+      flippedSquares: [27],
+      legalMovesBefore: [19, 26, 37, 44],
+    });
+    expect(result.session.moveHistory[0].boardBefore).not.toBe(session.board);
+    expect(result.session.moveHistory[0].boardAfter).not.toBe(
+      result.session.board,
+    );
   });
 
   it("does not change the session when placing outside a legal move", () => {
@@ -110,6 +126,8 @@ describe("game session", () => {
     expect(result.session.message).toBe(
       "White has no legal moves. Black plays again.",
     );
+    expect(result.session.moveHistory).toHaveLength(1);
+    expect(result.session.moveHistory[0].legalMovesBefore).toEqual([2, 5]);
     expect(getSessionLegalMoves(result.session)).toEqual([5]);
   });
 
@@ -125,6 +143,10 @@ describe("game session", () => {
     expect(result.session.winner).toBe("black");
     expect(result.session.lastMove).toBe(2);
     expect(result.session.discCounts).toEqual({ black: 64, white: 0 });
+    expect(result.session.moveHistory).toHaveLength(1);
+    expect(result.session.moveHistory[0].boardAfter).toEqual(
+      result.session.board,
+    );
     expect(getSessionLegalMoves(result.session)).toEqual([]);
   });
 });
@@ -140,6 +162,7 @@ function createPlayingSession(
     endReason: null,
     lastMove: null,
     message: null,
+    moveHistory: [],
     status: "playing",
     winner: null,
   };
