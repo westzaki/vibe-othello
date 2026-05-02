@@ -1,5 +1,5 @@
-export type Disc = "black" | "white";
-export type Cell = Disc | null;
+export type DiscColor = "black" | "white";
+export type Cell = DiscColor | null;
 export type Board = Cell[];
 
 const boardSize = 8;
@@ -29,11 +29,15 @@ export function createInitialBoard(): Board {
   return board;
 }
 
-export function getNextDisc(disc: Disc): Disc {
+export function getNextDisc(disc: DiscColor): DiscColor {
   return disc === "black" ? "white" : "black";
 }
 
-export function isLegalMove(board: Board, index: number, disc: Disc): boolean {
+export function isLegalMove(
+  board: Board,
+  index: number,
+  disc: DiscColor,
+): boolean {
   if (board[index] !== null) {
     return false;
   }
@@ -43,13 +47,13 @@ export function isLegalMove(board: Board, index: number, disc: Disc): boolean {
   );
 }
 
-export function getLegalMoves(board: Board, disc: Disc): number[] {
+export function getLegalMoves(board: Board, disc: DiscColor): number[] {
   return board.flatMap((_, index) =>
     isLegalMove(board, index, disc) ? [index] : [],
   );
 }
 
-export function placeDisc(board: Board, index: number, disc: Disc): Board {
+export function placeDisc(board: Board, index: number, disc: DiscColor): Board {
   if (!isLegalMove(board, index, disc)) {
     return board;
   }
@@ -72,7 +76,7 @@ export function placeDisc(board: Board, index: number, disc: Disc): Board {
 function getDiscsToFlip(
   board: Board,
   startIndex: number,
-  disc: Disc,
+  disc: DiscColor,
   direction: { row: number; column: number },
 ): number[] {
   const opponentDisc = getNextDisc(disc);

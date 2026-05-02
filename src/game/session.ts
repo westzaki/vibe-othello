@@ -4,14 +4,14 @@ import {
   getNextDisc,
   placeDisc,
   type Board,
-  type Disc,
+  type DiscColor,
 } from "./othello";
 
 export type GameStatus = "notStarted" | "playing" | "ended";
 
 export type GameSession = {
   board: Board;
-  currentDisc: Disc;
+  currentDisc: DiscColor;
   status: GameStatus;
 };
 
