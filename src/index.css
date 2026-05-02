@@ -65,6 +65,7 @@ h1 {
 }
 
 .session-status,
+.result-status,
 .turn-status {
   display: flex;
   align-items: center;
@@ -84,6 +85,15 @@ h1 {
   padding: 5px 12px;
   color: #f2dc9f;
   background: rgba(20, 22, 18, 0.54);
+}
+
+.result-status {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 5px 12px;
+  color: #fff8e8;
+  background: rgba(255, 255, 255, 0.1);
+  text-transform: capitalize;
 }
 
 .turn-disc {

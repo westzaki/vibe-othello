@@ -14,9 +14,11 @@ export function useOthelloGame() {
   return {
     board: session.board,
     currentDisc: session.currentDisc,
+    discCounts: session.discCounts,
     gameStatus: session.status,
     isPlaying: session.status === "playing",
     legalMoves,
+    winner: session.winner,
     endGame: () => setSession((currentSession) => endGame(currentSession)),
     placeCurrentDisc: (square: number) =>
       setSession((currentSession) => placeCurrentDisc(currentSession, square)),

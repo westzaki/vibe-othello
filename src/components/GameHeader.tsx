@@ -1,20 +1,24 @@
-import type { DiscColor } from "../game/othello";
+import type { DiscColor, DiscCounts, Winner } from "../game/othello";
 import type { GameStatus } from "../game/session";
 
 type GameHeaderProps = {
   currentDisc: DiscColor;
+  discCounts: DiscCounts;
   gameStatus: GameStatus;
   isPlaying: boolean;
   onEndGame: () => void;
   onNewGame: () => void;
+  winner: Winner | null;
 };
 
 export function GameHeader({
   currentDisc,
+  discCounts,
   gameStatus,
   isPlaying,
   onEndGame,
   onNewGame,
+  winner,
 }: GameHeaderProps) {
   return (
     <div className="game-heading">
@@ -22,12 +26,18 @@ export function GameHeader({
       <h1 id="game-title">Vibe Othello</h1>
       <div className="game-status-row">
         <p className="session-status">{getStatusLabel(gameStatus)}</p>
-        <p className="turn-status">
-          Current turn:
-          <span className={`turn-disc turn-disc--${currentDisc}`}>
-            {currentDisc}
-          </span>
-        </p>
+        {gameStatus === "ended" && winner !== null ? (
+          <p className="result-status">
+            {getResultLabel(winner, discCounts)}
+          </p>
+        ) : (
+          <p className="turn-status">
+            Current turn:
+            <span className={`turn-disc turn-disc--${currentDisc}`}>
+              {currentDisc}
+            </span>
+          </p>
+        )}
       </div>
       <div className="game-actions" aria-label="Game controls">
         <button
@@ -48,6 +58,16 @@ export function GameHeader({
       </div>
     </div>
   );
+}
+
+function getResultLabel(winner: Winner, discCounts: DiscCounts): string {
+  const score = `${discCounts.black} - ${discCounts.white}`;
+
+  if (winner === "draw") {
+    return `Draw ${score}`;
+  }
+
+  return `${winner} wins ${score}`;
 }
 
 function getStatusLabel(gameStatus: GameStatus): string {

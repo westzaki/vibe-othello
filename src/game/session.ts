@@ -1,10 +1,16 @@
 import {
+  countDiscs,
   createInitialBoard,
   getLegalMoves,
   getNextDisc,
+  getWinner,
+  hasLegalMove,
+  isGameOver,
   placeDisc,
   type Board,
+  type DiscCounts,
   type DiscColor,
+  type Winner,
 } from "./othello";
 
 export type GameStatus = "notStarted" | "playing" | "ended";
@@ -12,29 +18,41 @@ export type GameStatus = "notStarted" | "playing" | "ended";
 export type GameSession = {
   board: Board;
   currentDisc: DiscColor;
+  discCounts: DiscCounts;
   status: GameStatus;
+  winner: Winner | null;
 };
 
 export function createGameSession(): GameSession {
+  const board = createInitialBoard();
+
   return {
-    board: createInitialBoard(),
+    board,
     currentDisc: "black",
+    discCounts: countDiscs(board),
     status: "notStarted",
+    winner: null,
   };
 }
 
 export function startNewGame(): GameSession {
+  const board = createInitialBoard();
+
   return {
-    board: createInitialBoard(),
+    board,
     currentDisc: "black",
+    discCounts: countDiscs(board),
     status: "playing",
+    winner: null,
   };
 }
 
 export function endGame(session: GameSession): GameSession {
   return {
     ...session,
+    discCounts: countDiscs(session.board),
     status: "ended",
+    winner: getWinner(session.board),
   };
 }
 
@@ -60,9 +78,24 @@ export function placeCurrentDisc(
     return session;
   }
 
+  if (isGameOver(nextBoard)) {
+    return {
+      ...session,
+      board: nextBoard,
+      discCounts: countDiscs(nextBoard),
+      status: "ended",
+      winner: getWinner(nextBoard),
+    };
+  }
+
+  const nextDisc = getNextDisc(session.currentDisc);
+  const currentDisc =
+    hasLegalMove(nextBoard, nextDisc) ? nextDisc : session.currentDisc;
+
   return {
     ...session,
     board: nextBoard,
-    currentDisc: getNextDisc(session.currentDisc),
+    currentDisc,
+    discCounts: countDiscs(nextBoard),
   };
 }

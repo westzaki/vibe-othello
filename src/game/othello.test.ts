@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  countDiscs,
   createInitialBoard,
   getLegalMoves,
+  getWinner,
+  isGameOver,
   placeDisc,
   type Board,
 } from "./othello";
@@ -59,5 +62,33 @@ describe("Othello rules", () => {
     expect(nextBoard[27]).toBe("black");
     expect(nextBoard[35]).toBe("black");
     expect(nextBoard[43]).toBe("black");
+  });
+
+  it("counts black and white discs", () => {
+    const board = createInitialBoard();
+
+    expect(countDiscs(board)).toEqual({ black: 2, white: 2 });
+  });
+
+  it("detects game over when neither player has a legal move", () => {
+    const board: Board = Array.from({ length: 64 }, () => "black");
+
+    expect(isGameOver(board)).toBe(true);
+  });
+
+  it("detects the winner from disc counts", () => {
+    const board: Board = Array.from({ length: 64 }, () => "black");
+
+    board[0] = "white";
+
+    expect(getWinner(board)).toBe("black");
+  });
+
+  it("detects a draw from disc counts", () => {
+    const board: Board = Array.from({ length: 64 }, (_, index) =>
+      index < 32 ? "black" : "white",
+    );
+
+    expect(getWinner(board)).toBe("draw");
   });
 });

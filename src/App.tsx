@@ -10,10 +10,12 @@ export default function App() {
       <section className="game-shell" aria-labelledby="game-title">
         <GameHeader
           currentDisc={game.currentDisc}
+          discCounts={game.discCounts}
           gameStatus={game.gameStatus}
           isPlaying={game.isPlaying}
           onEndGame={game.endGame}
           onNewGame={game.startNewGame}
+          winner={game.winner}
         />
 
         <Board
