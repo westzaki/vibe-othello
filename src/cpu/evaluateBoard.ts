@@ -1,34 +1,17 @@
+import type { Board, DiscColor } from "../game/othello";
 import {
-  countDiscs,
-  getLegalMoves,
-  getNextDisc,
-  type Board,
-  type DiscColor,
-} from "../game/othello";
+  getCornerDifference,
+  getDiscCountDifference,
+  getMobilityDifference,
+} from "./evaluationFeatures";
 
-const cornerSquares = [0, 7, 56, 63];
 const cornerScore = 25;
 const mobilityWeight = 2;
 
 export function evaluateBoard(board: Board, disc: DiscColor): number {
-  const opponentDisc = getNextDisc(disc);
-  const counts = countDiscs(board);
-  let score =
-    counts[disc] -
-    counts[opponentDisc] +
-    (getLegalMoves(board, disc).length -
-      getLegalMoves(board, opponentDisc).length) *
-      mobilityWeight;
-
-  for (const square of cornerSquares) {
-    if (board[square] === disc) {
-      score += cornerScore;
-    }
-
-    if (board[square] === opponentDisc) {
-      score -= cornerScore;
-    }
-  }
-
-  return score;
+  return (
+    getDiscCountDifference(board, disc) +
+    getMobilityDifference(board, disc) * mobilityWeight +
+    getCornerDifference(board, disc) * cornerScore
+  );
 }

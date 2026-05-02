@@ -7,6 +7,8 @@ import {
   type DiscColor,
 } from "../game/othello";
 import { strategicEvaluateBoard } from "./strategicEvaluateBoard";
+import { countEmptySquares } from "./evaluationFeatures";
+import { getScoredMoves, orderMovesByScore } from "./moveSelection";
 
 const defaultSearchDepth = 4;
 const endGameExtensionEmptyThreshold = 8;
@@ -137,24 +139,19 @@ function getOrderedMoves(
   legalMoves: number[],
   isMaximizing: boolean,
 ): number[] {
-  return legalMoves
-    .map((move) => ({
-      move,
-      score: strategicEvaluateBoard(
-        placeDisc(board, move, currentDisc),
-        maximizingDisc,
-      ),
-    }))
-    .sort((firstMove, secondMove) =>
-      isMaximizing
-        ? secondMove.score - firstMove.score
-        : firstMove.score - secondMove.score,
-    )
-    .map(({ move }) => move);
+  return orderMovesByScore(
+    getScoredMoves(
+      board,
+      currentDisc,
+      (nextBoard) => strategicEvaluateBoard(nextBoard, maximizingDisc),
+      legalMoves,
+    ),
+    isMaximizing ? "descending" : "ascending",
+  );
 }
 
 function getSearchDepth(board: Board, requestedDepth: number): number {
-  const emptyCount = board.filter((cell) => cell === null).length;
+  const emptyCount = countEmptySquares(board);
 
   if (emptyCount <= endGameExtensionEmptyThreshold) {
     return Math.max(requestedDepth, emptyCount);

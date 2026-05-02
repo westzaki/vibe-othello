@@ -1,10 +1,10 @@
+import { type Board, type DiscColor } from "../game/othello";
 import {
-  countDiscs,
-  getLegalMoves,
-  getNextDisc,
-  type Board,
-  type DiscColor,
-} from "../game/othello";
+  countEmptySquares,
+  getCornerDifference,
+  getDiscCountDifference,
+  getMobilityDifference,
+} from "./evaluationFeatures";
 
 const boardWeights = [
   100, -25, 10, 5, 5, 10, -25, 100, -25, -40, -5, -5, -5, -5, -40, -25, 10, -5,
@@ -12,7 +12,6 @@ const boardWeights = [
   -5, 3, 2, 2, 3, -5, 10, -25, -40, -5, -5, -5, -5, -40, -25, 100, -25, 10, 5,
   5, 10, -25, 100,
 ];
-const cornerSquares = [0, 7, 56, 63];
 const middleGameMobilityWeight = 6;
 const endGameMobilityWeight = 2;
 const cornerWeight = 35;
@@ -21,23 +20,15 @@ const endGameDiscCountWeight = 3;
 const endGameEmptyThreshold = 12;
 
 export function strategicEvaluateBoard(board: Board, disc: DiscColor): number {
-  const opponentDisc = getNextDisc(disc);
-  const counts = countDiscs(board);
   const emptyCount = countEmptySquares(board);
   const boardWeightScore = getBoardWeightScore(board, disc);
   const mobilityScore =
-    (getLegalMoves(board, disc).length -
-      getLegalMoves(board, opponentDisc).length) *
-    getMobilityWeight(emptyCount);
+    getMobilityDifference(board, disc) * getMobilityWeight(emptyCount);
   const cornerScore = getCornerDifference(board, disc) * cornerWeight;
   const discCountScore =
-    (counts[disc] - counts[opponentDisc]) * getDiscCountWeight(emptyCount);
+    getDiscCountDifference(board, disc) * getDiscCountWeight(emptyCount);
 
   return boardWeightScore + mobilityScore + cornerScore + discCountScore;
-}
-
-function countEmptySquares(board: Board): number {
-  return board.filter((cell) => cell === null).length;
 }
 
 function getMobilityWeight(emptyCount: number): number {
@@ -53,7 +44,7 @@ function getDiscCountWeight(emptyCount: number): number {
 }
 
 function getBoardWeightScore(board: Board, disc: DiscColor): number {
-  const opponentDisc = getNextDisc(disc);
+  const opponentDisc = disc === "black" ? "white" : "black";
 
   return board.reduce((score, cell, index) => {
     if (cell === disc) {
@@ -65,21 +56,5 @@ function getBoardWeightScore(board: Board, disc: DiscColor): number {
     }
 
     return score;
-  }, 0);
-}
-
-function getCornerDifference(board: Board, disc: DiscColor): number {
-  const opponentDisc = getNextDisc(disc);
-
-  return cornerSquares.reduce((difference, square) => {
-    if (board[square] === disc) {
-      return difference + 1;
-    }
-
-    if (board[square] === opponentDisc) {
-      return difference - 1;
-    }
-
-    return difference;
   }, 0);
 }
