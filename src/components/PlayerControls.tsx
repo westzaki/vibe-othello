@@ -3,7 +3,7 @@ import type { CpuLevel, PlayerSettings, PlayerType } from "../game/players";
 
 const discs: DiscColor[] = ["black", "white"];
 const playerTypes: PlayerType[] = ["human", "cpu"];
-const cpuLevels: CpuLevel[] = ["level1", "level2", "level3"];
+const cpuLevels: CpuLevel[] = ["level1", "level2", "level3", "level4"];
 
 type PlayerControlsProps = {
   onCpuLevelChange: (disc: DiscColor, cpuLevel: CpuLevel) => void;

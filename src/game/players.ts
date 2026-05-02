@@ -1,6 +1,6 @@
 import type { DiscColor } from "./othello";
 
-export type CpuLevel = "level1" | "level2" | "level3";
+export type CpuLevel = "level1" | "level2" | "level3" | "level4";
 export type PlayerType = "human" | "cpu";
 export type PlayerConfig = {
   cpuLevel: CpuLevel;
