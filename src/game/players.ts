@@ -1,6 +1,12 @@
 import type { DiscColor } from "./othello";
 
-export type CpuLevel = "level1" | "level2" | "level3" | "level4" | "level5";
+export type CpuLevel =
+  | "level1"
+  | "level2"
+  | "level3"
+  | "level4"
+  | "level5"
+  | "level6";
 export type PlayerType = "human" | "cpu";
 export type PlayerConfig = {
   cpuLevel: CpuLevel;
@@ -16,6 +22,7 @@ export const cpuLevels = [
   "level3",
   "level4",
   "level5",
+  "level6",
 ] as const satisfies CpuLevel[];
 
 export const cpuLevelLabels: Record<CpuLevel, string> = {
@@ -24,6 +31,7 @@ export const cpuLevelLabels: Record<CpuLevel, string> = {
   level3: "Normal",
   level4: "Expert",
   level5: "Master",
+  level6: "Grandmaster",
 };
 
 export const playerTypeLabels: Record<PlayerType, string> = {

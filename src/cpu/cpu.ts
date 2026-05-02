@@ -11,7 +11,7 @@ export function chooseCpuMove(
   disc: DiscColor,
   level: CpuLevel,
 ): number | null {
-  if (level === "level5") {
+  if (level === "level6" || level === "level5") {
     return chooseMinimaxMove(board, disc);
   }
 
