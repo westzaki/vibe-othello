@@ -33,8 +33,24 @@ export function getNextDisc(disc: Disc): Disc {
   return disc === "black" ? "white" : "black";
 }
 
-export function placeDisc(board: Board, index: number, disc: Disc): Board {
+export function isLegalMove(board: Board, index: number, disc: Disc): boolean {
   if (board[index] !== null) {
+    return false;
+  }
+
+  return directions.some(
+    (direction) => getDiscsToFlip(board, index, disc, direction).length > 0,
+  );
+}
+
+export function getLegalMoves(board: Board, disc: Disc): number[] {
+  return board.flatMap((_, index) =>
+    isLegalMove(board, index, disc) ? [index] : [],
+  );
+}
+
+export function placeDisc(board: Board, index: number, disc: Disc): Board {
+  if (!isLegalMove(board, index, disc)) {
     return board;
   }
 

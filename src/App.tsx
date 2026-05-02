@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   createInitialBoard,
+  getLegalMoves,
   getNextDisc,
   placeDisc,
   type Disc,
@@ -14,6 +15,7 @@ export default function App() {
   const [gameStatus, setGameStatus] = useState<GameStatus>("notStarted");
 
   const isPlaying = gameStatus === "playing";
+  const legalMoves = isPlaying ? getLegalMoves(board, currentDisc) : [];
 
   function handleNewGame() {
     setBoard(createInitialBoard());
@@ -76,27 +78,34 @@ export default function App() {
 
         <div className="board-frame" aria-label="Playable Othello board">
           <div className="board-grid">
-            {board.map((cell, square) => (
-              <button
-                aria-label={
-                  cell === null
-                    ? `Place ${currentDisc} disc on square ${square + 1}`
-                    : `Square ${square + 1} has a ${cell} disc`
-                }
-                className="board-square"
-                disabled={!isPlaying || cell !== null}
-                key={square}
-                onClick={() => handleSquareClick(square)}
-                type="button"
-              >
-                {cell !== null && (
-                  <span
-                    aria-hidden="true"
-                    className={`disc disc--${cell}`}
-                  />
-                )}
-              </button>
-            ))}
+            {board.map((cell, square) => {
+              const isLegal = legalMoves.includes(square);
+
+              return (
+                <button
+                  aria-label={
+                    cell === null
+                      ? getEmptySquareLabel(square, currentDisc, isLegal)
+                      : `Square ${square + 1} has a ${cell} disc`
+                  }
+                  className={[
+                    "board-square",
+                    isLegal ? "board-square--legal" : "",
+                  ].join(" ")}
+                  disabled={!isLegal}
+                  key={square}
+                  onClick={() => handleSquareClick(square)}
+                  type="button"
+                >
+                  {cell !== null && (
+                    <span
+                      aria-hidden="true"
+                      className={`disc disc--${cell}`}
+                    />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -114,4 +123,16 @@ function getStatusLabel(gameStatus: GameStatus): string {
   }
 
   return "Ready to start";
+}
+
+function getEmptySquareLabel(
+  square: number,
+  currentDisc: Disc,
+  isLegal: boolean,
+): string {
+  if (isLegal) {
+    return `Place ${currentDisc} disc on square ${square + 1}`;
+  }
+
+  return `Square ${square + 1} is not a legal move`;
 }
