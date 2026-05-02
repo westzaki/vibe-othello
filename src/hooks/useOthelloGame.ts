@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { chooseRandomMove } from "../cpu/randomCpu";
+import { chooseCpuMove } from "../cpu/cpu";
 import type { DiscColor } from "../game/othello";
-import { createDefaultPlayerSettings, type PlayerType } from "../game/players";
+import {
+  createDefaultPlayerSettings,
+  type CpuLevel,
+  type PlayerType,
+} from "../game/players";
 import {
   createGameSession,
   endGame,
@@ -18,7 +22,8 @@ export function useOthelloGame() {
   const [flipAnimationId, setFlipAnimationId] = useState(0);
   const legalMoves = useMemo(() => getSessionLegalMoves(session), [session]);
   const isPlaying = session.status === "playing";
-  const currentPlayerType = players[session.currentDisc];
+  const currentPlayer = players[session.currentDisc];
+  const currentPlayerType = currentPlayer.type;
   const canHumanPlay = isPlaying && currentPlayerType === "human";
 
   function clearAnimationState() {
@@ -49,7 +54,11 @@ export function useOthelloGame() {
     }
 
     const timeoutId = window.setTimeout(() => {
-      const move = chooseRandomMove(session.board, session.currentDisc);
+      const move = chooseCpuMove(
+        session.board,
+        session.currentDisc,
+        currentPlayer.cpuLevel,
+      );
 
       if (move !== null) {
         handlePlaceCurrentDisc(move);
@@ -61,6 +70,7 @@ export function useOthelloGame() {
     currentPlayerType,
     handlePlaceCurrentDisc,
     isPlaying,
+    currentPlayer.cpuLevel,
     session.board,
     session.currentDisc,
   ]);
@@ -78,7 +88,20 @@ export function useOthelloGame() {
   function handlePlayerTypeChange(disc: DiscColor, playerType: PlayerType) {
     setPlayers((currentPlayers) => ({
       ...currentPlayers,
-      [disc]: playerType,
+      [disc]: {
+        ...currentPlayers[disc],
+        type: playerType,
+      },
+    }));
+  }
+
+  function handleCpuLevelChange(disc: DiscColor, cpuLevel: CpuLevel) {
+    setPlayers((currentPlayers) => ({
+      ...currentPlayers,
+      [disc]: {
+        ...currentPlayers[disc],
+        cpuLevel,
+      },
     }));
   }
 
@@ -99,6 +122,7 @@ export function useOthelloGame() {
     winner: session.winner,
     endGame: handleEndGame,
     placeCurrentDisc: handlePlaceCurrentDisc,
+    setCpuLevel: handleCpuLevelChange,
     setPlayerType: handlePlayerTypeChange,
     replaceSession: handleReplaceSession,
     startNewGame: handleStartNewGame,

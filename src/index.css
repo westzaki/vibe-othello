@@ -249,6 +249,7 @@ h1 {
 .player-control {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
@@ -282,6 +283,11 @@ h1 {
   gap: 4px;
 }
 
+.player-control__options--levels {
+  width: 100%;
+  justify-content: flex-end;
+}
+
 .player-control__option {
   border: 1px solid transparent;
   border-radius: 7px;
@@ -312,6 +318,11 @@ h1 {
 
 .player-control__option--selected:hover {
   background: linear-gradient(180deg, #ffe6a3, #d9a94d);
+}
+
+.player-control__option--level {
+  padding-inline: 9px;
+  font-size: 0.76rem;
 }
 
 .board-frame {
