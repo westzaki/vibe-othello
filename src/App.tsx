@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Board } from "./components/Board";
 import { GameHeader } from "./components/GameHeader";
+import { GameResultOverlay } from "./components/GameResultOverlay";
 import { PlayerControls } from "./components/PlayerControls";
 import { useOthelloGame } from "./hooks/useOthelloGame";
 
@@ -50,6 +51,14 @@ export default function App() {
           <Suspense fallback={null}>
             <DevDebugPanel onReplaceSession={game.replaceSession} />
           </Suspense>
+        )}
+
+        {game.gameStatus === "ended" && game.winner !== null && (
+          <GameResultOverlay
+            discCounts={game.discCounts}
+            onNewGame={game.startNewGame}
+            winner={game.winner}
+          />
         )}
       </section>
     </main>

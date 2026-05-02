@@ -238,6 +238,167 @@ h1 {
   background: linear-gradient(180deg, #ffe6a3, #d9a94d);
 }
 
+.result-overlay {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+  padding: 24px;
+  animation: result-overlay-enter 420ms ease both;
+}
+
+.result-overlay--black {
+  color: #fff8e8;
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(240, 200, 107, 0.2),
+      transparent 18rem
+    ),
+    linear-gradient(135deg, rgba(8, 9, 8, 0.98), rgba(28, 31, 26, 0.96));
+}
+
+.result-overlay--white {
+  color: #1b201b;
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(255, 255, 255, 0.75),
+      transparent 18rem
+    ),
+    linear-gradient(
+      135deg,
+      rgba(244, 237, 221, 0.98),
+      rgba(210, 197, 168, 0.96)
+    );
+}
+
+.result-overlay--draw {
+  color: #fff8e8;
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(214, 179, 106, 0.2),
+      transparent 18rem
+    ),
+    linear-gradient(135deg, rgba(23, 24, 20, 0.98), rgba(77, 70, 54, 0.96));
+}
+
+.result-overlay__burst {
+  position: absolute;
+  width: min(84vw, 620px);
+  aspect-ratio: 1;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  opacity: 0.16;
+  animation: result-burst 900ms ease-out both;
+}
+
+.result-overlay__content {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.result-overlay__eyebrow {
+  margin: 0;
+  color: #d6b36a;
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.result-overlay--white .result-overlay__eyebrow {
+  color: #826329;
+}
+
+.result-overlay__title {
+  margin: 0;
+  font-size: clamp(3.2rem, 13vw, 8.5rem);
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 0.9;
+  text-transform: capitalize;
+  text-shadow: 0 18px 34px rgba(0, 0, 0, 0.3);
+}
+
+.result-overlay--white .result-overlay__title {
+  text-shadow: 0 16px 30px rgba(92, 73, 36, 0.18);
+}
+
+.result-overlay__score {
+  margin: 0;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.result-overlay--white .result-overlay__score {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.result-overlay__discs {
+  display: flex;
+  gap: 14px;
+}
+
+.result-overlay__disc {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.24);
+}
+
+.result-overlay__disc--black {
+  background: radial-gradient(
+    circle at 35% 28%,
+    #555a54 0%,
+    #181a18 38%,
+    #070807 100%
+  );
+}
+
+.result-overlay__disc--white {
+  background: radial-gradient(
+    circle at 35% 28%,
+    #ffffff 0%,
+    #eee6d6 48%,
+    #c8baa1 100%
+  );
+}
+
+.result-overlay__action {
+  margin-top: 10px;
+}
+
+@keyframes result-overlay-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes result-burst {
+  from {
+    transform: scale(0.72);
+  }
+
+  to {
+    transform: scale(1.08);
+  }
+}
+
 .player-controls {
   display: flex;
   width: min(100%, 560px);
