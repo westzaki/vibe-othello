@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { countDiscs } from "../game/othello";
+import { getSessionLegalMoves, placeCurrentDisc } from "../game/session";
 import { createDebugSession } from "./debugFixtures";
 
 describe("debug fixtures", () => {
@@ -8,9 +9,10 @@ describe("debug fixtures", () => {
 
     expect(session.status).toBe("ended");
     expect(session.winner).toBe("black");
-    expect(session.lastMove).toBeNull();
     expect(session.message).toBeNull();
-    expect(session.discCounts).toEqual({ black: 44, white: 20 });
+    expect(session.discCounts).toEqual({ black: 52, white: 12 });
+    expect(session.moveHistory).toHaveLength(60);
+    expect(session.lastMove).not.toBeNull();
   });
 
   it("creates a white win session", () => {
@@ -18,7 +20,8 @@ describe("debug fixtures", () => {
 
     expect(session.status).toBe("ended");
     expect(session.winner).toBe("white");
-    expect(session.discCounts).toEqual({ black: 20, white: 44 });
+    expect(session.discCounts).toEqual({ black: 18, white: 46 });
+    expect(session.moveHistory).toHaveLength(60);
   });
 
   it("creates a draw session", () => {
@@ -27,6 +30,7 @@ describe("debug fixtures", () => {
     expect(session.status).toBe("ended");
     expect(session.winner).toBe("draw");
     expect(session.discCounts).toEqual({ black: 32, white: 32 });
+    expect(session.moveHistory).toHaveLength(60);
   });
 
   it("creates a near-end playable session", () => {
@@ -34,18 +38,24 @@ describe("debug fixtures", () => {
 
     expect(session.status).toBe("playing");
     expect(session.currentDisc).toBe("black");
-    expect(session.lastMove).toBeNull();
+    expect(session.lastMove).toBe(62);
     expect(session.winner).toBeNull();
-    expect(countDiscs(session.board)).toEqual({ black: 62, white: 1 });
+    expect(session.moveHistory).toHaveLength(58);
+    expect(countDiscs(session.board)).toEqual({ black: 32, white: 30 });
   });
 
   it("creates a session that can trigger a pass on the next move", () => {
     const session = createDebugSession("passNext");
 
     expect(session.status).toBe("playing");
-    expect(session.currentDisc).toBe("black");
-    expect(session.board[2]).toBeNull();
-    expect(session.board[5]).toBeNull();
-    expect(session.discCounts).toEqual({ black: 60, white: 2 });
+    expect(session.currentDisc).toBe("white");
+    expect(session.moveHistory).toHaveLength(57);
+    expect(getSessionLegalMoves(session)).toContain(10);
+
+    const result = placeCurrentDisc(session, 10).session;
+
+    expect(result.status).toBe("playing");
+    expect(result.currentDisc).toBe("white");
+    expect(result.message).toBe("Black has no legal moves. White plays again.");
   });
 });
