@@ -3,6 +3,7 @@ import { calculateAdvantage } from "../cpu/advantage";
 import { AdvantageBar } from "../components/AdvantageBar";
 import { Board } from "../components/Board";
 import { GameHeader } from "../components/GameHeader";
+import { GameResultOverlay } from "../components/GameResultOverlay";
 import { MoveHistory } from "../components/MoveHistory";
 import type { useOthelloGame } from "../hooks/useOthelloGame";
 
@@ -18,31 +19,50 @@ type GameScreenProps = {
   game: ReturnType<typeof useOthelloGame>;
   onBackToStart: () => void;
   onEndGame: () => void;
+  onPlayAgain: () => void;
 };
 
 export function GameScreen({
   game,
   onBackToStart,
   onEndGame,
+  onPlayAgain,
 }: GameScreenProps) {
   const advantage = useMemo(() => calculateAdvantage(game.board), [game.board]);
+  const resultWinner =
+    game.gameStatus === "ended" &&
+    game.endReason === "completed" &&
+    game.winner !== null
+      ? game.winner
+      : null;
 
   return (
-    <section className="game-shell" aria-labelledby="game-title">
+    <section className="game-shell" aria-label="Othello game">
       <aside className="game-sidebar" aria-label="Game controls and status">
-        <GameHeader
-          currentDisc={game.currentDisc}
-          discCounts={game.discCounts}
-          endReason={game.endReason}
-          gameStatus={game.gameStatus}
-          isPlaying={game.isPlaying}
-          message={game.message}
-          onEndGame={onEndGame}
-          onNewGame={onBackToStart}
-          winner={game.winner}
-        />
+        {resultWinner !== null ? (
+          <GameResultOverlay
+            discCounts={game.discCounts}
+            onBackToStart={onBackToStart}
+            onPlayAgain={onPlayAgain}
+            winner={resultWinner}
+          />
+        ) : (
+          <>
+            <GameHeader
+              currentDisc={game.currentDisc}
+              discCounts={game.discCounts}
+              endReason={game.endReason}
+              gameStatus={game.gameStatus}
+              isPlaying={game.isPlaying}
+              message={game.message}
+              onEndGame={onEndGame}
+              onNewGame={onBackToStart}
+              winner={game.winner}
+            />
 
-        <AdvantageBar advantage={advantage} />
+            <AdvantageBar advantage={advantage} />
+          </>
+        )}
 
         <MoveHistory moves={game.moveHistory} />
       </aside>
