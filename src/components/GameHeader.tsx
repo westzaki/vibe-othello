@@ -39,9 +39,7 @@ export function GameHeader({
       <div className="game-status-row">
         <p className="session-status">{getStatusLabel(gameStatus)}</p>
         {gameStatus === "ended" && winner !== null ? (
-          <p className="result-status">
-            {getResultLabel(winner, discCounts)}
-          </p>
+          <p className="result-status">{getResultLabel(winner, discCounts)}</p>
         ) : (
           <p className="turn-status">
             Current turn:
