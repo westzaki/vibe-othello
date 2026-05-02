@@ -26,6 +26,7 @@ export function createDebugSession(name: DebugFixtureName): GameSession {
     board,
     currentDisc: "black",
     discCounts: countDiscs(board),
+    lastMove: null,
     status: "ended",
     winner: getWinner(board),
   };
@@ -61,6 +62,7 @@ function createNearEndSession(): GameSession {
     board,
     currentDisc: "black",
     discCounts: countDiscs(board),
+    lastMove: null,
     status: "playing",
     winner: null,
   };

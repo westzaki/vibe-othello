@@ -7,6 +7,7 @@ const rowLabels = ["1", "2", "3", "4", "5", "6", "7", "8"];
 type BoardProps = {
   board: OthelloBoard;
   currentDisc: DiscColor;
+  lastMove: number | null;
   legalMoves: number[];
   onSquareClick: (square: number) => void;
 };
@@ -14,6 +15,7 @@ type BoardProps = {
 export function Board({
   board,
   currentDisc,
+  lastMove,
   legalMoves,
   onSquareClick,
 }: BoardProps) {
@@ -38,6 +40,7 @@ export function Board({
         <div className="board-grid">
           {board.map((cell, square) => {
             const isLegal = legalMoves.includes(square);
+            const isLastMove = square === lastMove && cell !== null;
 
             return (
               <button
@@ -49,6 +52,7 @@ export function Board({
                 className={[
                   "board-square",
                   isLegal ? "board-square--legal" : "",
+                  isLastMove ? "board-square--last-move" : "",
                 ].join(" ")}
                 disabled={!isLegal}
                 key={square}

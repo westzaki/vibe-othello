@@ -30,6 +30,7 @@ export default function App() {
         <Board
           board={game.board}
           currentDisc={game.currentDisc}
+          lastMove={game.lastMove}
           legalMoves={game.legalMoves}
           onSquareClick={game.placeCurrentDisc}
         />

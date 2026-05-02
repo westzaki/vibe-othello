@@ -16,6 +16,7 @@ describe("game session", () => {
     expect(session.status).toBe("notStarted");
     expect(session.currentDisc).toBe("black");
     expect(session.discCounts).toEqual({ black: 2, white: 2 });
+    expect(session.lastMove).toBeNull();
     expect(session.winner).toBeNull();
     expect(getSessionLegalMoves(session)).toEqual([]);
   });
@@ -26,6 +27,7 @@ describe("game session", () => {
     expect(session.status).toBe("playing");
     expect(session.currentDisc).toBe("black");
     expect(session.discCounts).toEqual({ black: 2, white: 2 });
+    expect(session.lastMove).toBeNull();
     expect(session.winner).toBeNull();
     expect(getSessionLegalMoves(session)).toEqual([19, 26, 37, 44]);
   });
@@ -47,6 +49,7 @@ describe("game session", () => {
     expect(nextSession.board[19]).toBe("black");
     expect(nextSession.board[27]).toBe("black");
     expect(nextSession.discCounts).toEqual({ black: 4, white: 1 });
+    expect(nextSession.lastMove).toBe(19);
     expect(nextSession.currentDisc).toBe("white");
   });
 
@@ -75,6 +78,7 @@ describe("game session", () => {
 
     expect(nextSession.status).toBe("playing");
     expect(nextSession.currentDisc).toBe("black");
+    expect(nextSession.lastMove).toBe(2);
     expect(getSessionLegalMoves(nextSession)).toEqual([5]);
   });
 
@@ -89,6 +93,7 @@ describe("game session", () => {
 
     expect(nextSession.status).toBe("ended");
     expect(nextSession.winner).toBe("black");
+    expect(nextSession.lastMove).toBe(2);
     expect(nextSession.discCounts).toEqual({ black: 64, white: 0 });
     expect(getSessionLegalMoves(nextSession)).toEqual([]);
   });
@@ -102,6 +107,7 @@ function createPlayingSession(
     board,
     currentDisc,
     discCounts: { black: 0, white: 0 },
+    lastMove: null,
     status: "playing",
     winner: null,
   };

@@ -19,6 +19,7 @@ export type GameSession = {
   board: Board;
   currentDisc: DiscColor;
   discCounts: DiscCounts;
+  lastMove: number | null;
   status: GameStatus;
   winner: Winner | null;
 };
@@ -30,6 +31,7 @@ export function createGameSession(): GameSession {
     board,
     currentDisc: "black",
     discCounts: countDiscs(board),
+    lastMove: null,
     status: "notStarted",
     winner: null,
   };
@@ -42,6 +44,7 @@ export function startNewGame(): GameSession {
     board,
     currentDisc: "black",
     discCounts: countDiscs(board),
+    lastMove: null,
     status: "playing",
     winner: null,
   };
@@ -83,6 +86,7 @@ export function placeCurrentDisc(
       ...session,
       board: nextBoard,
       discCounts: countDiscs(nextBoard),
+      lastMove: square,
       status: "ended",
       winner: getWinner(nextBoard),
     };
@@ -97,5 +101,6 @@ export function placeCurrentDisc(
     board: nextBoard,
     currentDisc,
     discCounts: countDiscs(nextBoard),
+    lastMove: square,
   };
 }

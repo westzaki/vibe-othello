@@ -8,6 +8,7 @@ describe("debug fixtures", () => {
 
     expect(session.status).toBe("ended");
     expect(session.winner).toBe("black");
+    expect(session.lastMove).toBeNull();
     expect(session.discCounts).toEqual({ black: 44, white: 20 });
   });
 
@@ -32,6 +33,7 @@ describe("debug fixtures", () => {
 
     expect(session.status).toBe("playing");
     expect(session.currentDisc).toBe("black");
+    expect(session.lastMove).toBeNull();
     expect(session.winner).toBeNull();
     expect(countDiscs(session.board)).toEqual({ black: 62, white: 1 });
   });
