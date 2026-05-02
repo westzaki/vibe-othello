@@ -24,4 +24,18 @@ describe("board evaluation", () => {
 
     expect(evaluateBoard(board, "black")).toBeGreaterThan(0);
   });
+
+  it("slightly rewards having more legal moves than the opponent", () => {
+    const board: Board = Array.from({ length: 64 }, () => null);
+
+    board[18] = "white";
+    board[19] = "black";
+    board[20] = "white";
+    board[27] = "black";
+    board[28] = "black";
+    board[35] = "white";
+    board[36] = "black";
+
+    expect(evaluateBoard(board, "black")).toBeGreaterThan(1);
+  });
 });

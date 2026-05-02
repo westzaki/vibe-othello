@@ -36,4 +36,26 @@ describe("strategic board evaluation", () => {
 
     expect(strategicEvaluateBoard(mobileBoard, "black")).toBeGreaterThan(0);
   });
+
+  it("weights disc count more heavily near the endgame", () => {
+    const board: Board = Array.from({ length: 64 }, (_, index) =>
+      index % 2 === 0 ? "black" : "white",
+    );
+
+    board[27] = null;
+    board[58] = null;
+    board[59] = null;
+    board[60] = null;
+    board[61] = null;
+    board[62] = null;
+    board[63] = null;
+
+    const beforeScore = strategicEvaluateBoard(board, "black");
+
+    board[27] = "black";
+
+    expect(
+      strategicEvaluateBoard(board, "black") - beforeScore,
+    ).toBeGreaterThan(3);
+  });
 });

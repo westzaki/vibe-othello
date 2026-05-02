@@ -8,7 +8,8 @@ import {
 } from "../game/othello";
 import { strategicEvaluateBoard } from "./strategicEvaluateBoard";
 
-const defaultSearchDepth = 3;
+const defaultSearchDepth = 4;
+const endGameExtensionEmptyThreshold = 8;
 
 export function chooseMinimaxMove(
   board: Board,
@@ -21,17 +22,19 @@ export function chooseMinimaxMove(
     return null;
   }
 
-  let bestMove = legalMoves[0];
+  const orderedMoves = getOrderedMoves(board, disc, disc, legalMoves, true);
+  const effectiveSearchDepth = getSearchDepth(board, searchDepth);
+  let bestMove = orderedMoves[0];
   let bestScore = Number.NEGATIVE_INFINITY;
   let alpha = Number.NEGATIVE_INFINITY;
 
-  for (const move of legalMoves) {
+  for (const move of orderedMoves) {
     const nextBoard = placeDisc(board, move, disc);
     const score = minimax(
       nextBoard,
       getNextDisc(disc),
       disc,
-      searchDepth - 1,
+      effectiveSearchDepth - 1,
       alpha,
       Number.POSITIVE_INFINITY,
     );
@@ -68,8 +71,15 @@ function minimax(
 
   if (currentDisc === maximizingDisc) {
     let bestScore = Number.NEGATIVE_INFINITY;
+    const orderedMoves = getOrderedMoves(
+      board,
+      currentDisc,
+      maximizingDisc,
+      legalMoves,
+      true,
+    );
 
-    for (const move of legalMoves) {
+    for (const move of orderedMoves) {
       const score = minimax(
         placeDisc(board, move, currentDisc),
         nextDisc,
@@ -91,8 +101,15 @@ function minimax(
   }
 
   let bestScore = Number.POSITIVE_INFINITY;
+  const orderedMoves = getOrderedMoves(
+    board,
+    currentDisc,
+    maximizingDisc,
+    legalMoves,
+    false,
+  );
 
-  for (const move of legalMoves) {
+  for (const move of orderedMoves) {
     const score = minimax(
       placeDisc(board, move, currentDisc),
       nextDisc,
@@ -111,4 +128,37 @@ function minimax(
   }
 
   return bestScore;
+}
+
+function getOrderedMoves(
+  board: Board,
+  currentDisc: DiscColor,
+  maximizingDisc: DiscColor,
+  legalMoves: number[],
+  isMaximizing: boolean,
+): number[] {
+  return legalMoves
+    .map((move) => ({
+      move,
+      score: strategicEvaluateBoard(
+        placeDisc(board, move, currentDisc),
+        maximizingDisc,
+      ),
+    }))
+    .sort((firstMove, secondMove) =>
+      isMaximizing
+        ? secondMove.score - firstMove.score
+        : firstMove.score - secondMove.score,
+    )
+    .map(({ move }) => move);
+}
+
+function getSearchDepth(board: Board, requestedDepth: number): number {
+  const emptyCount = board.filter((cell) => cell === null).length;
+
+  if (emptyCount <= endGameExtensionEmptyThreshold) {
+    return Math.max(requestedDepth, emptyCount);
+  }
+
+  return requestedDepth;
 }

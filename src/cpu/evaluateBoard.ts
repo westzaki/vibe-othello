@@ -1,5 +1,6 @@
 import {
   countDiscs,
+  getLegalMoves,
   getNextDisc,
   type Board,
   type DiscColor,
@@ -7,11 +8,17 @@ import {
 
 const cornerSquares = [0, 7, 56, 63];
 const cornerScore = 25;
+const mobilityWeight = 2;
 
 export function evaluateBoard(board: Board, disc: DiscColor): number {
   const opponentDisc = getNextDisc(disc);
   const counts = countDiscs(board);
-  let score = counts[disc] - counts[opponentDisc];
+  let score =
+    counts[disc] -
+    counts[opponentDisc] +
+    (getLegalMoves(board, disc).length -
+      getLegalMoves(board, opponentDisc).length) *
+      mobilityWeight;
 
   for (const square of cornerSquares) {
     if (board[square] === disc) {
