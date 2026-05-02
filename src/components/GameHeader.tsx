@@ -72,7 +72,7 @@ export function GameHeader({
             onClick={onNewGame}
             type="button"
           >
-            Start Match
+            Title Screen
           </button>
         )}
       </div>

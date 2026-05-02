@@ -1,81 +1,69 @@
-import { lazy, Suspense, useMemo } from "react";
-import { calculateAdvantage } from "./cpu/advantage";
-import { AdvantageBar } from "./components/AdvantageBar";
-import { Board } from "./components/Board";
-import { GameHeader } from "./components/GameHeader";
-import { GameResultOverlay } from "./components/GameResultOverlay";
-import { PlayerControls } from "./components/PlayerControls";
+import { useState } from "react";
+import type { CpuLevel } from "./game/players";
 import { useOthelloGame } from "./hooks/useOthelloGame";
+import { GameScreen } from "./screens/GameScreen";
+import { ResultScreen } from "./screens/ResultScreen";
+import { StartScreen, type GameMode } from "./screens/StartScreen";
 
-const DevDebugPanel = import.meta.env.DEV
-  ? lazy(() =>
-      import("./debug/DebugPanel").then((module) => ({
-        default: module.DebugPanel,
-      })),
-    )
-  : null;
+type AppScreen = "start" | "game" | "result";
 
 export default function App() {
   const game = useOthelloGame();
-  const advantage = useMemo(
-    () => calculateAdvantage(game.board),
-    [game.board],
-  );
+  const [screen, setScreen] = useState<AppScreen>("start");
+
+  function handleStartMatch(mode: GameMode, cpuLevel: CpuLevel) {
+    game.setPlayerType("black", "human");
+    game.setPlayerType("white", mode === "onePlayer" ? "cpu" : "human");
+    game.setCpuLevel("white", cpuLevel);
+    game.startNewGame();
+    setScreen("game");
+  }
+
+  function handleEndGame() {
+    game.endGame();
+    setScreen("start");
+  }
+
+  function handlePlayAgain() {
+    game.startNewGame();
+    setScreen("game");
+  }
+
+  function handleBackToStart() {
+    game.resetGame();
+    setScreen("start");
+  }
+
+  const shouldShowResult =
+    screen === "result" ||
+    (screen === "game" &&
+      game.gameStatus === "ended" &&
+      game.endReason === "completed");
 
   return (
     <main className="app">
-      <section className="game-shell" aria-labelledby="game-title">
-        <aside className="game-sidebar" aria-label="Game controls and status">
-          <GameHeader
-            currentDisc={game.currentDisc}
-            discCounts={game.discCounts}
-            endReason={game.endReason}
-            gameStatus={game.gameStatus}
-            isPlaying={game.isPlaying}
-            message={game.message}
-            onEndGame={game.endGame}
-            onNewGame={game.startNewGame}
-            winner={game.winner}
-          />
-
-          <AdvantageBar advantage={advantage} />
-
-          <PlayerControls
-            disabled={game.isPlaying}
-            onCpuLevelChange={game.setCpuLevel}
-            onPlayerTypeChange={game.setPlayerType}
-            players={game.players}
-          />
-        </aside>
-
-        <div className="game-table">
-          <Board
-            board={game.board}
-            currentDisc={game.currentDisc}
-            flipAnimationId={game.flipAnimationId}
-            flippedSquares={game.flippedSquares}
-            lastMove={game.lastMove}
-            legalMoves={game.canHumanPlay ? game.legalMoves : []}
-            onSquareClick={game.placeCurrentDisc}
-          />
-        </div>
-
-        {DevDebugPanel !== null && (
-          <Suspense fallback={null}>
-            <DevDebugPanel onReplaceSession={game.replaceSession} />
-          </Suspense>
-        )}
-
-        {game.gameStatus === "ended" &&
-          game.endReason === "completed" &&
-          game.winner !== null && (
-            <GameResultOverlay
-              discCounts={game.discCounts}
-              onPlayAgain={game.resetGame}
-              winner={game.winner}
-            />
-          )}
-      </section>
+      {screen === "start" ? (
+        <StartScreen
+          initialCpuLevel={game.players.white.cpuLevel}
+          initialMode={
+            game.players.white.type === "cpu" ? "onePlayer" : "twoPlayer"
+          }
+          onStart={handleStartMatch}
+        />
+      ) : shouldShowResult && game.winner !== null ? (
+        <ResultScreen
+          discCounts={game.discCounts}
+          onBackToStart={handleBackToStart}
+          onPlayAgain={handlePlayAgain}
+          winner={game.winner}
+        />
+      ) : (
+        <GameScreen
+          game={game}
+          onBackToStart={handleBackToStart}
+          onEndGame={handleEndGame}
+        />
+      )}
     </main>
   );
 }
