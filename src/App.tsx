@@ -1,4 +1,6 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useMemo } from "react";
+import { calculateAdvantage } from "./cpu/advantage";
+import { AdvantageBar } from "./components/AdvantageBar";
 import { Board } from "./components/Board";
 import { GameHeader } from "./components/GameHeader";
 import { GameResultOverlay } from "./components/GameResultOverlay";
@@ -15,6 +17,10 @@ const DevDebugPanel = import.meta.env.DEV
 
 export default function App() {
   const game = useOthelloGame();
+  const advantage = useMemo(
+    () => calculateAdvantage(game.board),
+    [game.board],
+  );
 
   return (
     <main className="app">
@@ -31,6 +37,8 @@ export default function App() {
             onNewGame={game.startNewGame}
             winner={game.winner}
           />
+
+          <AdvantageBar advantage={advantage} />
 
           <PlayerControls
             disabled={game.isPlaying}

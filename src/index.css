@@ -277,6 +277,88 @@ h1 {
   background: linear-gradient(180deg, #ffe6a3, #d9a94d);
 }
 
+.advantage-panel {
+  display: grid;
+  gap: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 10px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.085),
+      rgba(255, 255, 255, 0.04)
+    ),
+    rgba(12, 14, 12, 0.48);
+}
+
+.advantage-panel__header,
+.advantage-panel__scores {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.advantage-panel__header {
+  color: #d8cfba;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.advantage-panel__header strong {
+  color: #f7df9b;
+  font-size: 0.82rem;
+  text-transform: none;
+}
+
+.advantage-bar {
+  display: flex;
+  overflow: hidden;
+  height: 18px;
+  border: 1px solid rgba(255, 244, 214, 0.22);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.26);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 10px 16px rgba(0, 0, 0, 0.18);
+}
+
+.advantage-bar__segment {
+  min-width: 0;
+  transition: flex-basis 280ms ease;
+}
+
+.advantage-bar__segment--black {
+  flex-basis: var(--black-advantage);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14), transparent 32%),
+    linear-gradient(180deg, #343831, #080908);
+}
+
+.advantage-bar__segment--white {
+  flex: 1;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.22), transparent 42%),
+    linear-gradient(180deg, #fffdf4, #c8baa1);
+}
+
+.advantage-panel__scores {
+  color: #e9dfc9;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.advantage-panel__score {
+  min-width: 0;
+}
+
+.advantage-panel__score--white {
+  color: #f6ead0;
+  text-align: right;
+}
+
 .result-overlay {
   position: fixed;
   z-index: 20;
