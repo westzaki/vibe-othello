@@ -16,6 +16,8 @@ export function useOthelloGame() {
     board: session.board,
     currentDisc: session.currentDisc,
     discCounts: session.discCounts,
+    flipAnimationId: session.flipAnimationId,
+    flippedSquares: session.flippedSquares,
     gameStatus: session.status,
     isPlaying: session.status === "playing",
     lastMove: session.lastMove,

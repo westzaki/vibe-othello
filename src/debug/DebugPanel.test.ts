@@ -8,6 +8,8 @@ describe("debug fixtures", () => {
 
     expect(session.status).toBe("ended");
     expect(session.winner).toBe("black");
+    expect(session.flipAnimationId).toBe(0);
+    expect(session.flippedSquares).toEqual([]);
     expect(session.lastMove).toBeNull();
     expect(session.discCounts).toEqual({ black: 44, white: 20 });
   });

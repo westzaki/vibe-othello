@@ -7,6 +7,8 @@ const rowLabels = ["1", "2", "3", "4", "5", "6", "7", "8"];
 type BoardProps = {
   board: OthelloBoard;
   currentDisc: DiscColor;
+  flipAnimationId: number;
+  flippedSquares: number[];
   lastMove: number | null;
   legalMoves: number[];
   onSquareClick: (square: number) => void;
@@ -15,6 +17,8 @@ type BoardProps = {
 export function Board({
   board,
   currentDisc,
+  flipAnimationId,
+  flippedSquares,
   lastMove,
   legalMoves,
   onSquareClick,
@@ -41,6 +45,7 @@ export function Board({
           {board.map((cell, square) => {
             const isLegal = legalMoves.includes(square);
             const isLastMove = square === lastMove && cell !== null;
+            const flipIndex = flippedSquares.indexOf(square);
 
             return (
               <button
@@ -59,7 +64,17 @@ export function Board({
                 onClick={() => onSquareClick(square)}
                 type="button"
               >
-                {cell !== null && <GameDisc color={cell} />}
+                {cell !== null && (
+                  <GameDisc
+                    color={cell}
+                    flipDelay={flipIndex >= 0 ? flipIndex * 70 : null}
+                    key={
+                      flipIndex >= 0
+                        ? `${square}-${flipAnimationId}`
+                        : `${square}-stable`
+                    }
+                  />
+                )}
               </button>
             );
           })}

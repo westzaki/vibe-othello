@@ -1,6 +1,7 @@
 import {
   countDiscs,
   createInitialBoard,
+  getFlippedSquares,
   getLegalMoves,
   getNextDisc,
   getWinner,
@@ -19,6 +20,8 @@ export type GameSession = {
   board: Board;
   currentDisc: DiscColor;
   discCounts: DiscCounts;
+  flipAnimationId: number;
+  flippedSquares: number[];
   lastMove: number | null;
   status: GameStatus;
   winner: Winner | null;
@@ -31,6 +34,8 @@ export function createGameSession(): GameSession {
     board,
     currentDisc: "black",
     discCounts: countDiscs(board),
+    flipAnimationId: 0,
+    flippedSquares: [],
     lastMove: null,
     status: "notStarted",
     winner: null,
@@ -44,6 +49,8 @@ export function startNewGame(): GameSession {
     board,
     currentDisc: "black",
     discCounts: countDiscs(board),
+    flipAnimationId: 0,
+    flippedSquares: [],
     lastMove: null,
     status: "playing",
     winner: null,
@@ -54,6 +61,8 @@ export function endGame(session: GameSession): GameSession {
   return {
     ...session,
     discCounts: countDiscs(session.board),
+    flipAnimationId: session.flipAnimationId,
+    flippedSquares: [],
     status: "ended",
     winner: getWinner(session.board),
   };
@@ -76,6 +85,11 @@ export function placeCurrentDisc(
   }
 
   const nextBoard = placeDisc(session.board, square, session.currentDisc);
+  const flippedSquares = getFlippedSquares(
+    session.board,
+    square,
+    session.currentDisc,
+  ).sort((firstSquare, secondSquare) => firstSquare - secondSquare);
 
   if (nextBoard === session.board) {
     return session;
@@ -86,6 +100,8 @@ export function placeCurrentDisc(
       ...session,
       board: nextBoard,
       discCounts: countDiscs(nextBoard),
+      flipAnimationId: session.flipAnimationId + 1,
+      flippedSquares,
       lastMove: square,
       status: "ended",
       winner: getWinner(nextBoard),
@@ -101,6 +117,8 @@ export function placeCurrentDisc(
     board: nextBoard,
     currentDisc,
     discCounts: countDiscs(nextBoard),
+    flipAnimationId: session.flipAnimationId + 1,
+    flippedSquares,
     lastMove: square,
   };
 }

@@ -55,6 +55,20 @@ export function getLegalMoves(board: Board, disc: DiscColor): number[] {
   );
 }
 
+export function getFlippedSquares(
+  board: Board,
+  index: number,
+  disc: DiscColor,
+): number[] {
+  if (board[index] !== null) {
+    return [];
+  }
+
+  return directions.flatMap((direction) =>
+    getDiscsToFlip(board, index, disc, direction),
+  );
+}
+
 export function hasLegalMove(board: Board, disc: DiscColor): boolean {
   return board.some((_, index) => isLegalMove(board, index, disc));
 }
@@ -91,7 +105,9 @@ export function getWinner(board: Board): Winner {
 }
 
 export function placeDisc(board: Board, index: number, disc: DiscColor): Board {
-  if (!isLegalMove(board, index, disc)) {
+  const flippedSquares = getFlippedSquares(board, index, disc);
+
+  if (flippedSquares.length === 0) {
     return board;
   }
 
@@ -99,12 +115,8 @@ export function placeDisc(board: Board, index: number, disc: DiscColor): Board {
 
   nextBoard[index] = disc;
 
-  for (const direction of directions) {
-    const discsToFlip = getDiscsToFlip(board, index, disc, direction);
-
-    for (const flipIndex of discsToFlip) {
-      nextBoard[flipIndex] = disc;
-    }
+  for (const flipIndex of flippedSquares) {
+    nextBoard[flipIndex] = disc;
   }
 
   return nextBoard;

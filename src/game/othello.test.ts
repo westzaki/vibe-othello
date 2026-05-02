@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   countDiscs,
   createInitialBoard,
+  getFlippedSquares,
   getLegalMoves,
   getWinner,
   isGameOver,
@@ -41,6 +42,12 @@ describe("Othello rules", () => {
     expect(nextBoard[27]).toBe("black");
   });
 
+  it("returns flipped squares for a legal move", () => {
+    const board = createInitialBoard();
+
+    expect(getFlippedSquares(board, 19, "black")).toEqual([27]);
+  });
+
   it("returns the same board when the move is not legal", () => {
     const board = createInitialBoard();
 
@@ -62,6 +69,7 @@ describe("Othello rules", () => {
     expect(nextBoard[27]).toBe("black");
     expect(nextBoard[35]).toBe("black");
     expect(nextBoard[43]).toBe("black");
+    expect(getFlippedSquares(board, 43, "black")).toEqual([35, 27]);
   });
 
   it("counts black and white discs", () => {

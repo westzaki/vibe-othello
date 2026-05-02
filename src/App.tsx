@@ -30,6 +30,8 @@ export default function App() {
         <Board
           board={game.board}
           currentDisc={game.currentDisc}
+          flipAnimationId={game.flipAnimationId}
+          flippedSquares={game.flippedSquares}
           lastMove={game.lastMove}
           legalMoves={game.legalMoves}
           onSquareClick={game.placeCurrentDisc}
