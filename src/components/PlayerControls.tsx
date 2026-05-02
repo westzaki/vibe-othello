@@ -12,18 +12,26 @@ const cpuLevels: CpuLevel[] = [
 ];
 
 type PlayerControlsProps = {
+  disabled: boolean;
   onCpuLevelChange: (disc: DiscColor, cpuLevel: CpuLevel) => void;
   onPlayerTypeChange: (disc: DiscColor, playerType: PlayerType) => void;
   players: PlayerSettings;
 };
 
 export function PlayerControls({
+  disabled,
   onCpuLevelChange,
   onPlayerTypeChange,
   players,
 }: PlayerControlsProps) {
   return (
-    <div className="player-controls" aria-label="Player controls">
+    <div
+      className={[
+        "player-controls",
+        disabled ? "player-controls--locked" : "",
+      ].join(" ")}
+      aria-label="Player controls"
+    >
       {discs.map((disc) => (
         <div className="player-control" key={disc}>
           <span
@@ -41,6 +49,7 @@ export function PlayerControls({
                     ? "player-control__option--selected"
                     : "",
                 ].join(" ")}
+                disabled={disabled}
                 key={playerType}
                 onClick={() => onPlayerTypeChange(disc, playerType)}
                 type="button"
@@ -64,6 +73,7 @@ export function PlayerControls({
                       ? "player-control__option--selected"
                       : "",
                   ].join(" ")}
+                  disabled={disabled}
                   key={cpuLevel}
                   onClick={() => onCpuLevelChange(disc, cpuLevel)}
                   type="button"

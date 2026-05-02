@@ -30,6 +30,7 @@ export default function App() {
         />
 
         <PlayerControls
+          disabled={game.isPlaying}
           onCpuLevelChange={game.setCpuLevel}
           onPlayerTypeChange={game.setPlayerType}
           players={game.players}

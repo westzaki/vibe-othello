@@ -246,6 +246,10 @@ h1 {
   gap: 10px;
 }
 
+.player-controls--locked {
+  opacity: 0.72;
+}
+
 .player-control {
   display: flex;
   align-items: center;
@@ -301,8 +305,12 @@ h1 {
   text-transform: capitalize;
 }
 
-.player-control__option:hover {
+.player-control__option:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.1);
+}
+
+.player-control__option:disabled {
+  cursor: default;
 }
 
 .player-control__option:focus-visible {
@@ -316,7 +324,7 @@ h1 {
   background: linear-gradient(180deg, #f1d68b, #cf9f47);
 }
 
-.player-control__option--selected:hover {
+.player-control__option--selected:hover:not(:disabled) {
   background: linear-gradient(180deg, #ffe6a3, #d9a94d);
 }
 
