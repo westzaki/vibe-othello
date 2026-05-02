@@ -16,8 +16,6 @@ describe("game session", () => {
     expect(session.status).toBe("notStarted");
     expect(session.currentDisc).toBe("black");
     expect(session.discCounts).toEqual({ black: 2, white: 2 });
-    expect(session.flipAnimationId).toBe(0);
-    expect(session.flippedSquares).toEqual([]);
     expect(session.lastMove).toBeNull();
     expect(session.message).toBeNull();
     expect(session.winner).toBeNull();
@@ -30,8 +28,6 @@ describe("game session", () => {
     expect(session.status).toBe("playing");
     expect(session.currentDisc).toBe("black");
     expect(session.discCounts).toEqual({ black: 2, white: 2 });
-    expect(session.flipAnimationId).toBe(0);
-    expect(session.flippedSquares).toEqual([]);
     expect(session.lastMove).toBeNull();
     expect(session.message).toBeNull();
     expect(session.winner).toBeNull();
@@ -49,29 +45,28 @@ describe("game session", () => {
 
   it("places the current disc and switches turns", () => {
     const session = startNewGame();
-    const nextSession = placeCurrentDisc(session, 19);
+    const result = placeCurrentDisc(session, 19);
 
-    expect(nextSession).not.toBe(session);
-    expect(nextSession.board[19]).toBe("black");
-    expect(nextSession.board[27]).toBe("black");
-    expect(nextSession.discCounts).toEqual({ black: 4, white: 1 });
-    expect(nextSession.flipAnimationId).toBe(1);
-    expect(nextSession.flippedSquares).toEqual([27]);
-    expect(nextSession.lastMove).toBe(19);
-    expect(nextSession.message).toBeNull();
-    expect(nextSession.currentDisc).toBe("white");
+    expect(result.session).not.toBe(session);
+    expect(result.move).toEqual({ flippedSquares: [27], placedSquare: 19 });
+    expect(result.session.board[19]).toBe("black");
+    expect(result.session.board[27]).toBe("black");
+    expect(result.session.discCounts).toEqual({ black: 4, white: 1 });
+    expect(result.session.lastMove).toBe(19);
+    expect(result.session.message).toBeNull();
+    expect(result.session.currentDisc).toBe("white");
   });
 
   it("does not change the session when placing outside a legal move", () => {
     const session = startNewGame();
 
-    expect(placeCurrentDisc(session, 0)).toBe(session);
+    expect(placeCurrentDisc(session, 0)).toEqual({ move: null, session });
   });
 
   it("does not place discs after the game has ended", () => {
     const session = endGame(startNewGame());
 
-    expect(placeCurrentDisc(session, 19)).toBe(session);
+    expect(placeCurrentDisc(session, 19)).toEqual({ move: null, session });
   });
 
   it("passes the turn when the next player has no legal moves", () => {
@@ -83,15 +78,16 @@ describe("game session", () => {
     board[5] = null;
 
     const session = createPlayingSession(board, "black");
-    const nextSession = placeCurrentDisc(session, 2);
+    const result = placeCurrentDisc(session, 2);
 
-    expect(nextSession.status).toBe("playing");
-    expect(nextSession.currentDisc).toBe("black");
-    expect(nextSession.lastMove).toBe(2);
-    expect(nextSession.message).toBe(
+    expect(result.move).toEqual({ flippedSquares: [1], placedSquare: 2 });
+    expect(result.session.status).toBe("playing");
+    expect(result.session.currentDisc).toBe("black");
+    expect(result.session.lastMove).toBe(2);
+    expect(result.session.message).toBe(
       "White has no legal moves. Black plays again.",
     );
-    expect(getSessionLegalMoves(nextSession)).toEqual([5]);
+    expect(getSessionLegalMoves(result.session)).toEqual([5]);
   });
 
   it("ends automatically when neither player has legal moves after a move", () => {
@@ -101,13 +97,14 @@ describe("game session", () => {
     board[2] = null;
 
     const session = createPlayingSession(board, "black");
-    const nextSession = placeCurrentDisc(session, 2);
+    const result = placeCurrentDisc(session, 2);
 
-    expect(nextSession.status).toBe("ended");
-    expect(nextSession.winner).toBe("black");
-    expect(nextSession.lastMove).toBe(2);
-    expect(nextSession.discCounts).toEqual({ black: 64, white: 0 });
-    expect(getSessionLegalMoves(nextSession)).toEqual([]);
+    expect(result.move).toEqual({ flippedSquares: [1], placedSquare: 2 });
+    expect(result.session.status).toBe("ended");
+    expect(result.session.winner).toBe("black");
+    expect(result.session.lastMove).toBe(2);
+    expect(result.session.discCounts).toEqual({ black: 64, white: 0 });
+    expect(getSessionLegalMoves(result.session)).toEqual([]);
   });
 });
 
@@ -119,8 +116,6 @@ function createPlayingSession(
     board,
     currentDisc,
     discCounts: { black: 0, white: 0 },
-    flipAnimationId: 0,
-    flippedSquares: [],
     lastMove: null,
     message: null,
     status: "playing",

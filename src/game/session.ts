@@ -20,12 +20,20 @@ export type GameSession = {
   board: Board;
   currentDisc: DiscColor;
   discCounts: DiscCounts;
-  flipAnimationId: number;
-  flippedSquares: number[];
   lastMove: number | null;
   message: string | null;
   status: GameStatus;
   winner: Winner | null;
+};
+
+export type MoveResult = {
+  flippedSquares: number[];
+  placedSquare: number;
+};
+
+export type PlaceCurrentDiscResult = {
+  move: MoveResult | null;
+  session: GameSession;
 };
 
 export function createGameSession(): GameSession {
@@ -35,8 +43,6 @@ export function createGameSession(): GameSession {
     board,
     currentDisc: "black",
     discCounts: countDiscs(board),
-    flipAnimationId: 0,
-    flippedSquares: [],
     lastMove: null,
     message: null,
     status: "notStarted",
@@ -51,8 +57,6 @@ export function startNewGame(): GameSession {
     board,
     currentDisc: "black",
     discCounts: countDiscs(board),
-    flipAnimationId: 0,
-    flippedSquares: [],
     lastMove: null,
     message: null,
     status: "playing",
@@ -64,8 +68,6 @@ export function endGame(session: GameSession): GameSession {
   return {
     ...session,
     discCounts: countDiscs(session.board),
-    flipAnimationId: session.flipAnimationId,
-    flippedSquares: [],
     message: null,
     status: "ended",
     winner: getWinner(session.board),
@@ -83,9 +85,9 @@ export function getSessionLegalMoves(session: GameSession): number[] {
 export function placeCurrentDisc(
   session: GameSession,
   square: number,
-): GameSession {
+): PlaceCurrentDiscResult {
   if (session.status !== "playing") {
-    return session;
+    return { move: null, session };
   }
 
   const nextBoard = placeDisc(session.board, square, session.currentDisc);
@@ -96,20 +98,28 @@ export function placeCurrentDisc(
   ).sort((firstSquare, secondSquare) => firstSquare - secondSquare);
 
   if (nextBoard === session.board) {
-    return session;
+    return { move: null, session };
   }
+
+  const move: MoveResult = {
+    flippedSquares,
+    placedSquare: square,
+  };
+
+  const discCounts = countDiscs(nextBoard);
 
   if (isGameOver(nextBoard)) {
     return {
-      ...session,
-      board: nextBoard,
-      discCounts: countDiscs(nextBoard),
-      flipAnimationId: session.flipAnimationId + 1,
-      flippedSquares,
-      lastMove: square,
-      message: null,
-      status: "ended",
-      winner: getWinner(nextBoard),
+      move,
+      session: {
+        ...session,
+        board: nextBoard,
+        discCounts,
+        lastMove: square,
+        message: null,
+        status: "ended",
+        winner: getWinner(nextBoard),
+      },
     };
   }
 
@@ -118,18 +128,19 @@ export function placeCurrentDisc(
   const currentDisc = nextDiscCanMove ? nextDisc : session.currentDisc;
 
   return {
-    ...session,
-    board: nextBoard,
-    currentDisc,
-    discCounts: countDiscs(nextBoard),
-    flipAnimationId: session.flipAnimationId + 1,
-    flippedSquares,
-    lastMove: square,
-    message: nextDiscCanMove
-      ? null
-      : `${formatDisc(nextDisc)} has no legal moves. ${formatDisc(
-          session.currentDisc,
-        )} plays again.`,
+    move,
+    session: {
+      ...session,
+      board: nextBoard,
+      currentDisc,
+      discCounts,
+      lastMove: square,
+      message: nextDiscCanMove
+        ? null
+        : `${formatDisc(nextDisc)} has no legal moves. ${formatDisc(
+            session.currentDisc,
+          )} plays again.`,
+    },
   };
 }
 
