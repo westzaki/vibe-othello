@@ -1,4 +1,7 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { chooseRandomMove } from "../cpu/randomCpu";
+import type { DiscColor } from "../game/othello";
+import { createDefaultPlayerSettings, type PlayerType } from "../game/players";
 import {
   createGameSession,
   endGame,
@@ -10,9 +13,13 @@ import {
 
 export function useOthelloGame() {
   const [session, setSession] = useState(createGameSession);
+  const [players, setPlayers] = useState(createDefaultPlayerSettings);
   const [lastFlippedSquares, setLastFlippedSquares] = useState<number[]>([]);
   const [flipAnimationId, setFlipAnimationId] = useState(0);
   const legalMoves = useMemo(() => getSessionLegalMoves(session), [session]);
+  const isPlaying = session.status === "playing";
+  const currentPlayerType = players[session.currentDisc];
+  const canHumanPlay = isPlaying && currentPlayerType === "human";
 
   function clearAnimationState() {
     setLastFlippedSquares([]);
@@ -23,7 +30,7 @@ export function useOthelloGame() {
     clearAnimationState();
   }
 
-  function handlePlaceCurrentDisc(square: number) {
+  const handlePlaceCurrentDisc = useCallback((square: number) => {
     setSession((currentSession) => {
       const result = placeCurrentDisc(currentSession, square);
 
@@ -34,7 +41,29 @@ export function useOthelloGame() {
 
       return result.session;
     });
-  }
+  }, []);
+
+  useEffect(() => {
+    if (!isPlaying || currentPlayerType !== "cpu") {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      const move = chooseRandomMove(session.board, session.currentDisc);
+
+      if (move !== null) {
+        handlePlaceCurrentDisc(move);
+      }
+    }, 350);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [
+    currentPlayerType,
+    handlePlaceCurrentDisc,
+    isPlaying,
+    session.board,
+    session.currentDisc,
+  ]);
 
   function handleReplaceSession(nextSession: GameSession) {
     setSession(nextSession);
@@ -46,9 +75,18 @@ export function useOthelloGame() {
     clearAnimationState();
   }
 
+  function handlePlayerTypeChange(disc: DiscColor, playerType: PlayerType) {
+    setPlayers((currentPlayers) => ({
+      ...currentPlayers,
+      [disc]: playerType,
+    }));
+  }
+
   return {
     board: session.board,
+    canHumanPlay,
     currentDisc: session.currentDisc,
+    currentPlayerType,
     discCounts: session.discCounts,
     flipAnimationId,
     flippedSquares: lastFlippedSquares,
@@ -57,9 +95,11 @@ export function useOthelloGame() {
     lastMove: session.lastMove,
     legalMoves,
     message: session.message,
+    players,
     winner: session.winner,
     endGame: handleEndGame,
     placeCurrentDisc: handlePlaceCurrentDisc,
+    setPlayerType: handlePlayerTypeChange,
     replaceSession: handleReplaceSession,
     startNewGame: handleStartNewGame,
   };

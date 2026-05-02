@@ -238,6 +238,82 @@ h1 {
   background: linear-gradient(180deg, #ffe6a3, #d9a94d);
 }
 
+.player-controls {
+  display: flex;
+  width: min(100%, 560px);
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.player-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.player-control__label {
+  display: inline-flex;
+  min-width: 54px;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.player-control__label--black {
+  color: #f6f1e7;
+  background: #181a18;
+}
+
+.player-control__label--white {
+  color: #1f2620;
+  background: #f2eadb;
+}
+
+.player-control__options {
+  display: flex;
+  gap: 4px;
+}
+
+.player-control__option {
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 7px 10px;
+  color: #e8dec5;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.player-control__option:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.player-control__option:focus-visible {
+  outline: 3px solid #f0c86b;
+  outline-offset: 3px;
+}
+
+.player-control__option--selected {
+  border-color: rgba(255, 238, 194, 0.46);
+  color: #20170c;
+  background: linear-gradient(180deg, #f1d68b, #cf9f47);
+}
+
+.player-control__option--selected:hover {
+  background: linear-gradient(180deg, #ffe6a3, #d9a94d);
+}
+
 .board-frame {
   width: min(84vw, 560px);
   padding: clamp(12px, 2.8vw, 22px);

@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Board } from "./components/Board";
 import { GameHeader } from "./components/GameHeader";
+import { PlayerControls } from "./components/PlayerControls";
 import { useOthelloGame } from "./hooks/useOthelloGame";
 
 const DevDebugPanel = import.meta.env.DEV
@@ -28,13 +29,18 @@ export default function App() {
           winner={game.winner}
         />
 
+        <PlayerControls
+          onPlayerTypeChange={game.setPlayerType}
+          players={game.players}
+        />
+
         <Board
           board={game.board}
           currentDisc={game.currentDisc}
           flipAnimationId={game.flipAnimationId}
           flippedSquares={game.flippedSquares}
           lastMove={game.lastMove}
-          legalMoves={game.legalMoves}
+          legalMoves={game.canHumanPlay ? game.legalMoves : []}
           onSquareClick={game.placeCurrentDisc}
         />
 
