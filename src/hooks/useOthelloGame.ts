@@ -1,10 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  playFlipDiscSound,
-  playPlaceDiscSound,
-  unlockGameAudio,
-} from "../audio/gameSounds";
-import { chooseCpuMove } from "../cpu/cpu";
+import { useCallback, useMemo, useState } from "react";
+import { unlockGameAudio } from "../audio/gameSounds";
 import type { DiscColor } from "../game/othello";
 import {
   createDefaultPlayerSettings,
@@ -19,9 +14,8 @@ import {
   startNewGame,
   type GameSession,
 } from "../game/session";
-
-const firstFlipSoundDelayMs = 110;
-const flipSoundDelayMs = 70;
+import { useCpuTurn } from "./useCpuTurn";
+import { useMoveSounds } from "./useMoveSounds";
 
 export function useOthelloGame() {
   const [session, setSession] = useState(createGameSession);
@@ -56,53 +50,15 @@ export function useOthelloGame() {
     });
   }, []);
 
-  useEffect(() => {
-    if (!isPlaying || currentPlayerType !== "cpu") {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      const move = chooseCpuMove(
-        session.board,
-        session.currentDisc,
-        currentPlayer.cpuLevel,
-      );
-
-      if (move !== null) {
-        handlePlaceCurrentDisc(move);
-      }
-    }, 350);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [
-    currentPlayerType,
-    handlePlaceCurrentDisc,
-    isPlaying,
-    currentPlayer.cpuLevel,
-    session.board,
-    session.currentDisc,
-  ]);
-
-  useEffect(() => {
-    if (flipAnimationId === 0) {
-      return;
-    }
-
-    playPlaceDiscSound();
-
-    const timeoutIds = lastFlippedSquares.map((_, index) =>
-      window.setTimeout(
-        playFlipDiscSound,
-        firstFlipSoundDelayMs + index * flipSoundDelayMs,
-      ),
-    );
-
-    return () => {
-      for (const timeoutId of timeoutIds) {
-        window.clearTimeout(timeoutId);
-      }
-    };
-  }, [flipAnimationId, lastFlippedSquares]);
+  useCpuTurn({
+    currentPlayer,
+    onPlaceDisc: handlePlaceCurrentDisc,
+    session,
+  });
+  useMoveSounds({
+    flipAnimationId,
+    flippedSquares: lastFlippedSquares,
+  });
 
   function handleReplaceSession(nextSession: GameSession) {
     setSession(nextSession);
