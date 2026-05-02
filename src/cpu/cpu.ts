@@ -1,6 +1,7 @@
 import type { CpuLevel } from "../game/players";
 import type { Board, DiscColor } from "../game/othello";
 import { chooseCornerMove } from "./cornerCpu";
+import { chooseMinimaxMove } from "./minimaxCpu";
 import { chooseOnePlyMove } from "./onePlyCpu";
 import { chooseRandomMove } from "./randomCpu";
 import { chooseStrategicMove } from "./strategicCpu";
@@ -10,6 +11,10 @@ export function chooseCpuMove(
   disc: DiscColor,
   level: CpuLevel,
 ): number | null {
+  if (level === "level5") {
+    return chooseMinimaxMove(board, disc);
+  }
+
   if (level === "level4") {
     return chooseStrategicMove(board, disc);
   }
