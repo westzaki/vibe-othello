@@ -3,6 +3,7 @@ import { calculateAdvantage } from "../cpu/advantage";
 import { AdvantageBar } from "../components/AdvantageBar";
 import { Board } from "../components/Board";
 import { GameHeader } from "../components/GameHeader";
+import { MoveHistory } from "../components/MoveHistory";
 import type { useOthelloGame } from "../hooks/useOthelloGame";
 
 const DevDebugPanel = import.meta.env.DEV
@@ -42,6 +43,8 @@ export function GameScreen({
         />
 
         <AdvantageBar advantage={advantage} />
+
+        <MoveHistory moves={game.moveHistory} />
       </aside>
 
       <div className="game-table">

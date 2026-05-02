@@ -110,6 +110,7 @@ export function useOthelloGame() {
     lastMove: session.lastMove,
     legalMoves,
     message: session.message,
+    moveHistory: session.moveHistory,
     players,
     winner: session.winner,
     endGame: handleEndGame,
