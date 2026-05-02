@@ -26,7 +26,6 @@ export function GameHeader({
 }: GameHeaderProps) {
   return (
     <div className="game-heading">
-      <p className="eyebrow">Game Session</p>
       <h1 id="game-title">Vibe Othello</h1>
       <div className="score-row" aria-label="Current score">
         <span className="score-chip score-chip--black">

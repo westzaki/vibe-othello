@@ -1,5 +1,6 @@
 .debug-panel {
   display: grid;
+  grid-column: 1 / -1;
   gap: 10px;
   width: min(100%, 560px);
   border: 1px dashed rgba(255, 238, 194, 0.32);

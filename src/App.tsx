@@ -19,34 +19,38 @@ export default function App() {
   return (
     <main className="app">
       <section className="game-shell" aria-labelledby="game-title">
-        <GameHeader
-          currentDisc={game.currentDisc}
-          discCounts={game.discCounts}
-          endReason={game.endReason}
-          gameStatus={game.gameStatus}
-          isPlaying={game.isPlaying}
-          message={game.message}
-          onEndGame={game.endGame}
-          onNewGame={game.startNewGame}
-          winner={game.winner}
-        />
+        <aside className="game-sidebar" aria-label="Game controls and status">
+          <GameHeader
+            currentDisc={game.currentDisc}
+            discCounts={game.discCounts}
+            endReason={game.endReason}
+            gameStatus={game.gameStatus}
+            isPlaying={game.isPlaying}
+            message={game.message}
+            onEndGame={game.endGame}
+            onNewGame={game.startNewGame}
+            winner={game.winner}
+          />
 
-        <PlayerControls
-          disabled={game.isPlaying}
-          onCpuLevelChange={game.setCpuLevel}
-          onPlayerTypeChange={game.setPlayerType}
-          players={game.players}
-        />
+          <PlayerControls
+            disabled={game.isPlaying}
+            onCpuLevelChange={game.setCpuLevel}
+            onPlayerTypeChange={game.setPlayerType}
+            players={game.players}
+          />
+        </aside>
 
-        <Board
-          board={game.board}
-          currentDisc={game.currentDisc}
-          flipAnimationId={game.flipAnimationId}
-          flippedSquares={game.flippedSquares}
-          lastMove={game.lastMove}
-          legalMoves={game.canHumanPlay ? game.legalMoves : []}
-          onSquareClick={game.placeCurrentDisc}
-        />
+        <div className="game-table">
+          <Board
+            board={game.board}
+            currentDisc={game.currentDisc}
+            flipAnimationId={game.flipAnimationId}
+            flippedSquares={game.flippedSquares}
+            lastMove={game.lastMove}
+            legalMoves={game.canHumanPlay ? game.legalMoves : []}
+            onSquareClick={game.placeCurrentDisc}
+          />
+        </div>
 
         {DevDebugPanel !== null && (
           <Suspense fallback={null}>
