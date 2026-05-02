@@ -109,6 +109,11 @@ export function useOthelloGame() {
     clearAnimationState();
   }
 
+  function handleResetGame() {
+    setSession(createGameSession());
+    clearAnimationState();
+  }
+
   function handleStartNewGame() {
     unlockGameAudio();
     setSession(startNewGame());
@@ -156,6 +161,7 @@ export function useOthelloGame() {
     setCpuLevel: handleCpuLevelChange,
     setPlayerType: handlePlayerTypeChange,
     replaceSession: handleReplaceSession,
+    resetGame: handleResetGame,
     startNewGame: handleStartNewGame,
   };
 }

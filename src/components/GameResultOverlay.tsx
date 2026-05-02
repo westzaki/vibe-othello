@@ -2,13 +2,13 @@ import type { DiscCounts, Winner } from "../game/othello";
 
 type GameResultOverlayProps = {
   discCounts: DiscCounts;
-  onNewGame: () => void;
+  onPlayAgain: () => void;
   winner: Winner;
 };
 
 export function GameResultOverlay({
   discCounts,
-  onNewGame,
+  onPlayAgain,
   winner,
 }: GameResultOverlayProps) {
   const score = `${discCounts.black} - ${discCounts.white}`;
@@ -33,7 +33,7 @@ export function GameResultOverlay({
         </div>
         <button
           className="game-action game-action--primary result-overlay__action"
-          onClick={onNewGame}
+          onClick={onPlayAgain}
           type="button"
         >
           Play Again

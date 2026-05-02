@@ -59,7 +59,7 @@ export default function App() {
           game.winner !== null && (
             <GameResultOverlay
               discCounts={game.discCounts}
-              onNewGame={game.startNewGame}
+              onPlayAgain={game.resetGame}
               winner={game.winner}
             />
           )}
