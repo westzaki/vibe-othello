@@ -1,15 +1,19 @@
-import { getLegalMoves, type Board, type DiscColor } from "../game/othello";
+import {
+  CORNER_SQUARES,
+  getLegalMoves,
+  type Board,
+  type DiscColor,
+  type SquareIndex,
+} from "../game/othello";
 import { chooseRandomMove } from "./randomCpu";
-
-const cornerSquares = [0, 7, 56, 63];
 
 export function chooseCornerMove(
   board: Board,
   disc: DiscColor,
   random = Math.random,
-): number | null {
+): SquareIndex | null {
   const legalMoves = getLegalMoves(board, disc);
-  const cornerMove = cornerSquares.find((square) =>
+  const cornerMove = CORNER_SQUARES.find((square) =>
     legalMoves.includes(square),
   );
 

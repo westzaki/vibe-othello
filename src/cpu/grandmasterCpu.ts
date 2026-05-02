@@ -6,6 +6,7 @@ import {
   placeDisc,
   type Board,
   type DiscColor,
+  type SquareIndex,
 } from "../game/othello";
 import { countEmptySquares } from "./evaluationFeatures";
 import { getScoredMoves, orderMovesByScore } from "./moveSelection";
@@ -21,7 +22,7 @@ const finalScoreWeight = 1000;
 
 type ExactScoreCache = Map<string, number>;
 type RootMoveScore = {
-  move: number;
+  move: SquareIndex;
   score: number;
 };
 type EndgameScore = {
@@ -36,7 +37,7 @@ type TimedSearchResult = {
 export function chooseGrandmasterMove(
   board: Board,
   disc: DiscColor,
-): number | null {
+): SquareIndex | null {
   return chooseIterativeDeepeningMove(board, disc);
 }
 
@@ -44,7 +45,7 @@ export function chooseIterativeDeepeningMove(
   board: Board,
   disc: DiscColor,
   timeLimitMs = grandmasterTimeLimitMs,
-): number | null {
+): SquareIndex | null {
   const legalMoves = getLegalMoves(board, disc);
 
   if (legalMoves.length === 0) {
@@ -90,7 +91,7 @@ function searchRootMoves(
   board: Board,
   disc: DiscColor,
   depth: number,
-  candidateMoves: number[],
+  candidateMoves: SquareIndex[],
   deadline: number,
 ): { scores: RootMoveScore[]; timedOut: boolean } {
   const scores: RootMoveScore[] = [];
@@ -208,7 +209,7 @@ function getTimedMaxScore(
   board: Board,
   currentDisc: DiscColor,
   maximizingDisc: DiscColor,
-  legalMoves: number[],
+  legalMoves: SquareIndex[],
   depth: number,
   alpha: number,
   beta: number,
@@ -256,7 +257,7 @@ function getTimedMinScore(
   board: Board,
   currentDisc: DiscColor,
   maximizingDisc: DiscColor,
-  legalMoves: number[],
+  legalMoves: SquareIndex[],
   depth: number,
   alpha: number,
   beta: number,
@@ -303,7 +304,7 @@ function getTimedMinScore(
 function getDeepeningCandidates(
   scores: RootMoveScore[],
   depth: number,
-): number[] {
+): SquareIndex[] {
   const sortedScores = [...scores].sort(
     (firstMove, secondMove) => secondMove.score - firstMove.score,
   );
@@ -327,7 +328,7 @@ function getDeepeningCandidates(
 export function choosePerfectEndgameMove(
   board: Board,
   disc: DiscColor,
-): number | null {
+): SquareIndex | null {
   const legalMoves = getLegalMoves(board, disc);
 
   if (legalMoves.length === 0) {
@@ -388,14 +389,7 @@ function solveEndgame(
   const nextDisc = getNextDisc(currentDisc);
 
   if (legalMoves.length === 0) {
-    return solveEndgame(
-      board,
-      nextDisc,
-      maximizingDisc,
-      alpha,
-      beta,
-      cache,
-    );
+    return solveEndgame(board, nextDisc, maximizingDisc, alpha, beta, cache);
   }
 
   if (currentDisc === maximizingDisc) {
@@ -437,7 +431,7 @@ function getMaxScore(
   board: Board,
   currentDisc: DiscColor,
   maximizingDisc: DiscColor,
-  legalMoves: number[],
+  legalMoves: SquareIndex[],
   alpha: number,
   beta: number,
   cache: ExactScoreCache,
@@ -481,7 +475,7 @@ function getMinScore(
   board: Board,
   currentDisc: DiscColor,
   maximizingDisc: DiscColor,
-  legalMoves: number[],
+  legalMoves: SquareIndex[],
   alpha: number,
   beta: number,
   cache: ExactScoreCache,
@@ -525,9 +519,9 @@ function getOrderedMoves(
   board: Board,
   currentDisc: DiscColor,
   maximizingDisc: DiscColor,
-  legalMoves: number[],
+  legalMoves: SquareIndex[],
   isMaximizing: boolean,
-): number[] {
+): SquareIndex[] {
   return orderMovesByScore(
     getScoredMoves(
       board,

@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { unlockGameAudio } from "../audio/gameSounds";
-import type { DiscColor } from "../game/othello";
+import type { DiscColor, SquareIndex } from "../game/othello";
 import {
   createDefaultPlayerSettings,
   type CpuLevel,
@@ -20,7 +20,9 @@ import { useMoveSounds } from "./useMoveSounds";
 export function useOthelloGame() {
   const [session, setSession] = useState(createGameSession);
   const [players, setPlayers] = useState(createDefaultPlayerSettings);
-  const [lastFlippedSquares, setLastFlippedSquares] = useState<number[]>([]);
+  const [lastFlippedSquares, setLastFlippedSquares] = useState<SquareIndex[]>(
+    [],
+  );
   const [flipAnimationId, setFlipAnimationId] = useState(0);
   const legalMoves = useMemo(() => getSessionLegalMoves(session), [session]);
   const isPlaying = session.status === "playing";
@@ -37,7 +39,7 @@ export function useOthelloGame() {
     clearAnimationState();
   }
 
-  const handlePlaceCurrentDisc = useCallback((square: number) => {
+  const handlePlaceCurrentDisc = useCallback((square: SquareIndex) => {
     setSession((currentSession) => {
       const result = placeCurrentDisc(currentSession, square);
 

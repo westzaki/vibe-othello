@@ -3,17 +3,18 @@ import {
   placeDisc,
   type Board,
   type DiscColor,
+  type SquareIndex,
 } from "../game/othello";
 
 export type MoveScore = {
-  move: number;
+  move: SquareIndex;
   score: number;
 };
 
 export function getScoredMoves(
   board: Board,
   disc: DiscColor,
-  evaluateMove: (nextBoard: Board, move: number) => number,
+  evaluateMove: (nextBoard: Board, move: SquareIndex) => number,
   legalMoves = getLegalMoves(board, disc),
 ): MoveScore[] {
   return legalMoves.map((move) => ({
@@ -24,7 +25,7 @@ export function getScoredMoves(
 
 export function chooseHighestScoredMove(
   scoredMoves: MoveScore[],
-): number | null {
+): SquareIndex | null {
   if (scoredMoves.length === 0) {
     return null;
   }
@@ -37,7 +38,7 @@ export function chooseHighestScoredMove(
 export function orderMovesByScore(
   scoredMoves: MoveScore[],
   direction: "ascending" | "descending",
-): number[] {
+): SquareIndex[] {
   return [...scoredMoves]
     .sort((firstMove, secondMove) =>
       direction === "descending"

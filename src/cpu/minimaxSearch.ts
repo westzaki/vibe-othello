@@ -5,6 +5,7 @@ import {
   placeDisc,
   type Board,
   type DiscColor,
+  type SquareIndex,
 } from "../game/othello";
 import { countEmptySquares } from "./evaluationFeatures";
 import { getScoredMoves, orderMovesByScore } from "./moveSelection";
@@ -18,7 +19,7 @@ const selectiveDeepeningMaxCandidates = 5;
 const maxEvaluationCacheSize = 5000;
 
 export type MinimaxMoveScore = {
-  move: number;
+  move: SquareIndex;
   score: number;
 };
 
@@ -214,9 +215,9 @@ function getOrderedMoves(
   board: Board,
   currentDisc: DiscColor,
   maximizingDisc: DiscColor,
-  legalMoves: number[],
+  legalMoves: SquareIndex[],
   isMaximizing: boolean,
-): number[] {
+): SquareIndex[] {
   return orderMovesByScore(
     getScoredMoves(
       board,

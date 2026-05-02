@@ -1,4 +1,8 @@
-import type { Board as OthelloBoard, DiscColor } from "../game/othello";
+import type {
+  Board as OthelloBoard,
+  DiscColor,
+  SquareIndex,
+} from "../game/othello";
 import { GameDisc } from "./GameDisc";
 
 const columnLabels = ["A", "B", "C", "D", "E", "F", "G", "H"];
@@ -8,10 +12,10 @@ type BoardProps = {
   board: OthelloBoard;
   currentDisc: DiscColor;
   flipAnimationId: number;
-  flippedSquares: number[];
-  lastMove: number | null;
-  legalMoves: number[];
-  onSquareClick: (square: number) => void;
+  flippedSquares: SquareIndex[];
+  lastMove: SquareIndex | null;
+  legalMoves: SquareIndex[];
+  onSquareClick: (square: SquareIndex) => void;
 };
 
 export function Board({
@@ -42,7 +46,7 @@ export function Board({
           ))}
         </div>
         <div className="board-grid">
-          {board.map((cell, square) => {
+          {board.map((cell, square: SquareIndex) => {
             const isLegal = legalMoves.includes(square);
             const isLastMove = square === lastMove && cell !== null;
             const flipIndex = flippedSquares.indexOf(square);
@@ -85,7 +89,7 @@ export function Board({
 }
 
 function getEmptySquareLabel(
-  square: number,
+  square: SquareIndex,
   currentDisc: DiscColor,
   isLegal: boolean,
 ): string {

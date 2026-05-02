@@ -22,7 +22,7 @@ export type GameSession = {
   currentDisc: DiscColor;
   discCounts: DiscCounts;
   endReason: GameEndReason | null;
-  lastMove: number | null;
+  lastMove: SquareIndex | null;
   message: string | null;
   moveHistory: MoveRecord[];
   status: GameStatus;
@@ -92,7 +92,7 @@ export function endGame(session: GameSession): GameSession {
   };
 }
 
-export function getSessionLegalMoves(session: GameSession): number[] {
+export function getSessionLegalMoves(session: GameSession): SquareIndex[] {
   if (session.status !== "playing") {
     return [];
   }

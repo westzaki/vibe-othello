@@ -1,3 +1,4 @@
+import type { SquareIndex } from "../game/othello";
 import type {
   GameReview,
   GameReviewMessages,
@@ -105,7 +106,7 @@ function getScoreGap(review: MoveReview): number {
   return review.bestScore === null ? 0 : review.bestScore - review.playedScore;
 }
 
-function formatSquare(square: number): string {
+function formatSquare(square: SquareIndex): string {
   const column = String.fromCharCode("A".charCodeAt(0) + (square % 8));
   const row = Math.floor(square / 8) + 1;
 

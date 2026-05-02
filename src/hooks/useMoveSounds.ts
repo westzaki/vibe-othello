@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 import { playFlipDiscSound, playPlaceDiscSound } from "../audio/gameSounds";
+import type { SquareIndex } from "../game/othello";
 
 const firstFlipSoundDelayMs = 110;
 const flipSoundDelayMs = 70;
 
 type UseMoveSoundsParams = {
   flipAnimationId: number;
-  flippedSquares: number[];
+  flippedSquares: SquareIndex[];
 };
 
 export function useMoveSounds({

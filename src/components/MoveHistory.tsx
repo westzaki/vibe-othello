@@ -1,3 +1,4 @@
+import type { SquareIndex } from "../game/othello";
 import type { MoveRecord } from "../game/session";
 
 type MoveHistoryProps = {
@@ -45,7 +46,7 @@ export function MoveHistory({ moves }: MoveHistoryProps) {
   );
 }
 
-function formatSquare(square: number): string {
+function formatSquare(square: SquareIndex): string {
   const column = String.fromCharCode("A".charCodeAt(0) + (square % 8));
   const row = Math.floor(square / 8) + 1;
 

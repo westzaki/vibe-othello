@@ -1,3 +1,4 @@
+import type { SquareIndex } from "../game/othello";
 import {
   placeCurrentDisc,
   startNewGame,
@@ -69,7 +70,7 @@ function createPassNextSession(): GameSession {
   return playDebugMoves(passNextMoveSequence);
 }
 
-function playDebugMoves(moves: number[]): GameSession {
+function playDebugMoves(moves: SquareIndex[]): GameSession {
   let session = startNewGame();
 
   for (const move of moves) {
