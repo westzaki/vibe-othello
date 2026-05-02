@@ -18,14 +18,12 @@ export function GameResultOverlay({
   return (
     <div
       className={["result-overlay", `result-overlay--${winner}`].join(" ")}
-      role="dialog"
-      aria-labelledby="result-overlay-title"
-      aria-modal="true"
+      aria-labelledby="result-title"
     >
       <div className="result-overlay__burst" aria-hidden="true" />
       <div className="result-overlay__content">
         <p className="result-overlay__eyebrow">Game Over</p>
-        <h2 id="result-overlay-title" className="result-overlay__title">
+        <h2 id="result-title" className="result-overlay__title">
           {getResultTitle(winner)}
         </h2>
         <p className="result-overlay__score">{score}</p>

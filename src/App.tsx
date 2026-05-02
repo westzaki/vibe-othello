@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { CpuLevel } from "./game/players";
 import { useOthelloGame } from "./hooks/useOthelloGame";
 import { GameScreen } from "./screens/GameScreen";
@@ -6,6 +6,7 @@ import { ResultScreen } from "./screens/ResultScreen";
 import { StartScreen, type GameMode } from "./screens/StartScreen";
 
 type AppScreen = "start" | "game" | "result";
+const resultTransitionDelayMs = 900;
 
 export default function App() {
   const game = useOthelloGame();
@@ -34,11 +35,26 @@ export default function App() {
     setScreen("start");
   }
 
+  useEffect(() => {
+    if (
+      screen !== "game" ||
+      game.gameStatus !== "ended" ||
+      game.endReason !== "completed"
+    ) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setScreen("result");
+    }, resultTransitionDelayMs);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [game.endReason, game.gameStatus, screen]);
+
   const shouldShowResult =
-    screen === "result" ||
-    (screen === "game" &&
-      game.gameStatus === "ended" &&
-      game.endReason === "completed");
+    screen === "result" &&
+    game.gameStatus === "ended" &&
+    game.endReason === "completed";
 
   return (
     <main className="app">
@@ -52,10 +68,9 @@ export default function App() {
         />
       ) : shouldShowResult && game.winner !== null ? (
         <ResultScreen
-          discCounts={game.discCounts}
+          game={game}
           onBackToStart={handleBackToStart}
           onPlayAgain={handlePlayAgain}
-          winner={game.winner}
         />
       ) : (
         <GameScreen
