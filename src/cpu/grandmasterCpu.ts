@@ -8,27 +8,320 @@ import {
   type DiscColor,
 } from "../game/othello";
 import { countEmptySquares } from "./evaluationFeatures";
-import { chooseMinimaxMove } from "./minimaxCpu";
 import { getScoredMoves, orderMovesByScore } from "./moveSelection";
 import { strategicEvaluateBoard } from "./strategicEvaluateBoard";
 
-const perfectEndgameEmptyThreshold = 12;
+const grandmasterTimeLimitMs = 300;
+const iterativeDeepeningMinDepth = 1;
+const maxDeepCandidates = 6;
+const minDeepCandidates = 3;
+const candidatePruneScoreMargin = 45;
+const fullWidthSearchDepth = 4;
+const finalScoreWeight = 1000;
 
 type ExactScoreCache = Map<string, number>;
+type RootMoveScore = {
+  move: number;
+  score: number;
+};
 type EndgameScore = {
   isExact: boolean;
   score: number;
+};
+type TimedSearchResult = {
+  score: number;
+  timedOut: boolean;
 };
 
 export function chooseGrandmasterMove(
   board: Board,
   disc: DiscColor,
 ): number | null {
-  if (countEmptySquares(board) <= perfectEndgameEmptyThreshold) {
-    return choosePerfectEndgameMove(board, disc);
+  return chooseIterativeDeepeningMove(board, disc);
+}
+
+export function chooseIterativeDeepeningMove(
+  board: Board,
+  disc: DiscColor,
+  timeLimitMs = grandmasterTimeLimitMs,
+): number | null {
+  const legalMoves = getLegalMoves(board, disc);
+
+  if (legalMoves.length === 0) {
+    return null;
   }
 
-  return chooseMinimaxMove(board, disc);
+  const deadline = Date.now() + timeLimitMs;
+  const initialScores = getScoredMoves(
+    board,
+    disc,
+    (nextBoard) => strategicEvaluateBoard(nextBoard, disc),
+    legalMoves,
+  );
+  let bestMove = orderMovesByScore(initialScores, "descending")[0];
+  let previousScores = initialScores;
+  const maxDepth = countEmptySquares(board);
+
+  for (
+    let depth = iterativeDeepeningMinDepth;
+    depth <= maxDepth && Date.now() < deadline;
+    depth += 1
+  ) {
+    const searchResult = searchRootMoves(
+      board,
+      disc,
+      depth,
+      getDeepeningCandidates(previousScores, depth),
+      deadline,
+    );
+
+    if (searchResult.timedOut) {
+      break;
+    }
+
+    previousScores = searchResult.scores;
+    bestMove = orderMovesByScore(searchResult.scores, "descending")[0];
+  }
+
+  return bestMove;
+}
+
+function searchRootMoves(
+  board: Board,
+  disc: DiscColor,
+  depth: number,
+  candidateMoves: number[],
+  deadline: number,
+): { scores: RootMoveScore[]; timedOut: boolean } {
+  const scores: RootMoveScore[] = [];
+  let alpha = Number.NEGATIVE_INFINITY;
+
+  for (const move of candidateMoves) {
+    if (Date.now() >= deadline) {
+      return {
+        scores,
+        timedOut: true,
+      };
+    }
+
+    const result = timedMinimax(
+      placeDisc(board, move, disc),
+      getNextDisc(disc),
+      disc,
+      depth - 1,
+      alpha,
+      Number.POSITIVE_INFINITY,
+      deadline,
+    );
+
+    if (result.timedOut) {
+      return {
+        scores,
+        timedOut: true,
+      };
+    }
+
+    scores.push({
+      move,
+      score: result.score,
+    });
+    alpha = Math.max(alpha, result.score);
+  }
+
+  return {
+    scores,
+    timedOut: false,
+  };
+}
+
+function timedMinimax(
+  board: Board,
+  currentDisc: DiscColor,
+  maximizingDisc: DiscColor,
+  depth: number,
+  alpha: number,
+  beta: number,
+  deadline: number,
+): TimedSearchResult {
+  if (Date.now() >= deadline) {
+    return {
+      score: 0,
+      timedOut: true,
+    };
+  }
+
+  if (isGameOver(board)) {
+    return {
+      score: getFinalDiscDifference(board, maximizingDisc) * finalScoreWeight,
+      timedOut: false,
+    };
+  }
+
+  if (depth <= 0) {
+    return {
+      score: strategicEvaluateBoard(board, maximizingDisc),
+      timedOut: false,
+    };
+  }
+
+  const legalMoves = getLegalMoves(board, currentDisc);
+  const nextDisc = getNextDisc(currentDisc);
+
+  if (legalMoves.length === 0) {
+    return timedMinimax(
+      board,
+      nextDisc,
+      maximizingDisc,
+      depth - 1,
+      alpha,
+      beta,
+      deadline,
+    );
+  }
+
+  if (currentDisc === maximizingDisc) {
+    return getTimedMaxScore(
+      board,
+      currentDisc,
+      maximizingDisc,
+      legalMoves,
+      depth,
+      alpha,
+      beta,
+      deadline,
+    );
+  }
+
+  return getTimedMinScore(
+    board,
+    currentDisc,
+    maximizingDisc,
+    legalMoves,
+    depth,
+    alpha,
+    beta,
+    deadline,
+  );
+}
+
+function getTimedMaxScore(
+  board: Board,
+  currentDisc: DiscColor,
+  maximizingDisc: DiscColor,
+  legalMoves: number[],
+  depth: number,
+  alpha: number,
+  beta: number,
+  deadline: number,
+): TimedSearchResult {
+  let bestScore = Number.NEGATIVE_INFINITY;
+  const orderedMoves = getOrderedMoves(
+    board,
+    currentDisc,
+    maximizingDisc,
+    legalMoves,
+    true,
+  );
+
+  for (const move of orderedMoves) {
+    const result = timedMinimax(
+      placeDisc(board, move, currentDisc),
+      getNextDisc(currentDisc),
+      maximizingDisc,
+      depth - 1,
+      alpha,
+      beta,
+      deadline,
+    );
+
+    if (result.timedOut) {
+      return result;
+    }
+
+    bestScore = Math.max(bestScore, result.score);
+    alpha = Math.max(alpha, bestScore);
+
+    if (beta <= alpha) {
+      break;
+    }
+  }
+
+  return {
+    score: bestScore,
+    timedOut: false,
+  };
+}
+
+function getTimedMinScore(
+  board: Board,
+  currentDisc: DiscColor,
+  maximizingDisc: DiscColor,
+  legalMoves: number[],
+  depth: number,
+  alpha: number,
+  beta: number,
+  deadline: number,
+): TimedSearchResult {
+  let bestScore = Number.POSITIVE_INFINITY;
+  const orderedMoves = getOrderedMoves(
+    board,
+    currentDisc,
+    maximizingDisc,
+    legalMoves,
+    false,
+  );
+
+  for (const move of orderedMoves) {
+    const result = timedMinimax(
+      placeDisc(board, move, currentDisc),
+      getNextDisc(currentDisc),
+      maximizingDisc,
+      depth - 1,
+      alpha,
+      beta,
+      deadline,
+    );
+
+    if (result.timedOut) {
+      return result;
+    }
+
+    bestScore = Math.min(bestScore, result.score);
+    beta = Math.min(beta, bestScore);
+
+    if (beta <= alpha) {
+      break;
+    }
+  }
+
+  return {
+    score: bestScore,
+    timedOut: false,
+  };
+}
+
+function getDeepeningCandidates(
+  scores: RootMoveScore[],
+  depth: number,
+): number[] {
+  const sortedScores = [...scores].sort(
+    (firstMove, secondMove) => secondMove.score - firstMove.score,
+  );
+
+  if (depth <= fullWidthSearchDepth) {
+    return sortedScores.map(({ move }) => move);
+  }
+
+  const bestScore = sortedScores[0].score;
+  const forcedCandidates = sortedScores
+    .slice(0, minDeepCandidates)
+    .map(({ move }) => move);
+  const closeCandidates = sortedScores
+    .filter(({ score }) => bestScore - score <= candidatePruneScoreMargin)
+    .slice(0, maxDeepCandidates)
+    .map(({ move }) => move);
+
+  return Array.from(new Set([...forcedCandidates, ...closeCandidates]));
 }
 
 export function choosePerfectEndgameMove(

@@ -28,17 +28,44 @@ export function chooseMinimaxMove(
   disc: DiscColor,
   searchDepth = defaultSearchDepth,
 ): number | null {
+  const rootMoveScores = getRootMoveScores(board, disc, searchDepth);
+
+  if (rootMoveScores.length === 0) {
+    return null;
+  }
+
+  const deepenedScores = getDeepenedRootMoveScores(
+    board,
+    disc,
+    getSearchDepth(board, searchDepth),
+    rootMoveScores,
+  );
+
+  return chooseBestRootMove(deepenedScores);
+}
+
+export function chooseFixedDepthMinimaxMove(
+  board: Board,
+  disc: DiscColor,
+  searchDepth: number,
+): number | null {
+  return chooseBestRootMove(getRootMoveScores(board, disc, searchDepth));
+}
+
+function getRootMoveScores(
+  board: Board,
+  disc: DiscColor,
+  searchDepth: number,
+): RootMoveScore[] {
   const legalMoves = getLegalMoves(board, disc);
 
   if (legalMoves.length === 0) {
-    return null;
+    return [];
   }
 
   const orderedMoves = getOrderedMoves(board, disc, disc, legalMoves, true);
   const effectiveSearchDepth = getSearchDepth(board, searchDepth);
-  const shallowScores: RootMoveScore[] = [];
-  let bestMove = orderedMoves[0];
-  let bestScore = Number.NEGATIVE_INFINITY;
+  const rootMoveScores: RootMoveScore[] = [];
   let alpha = Number.NEGATIVE_INFINITY;
 
   for (const move of orderedMoves) {
@@ -51,24 +78,11 @@ export function chooseMinimaxMove(
       alpha,
       Number.POSITIVE_INFINITY,
     );
-    shallowScores.push({ move, score });
-
-    if (score > bestScore) {
-      bestMove = move;
-      bestScore = score;
-    }
-
-    alpha = Math.max(alpha, bestScore);
+    rootMoveScores.push({ move, score });
+    alpha = Math.max(alpha, score);
   }
 
-  const deepenedScores = getDeepenedRootMoveScores(
-    board,
-    disc,
-    effectiveSearchDepth,
-    shallowScores,
-  );
-
-  return chooseBestRootMove(deepenedScores) ?? bestMove;
+  return rootMoveScores;
 }
 
 function minimax(

@@ -2,7 +2,7 @@ import type { CpuLevel } from "../game/players";
 import type { Board, DiscColor } from "../game/othello";
 import { chooseCornerMove } from "./cornerCpu";
 import { chooseGrandmasterMove } from "./grandmasterCpu";
-import { chooseMinimaxMove } from "./minimaxCpu";
+import { chooseFixedDepthMinimaxMove } from "./minimaxCpu";
 import { chooseOnePlyMove } from "./onePlyCpu";
 import { chooseRandomMove } from "./randomCpu";
 import { chooseStrategicMove } from "./strategicCpu";
@@ -17,7 +17,7 @@ export function chooseCpuMove(
   }
 
   if (level === "level5") {
-    return chooseMinimaxMove(board, disc);
+    return chooseFixedDepthMinimaxMove(board, disc, 4);
   }
 
   if (level === "level4") {

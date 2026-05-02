@@ -1,16 +1,27 @@
 import { describe, expect, it } from "vitest";
-import { createInitialBoard } from "../game/othello";
+import { createInitialBoard, getLegalMoves } from "../game/othello";
 import { createBoardFixture } from "../test/boardFixtures";
-import { chooseGrandmasterMove, choosePerfectEndgameMove } from "./grandmasterCpu";
-import { chooseMinimaxMove } from "./minimaxCpu";
+import {
+  chooseGrandmasterMove,
+  chooseIterativeDeepeningMove,
+  choosePerfectEndgameMove,
+} from "./grandmasterCpu";
 
 describe("grandmaster CPU", () => {
-  it("uses the level 5 minimax search before the endgame", () => {
+  it("uses iterative deepening before the endgame", () => {
     const board = createInitialBoard();
 
     expect(chooseGrandmasterMove(board, "black")).toBe(
-      chooseMinimaxMove(board, "black"),
+      chooseIterativeDeepeningMove(board, "black"),
     );
+  });
+
+  it("returns a legal move from iterative deepening", () => {
+    const board = createInitialBoard();
+    const move = chooseIterativeDeepeningMove(board, "black");
+
+    expect(move).not.toBeNull();
+    expect(getLegalMoves(board, "black")).toContain(move);
   });
 
   it("returns null when there are no legal endgame moves", () => {
