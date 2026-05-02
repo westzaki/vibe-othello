@@ -15,11 +15,13 @@ import {
 } from "./othello";
 
 export type GameStatus = "notStarted" | "playing" | "ended";
+export type GameEndReason = "completed" | "abandoned";
 
 export type GameSession = {
   board: Board;
   currentDisc: DiscColor;
   discCounts: DiscCounts;
+  endReason: GameEndReason | null;
   lastMove: number | null;
   message: string | null;
   status: GameStatus;
@@ -43,6 +45,7 @@ export function createGameSession(): GameSession {
     board,
     currentDisc: "black",
     discCounts: countDiscs(board),
+    endReason: null,
     lastMove: null,
     message: null,
     status: "notStarted",
@@ -57,6 +60,7 @@ export function startNewGame(): GameSession {
     board,
     currentDisc: "black",
     discCounts: countDiscs(board),
+    endReason: null,
     lastMove: null,
     message: null,
     status: "playing",
@@ -68,9 +72,10 @@ export function endGame(session: GameSession): GameSession {
   return {
     ...session,
     discCounts: countDiscs(session.board),
+    endReason: "abandoned",
     message: null,
     status: "ended",
-    winner: getWinner(session.board),
+    winner: null,
   };
 }
 
@@ -115,6 +120,7 @@ export function placeCurrentDisc(
         ...session,
         board: nextBoard,
         discCounts,
+        endReason: "completed",
         lastMove: square,
         message: null,
         status: "ended",

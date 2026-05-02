@@ -22,6 +22,7 @@ export default function App() {
         <GameHeader
           currentDisc={game.currentDisc}
           discCounts={game.discCounts}
+          endReason={game.endReason}
           gameStatus={game.gameStatus}
           isPlaying={game.isPlaying}
           message={game.message}
@@ -53,13 +54,15 @@ export default function App() {
           </Suspense>
         )}
 
-        {game.gameStatus === "ended" && game.winner !== null && (
-          <GameResultOverlay
-            discCounts={game.discCounts}
-            onNewGame={game.startNewGame}
-            winner={game.winner}
-          />
-        )}
+        {game.gameStatus === "ended" &&
+          game.endReason === "completed" &&
+          game.winner !== null && (
+            <GameResultOverlay
+              discCounts={game.discCounts}
+              onNewGame={game.startNewGame}
+              winner={game.winner}
+            />
+          )}
       </section>
     </main>
   );

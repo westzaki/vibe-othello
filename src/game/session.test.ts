@@ -16,6 +16,7 @@ describe("game session", () => {
     expect(session.status).toBe("notStarted");
     expect(session.currentDisc).toBe("black");
     expect(session.discCounts).toEqual({ black: 2, white: 2 });
+    expect(session.endReason).toBeNull();
     expect(session.lastMove).toBeNull();
     expect(session.message).toBeNull();
     expect(session.winner).toBeNull();
@@ -28,18 +29,20 @@ describe("game session", () => {
     expect(session.status).toBe("playing");
     expect(session.currentDisc).toBe("black");
     expect(session.discCounts).toEqual({ black: 2, white: 2 });
+    expect(session.endReason).toBeNull();
     expect(session.lastMove).toBeNull();
     expect(session.message).toBeNull();
     expect(session.winner).toBeNull();
     expect(getSessionLegalMoves(session)).toEqual([19, 26, 37, 44]);
   });
 
-  it("ends the current game with a winner and disc counts", () => {
+  it("abandons the current game without a winner", () => {
     const session = endGame(startNewGame());
 
     expect(session.status).toBe("ended");
     expect(session.discCounts).toEqual({ black: 2, white: 2 });
-    expect(session.winner).toBe("draw");
+    expect(session.endReason).toBe("abandoned");
+    expect(session.winner).toBeNull();
     expect(getSessionLegalMoves(session)).toEqual([]);
   });
 
@@ -101,6 +104,7 @@ describe("game session", () => {
 
     expect(result.move).toEqual({ flippedSquares: [1], placedSquare: 2 });
     expect(result.session.status).toBe("ended");
+    expect(result.session.endReason).toBe("completed");
     expect(result.session.winner).toBe("black");
     expect(result.session.lastMove).toBe(2);
     expect(result.session.discCounts).toEqual({ black: 64, white: 0 });
@@ -116,6 +120,7 @@ function createPlayingSession(
     board,
     currentDisc,
     discCounts: { black: 0, white: 0 },
+    endReason: null,
     lastMove: null,
     message: null,
     status: "playing",

@@ -36,7 +36,7 @@ export function GameResultOverlay({
           onClick={onNewGame}
           type="button"
         >
-          New Game
+          Play Again
         </button>
       </div>
     </div>

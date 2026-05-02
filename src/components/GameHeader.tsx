@@ -1,9 +1,10 @@
 import type { DiscColor, DiscCounts, Winner } from "../game/othello";
-import type { GameStatus } from "../game/session";
+import type { GameEndReason, GameStatus } from "../game/session";
 
 type GameHeaderProps = {
   currentDisc: DiscColor;
   discCounts: DiscCounts;
+  endReason: GameEndReason | null;
   gameStatus: GameStatus;
   isPlaying: boolean;
   message: string | null;
@@ -15,6 +16,7 @@ type GameHeaderProps = {
 export function GameHeader({
   currentDisc,
   discCounts,
+  endReason,
   gameStatus,
   isPlaying,
   message,
@@ -37,9 +39,15 @@ export function GameHeader({
         </span>
       </div>
       <div className="game-status-row">
-        <p className="session-status">{getStatusLabel(gameStatus)}</p>
-        {gameStatus === "ended" && winner !== null ? (
+        <p className="session-status">
+          {getStatusLabel(gameStatus, endReason)}
+        </p>
+        {gameStatus === "ended" &&
+        endReason === "completed" &&
+        winner !== null ? (
           <p className="result-status">{getResultLabel(winner, discCounts)}</p>
+        ) : gameStatus === "ended" && endReason === "abandoned" ? (
+          <p className="result-status">Game abandoned</p>
         ) : (
           <p className="turn-status">
             Current turn:
@@ -55,21 +63,19 @@ export function GameHeader({
         </p>
       )}
       <div className="game-actions" aria-label="Game controls">
-        <button
-          className="game-action game-action--primary"
-          onClick={onNewGame}
-          type="button"
-        >
-          New Game
-        </button>
-        <button
-          className="game-action"
-          disabled={!isPlaying}
-          onClick={onEndGame}
-          type="button"
-        >
-          End Game
-        </button>
+        {isPlaying ? (
+          <button className="game-action" onClick={onEndGame} type="button">
+            End Game
+          </button>
+        ) : (
+          <button
+            className="game-action game-action--primary"
+            onClick={onNewGame}
+            type="button"
+          >
+            Start Game
+          </button>
+        )}
       </div>
     </div>
   );
@@ -85,13 +91,16 @@ function getResultLabel(winner: Winner, discCounts: DiscCounts): string {
   return `${winner} wins ${score}`;
 }
 
-function getStatusLabel(gameStatus: GameStatus): string {
+function getStatusLabel(
+  gameStatus: GameStatus,
+  endReason: GameEndReason | null,
+): string {
   if (gameStatus === "playing") {
     return "Playing";
   }
 
   if (gameStatus === "ended") {
-    return "Game ended";
+    return endReason === "completed" ? "Game complete" : "Game stopped";
   }
 
   return "Ready to start";
