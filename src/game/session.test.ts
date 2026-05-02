@@ -19,6 +19,7 @@ describe("game session", () => {
     expect(session.flipAnimationId).toBe(0);
     expect(session.flippedSquares).toEqual([]);
     expect(session.lastMove).toBeNull();
+    expect(session.message).toBeNull();
     expect(session.winner).toBeNull();
     expect(getSessionLegalMoves(session)).toEqual([]);
   });
@@ -32,6 +33,7 @@ describe("game session", () => {
     expect(session.flipAnimationId).toBe(0);
     expect(session.flippedSquares).toEqual([]);
     expect(session.lastMove).toBeNull();
+    expect(session.message).toBeNull();
     expect(session.winner).toBeNull();
     expect(getSessionLegalMoves(session)).toEqual([19, 26, 37, 44]);
   });
@@ -56,6 +58,7 @@ describe("game session", () => {
     expect(nextSession.flipAnimationId).toBe(1);
     expect(nextSession.flippedSquares).toEqual([27]);
     expect(nextSession.lastMove).toBe(19);
+    expect(nextSession.message).toBeNull();
     expect(nextSession.currentDisc).toBe("white");
   });
 
@@ -85,6 +88,9 @@ describe("game session", () => {
     expect(nextSession.status).toBe("playing");
     expect(nextSession.currentDisc).toBe("black");
     expect(nextSession.lastMove).toBe(2);
+    expect(nextSession.message).toBe(
+      "White has no legal moves. Black plays again.",
+    );
     expect(getSessionLegalMoves(nextSession)).toEqual([5]);
   });
 
@@ -116,6 +122,7 @@ function createPlayingSession(
     flipAnimationId: 0,
     flippedSquares: [],
     lastMove: null,
+    message: null,
     status: "playing",
     winner: null,
   };

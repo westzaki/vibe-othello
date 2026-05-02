@@ -11,6 +11,7 @@ describe("debug fixtures", () => {
     expect(session.flipAnimationId).toBe(0);
     expect(session.flippedSquares).toEqual([]);
     expect(session.lastMove).toBeNull();
+    expect(session.message).toBeNull();
     expect(session.discCounts).toEqual({ black: 44, white: 20 });
   });
 
@@ -38,5 +39,15 @@ describe("debug fixtures", () => {
     expect(session.lastMove).toBeNull();
     expect(session.winner).toBeNull();
     expect(countDiscs(session.board)).toEqual({ black: 62, white: 1 });
+  });
+
+  it("creates a session that can trigger a pass on the next move", () => {
+    const session = createDebugSession("passNext");
+
+    expect(session.status).toBe("playing");
+    expect(session.currentDisc).toBe("black");
+    expect(session.board[2]).toBeNull();
+    expect(session.board[5]).toBeNull();
+    expect(session.discCounts).toEqual({ black: 60, white: 2 });
   });
 });

@@ -6,6 +6,7 @@ type GameHeaderProps = {
   discCounts: DiscCounts;
   gameStatus: GameStatus;
   isPlaying: boolean;
+  message: string | null;
   onEndGame: () => void;
   onNewGame: () => void;
   winner: Winner | null;
@@ -16,6 +17,7 @@ export function GameHeader({
   discCounts,
   gameStatus,
   isPlaying,
+  message,
   onEndGame,
   onNewGame,
   winner,
@@ -49,6 +51,11 @@ export function GameHeader({
           </p>
         )}
       </div>
+      {message !== null && (
+        <p className="game-message" role="status">
+          {message}
+        </p>
+      )}
       <div className="game-actions" aria-label="Game controls">
         <button
           className="game-action game-action--primary"

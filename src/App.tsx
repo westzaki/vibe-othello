@@ -22,6 +22,7 @@ export default function App() {
           discCounts={game.discCounts}
           gameStatus={game.gameStatus}
           isPlaying={game.isPlaying}
+          message={game.message}
           onEndGame={game.endGame}
           onNewGame={game.startNewGame}
           winner={game.winner}

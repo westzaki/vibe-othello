@@ -23,6 +23,7 @@ export type GameSession = {
   flipAnimationId: number;
   flippedSquares: number[];
   lastMove: number | null;
+  message: string | null;
   status: GameStatus;
   winner: Winner | null;
 };
@@ -37,6 +38,7 @@ export function createGameSession(): GameSession {
     flipAnimationId: 0,
     flippedSquares: [],
     lastMove: null,
+    message: null,
     status: "notStarted",
     winner: null,
   };
@@ -52,6 +54,7 @@ export function startNewGame(): GameSession {
     flipAnimationId: 0,
     flippedSquares: [],
     lastMove: null,
+    message: null,
     status: "playing",
     winner: null,
   };
@@ -63,6 +66,7 @@ export function endGame(session: GameSession): GameSession {
     discCounts: countDiscs(session.board),
     flipAnimationId: session.flipAnimationId,
     flippedSquares: [],
+    message: null,
     status: "ended",
     winner: getWinner(session.board),
   };
@@ -103,14 +107,15 @@ export function placeCurrentDisc(
       flipAnimationId: session.flipAnimationId + 1,
       flippedSquares,
       lastMove: square,
+      message: null,
       status: "ended",
       winner: getWinner(nextBoard),
     };
   }
 
   const nextDisc = getNextDisc(session.currentDisc);
-  const currentDisc =
-    hasLegalMove(nextBoard, nextDisc) ? nextDisc : session.currentDisc;
+  const nextDiscCanMove = hasLegalMove(nextBoard, nextDisc);
+  const currentDisc = nextDiscCanMove ? nextDisc : session.currentDisc;
 
   return {
     ...session,
@@ -120,5 +125,14 @@ export function placeCurrentDisc(
     flipAnimationId: session.flipAnimationId + 1,
     flippedSquares,
     lastMove: square,
+    message: nextDiscCanMove
+      ? null
+      : `${formatDisc(nextDisc)} has no legal moves. ${formatDisc(
+          session.currentDisc,
+        )} plays again.`,
   };
+}
+
+function formatDisc(disc: DiscColor): string {
+  return disc === "black" ? "Black" : "White";
 }

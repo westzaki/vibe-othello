@@ -1,7 +1,12 @@
 import { countDiscs, getWinner, type Board } from "../game/othello";
 import type { GameSession } from "../game/session";
 
-export type DebugFixtureName = "blackWin" | "whiteWin" | "draw" | "nearEnd";
+export type DebugFixtureName =
+  | "blackWin"
+  | "whiteWin"
+  | "draw"
+  | "nearEnd"
+  | "passNext";
 
 export type DebugFixture = {
   name: DebugFixtureName;
@@ -13,11 +18,16 @@ export const debugFixtures: DebugFixture[] = [
   { name: "whiteWin", label: "White Win" },
   { name: "draw", label: "Draw" },
   { name: "nearEnd", label: "Near End" },
+  { name: "passNext", label: "Pass Next" },
 ];
 
 export function createDebugSession(name: DebugFixtureName): GameSession {
   if (name === "nearEnd") {
     return createNearEndSession();
+  }
+
+  if (name === "passNext") {
+    return createPassNextSession();
   }
 
   const board = createFinishedBoard(name);
@@ -29,13 +39,14 @@ export function createDebugSession(name: DebugFixtureName): GameSession {
     flipAnimationId: 0,
     flippedSquares: [],
     lastMove: null,
+    message: null,
     status: "ended",
     winner: getWinner(board),
   };
 }
 
 function createFinishedBoard(
-  name: Exclude<DebugFixtureName, "nearEnd">,
+  name: Exclude<DebugFixtureName, "nearEnd" | "passNext">,
 ): Board {
   if (name === "blackWin") {
     return Array.from({ length: 64 }, (_, index) =>
@@ -54,6 +65,27 @@ function createFinishedBoard(
   );
 }
 
+function createPassNextSession(): GameSession {
+  const board: Board = Array.from({ length: 64 }, () => "black");
+
+  board[1] = "white";
+  board[2] = null;
+  board[4] = "white";
+  board[5] = null;
+
+  return {
+    board,
+    currentDisc: "black",
+    discCounts: countDiscs(board),
+    flipAnimationId: 0,
+    flippedSquares: [],
+    lastMove: null,
+    message: null,
+    status: "playing",
+    winner: null,
+  };
+}
+
 function createNearEndSession(): GameSession {
   const board: Board = Array.from({ length: 64 }, () => "black");
 
@@ -67,6 +99,7 @@ function createNearEndSession(): GameSession {
     flipAnimationId: 0,
     flippedSquares: [],
     lastMove: null,
+    message: null,
     status: "playing",
     winner: null,
   };
