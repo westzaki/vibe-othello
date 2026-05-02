@@ -12,6 +12,16 @@ import { getScoredMoves, orderMovesByScore } from "./moveSelection";
 
 const defaultSearchDepth = 4;
 const endGameExtensionEmptyThreshold = 8;
+const selectiveDeepeningExtraDepth = 2;
+const selectiveDeepeningScoreMargin = 28;
+const selectiveDeepeningMaxCandidates = 5;
+const maxEvaluationCacheSize = 5000;
+
+type RootMoveScore = {
+  move: number;
+  score: number;
+};
+const evaluationCache = new Map<string, number>();
 
 export function chooseMinimaxMove(
   board: Board,
@@ -26,6 +36,7 @@ export function chooseMinimaxMove(
 
   const orderedMoves = getOrderedMoves(board, disc, disc, legalMoves, true);
   const effectiveSearchDepth = getSearchDepth(board, searchDepth);
+  const shallowScores: RootMoveScore[] = [];
   let bestMove = orderedMoves[0];
   let bestScore = Number.NEGATIVE_INFINITY;
   let alpha = Number.NEGATIVE_INFINITY;
@@ -40,6 +51,7 @@ export function chooseMinimaxMove(
       alpha,
       Number.POSITIVE_INFINITY,
     );
+    shallowScores.push({ move, score });
 
     if (score > bestScore) {
       bestMove = move;
@@ -49,7 +61,14 @@ export function chooseMinimaxMove(
     alpha = Math.max(alpha, bestScore);
   }
 
-  return bestMove;
+  const deepenedScores = getDeepenedRootMoveScores(
+    board,
+    disc,
+    effectiveSearchDepth,
+    shallowScores,
+  );
+
+  return chooseBestRootMove(deepenedScores) ?? bestMove;
 }
 
 function minimax(
@@ -61,14 +80,23 @@ function minimax(
   beta: number,
 ): number {
   if (depth === 0 || isGameOver(board)) {
-    return strategicEvaluateBoard(board, maximizingDisc);
+    return evaluateBoardWithCache(board, maximizingDisc);
   }
 
   const legalMoves = getLegalMoves(board, currentDisc);
   const nextDisc = getNextDisc(currentDisc);
 
   if (legalMoves.length === 0) {
-    return minimax(board, nextDisc, maximizingDisc, depth - 1, alpha, beta);
+    const score = minimax(
+      board,
+      nextDisc,
+      maximizingDisc,
+      depth - 1,
+      alpha,
+      beta,
+    );
+
+    return score;
   }
 
   if (currentDisc === maximizingDisc) {
@@ -132,6 +160,64 @@ function minimax(
   return bestScore;
 }
 
+function getDeepenedRootMoveScores(
+  board: Board,
+  disc: DiscColor,
+  searchDepth: number,
+  shallowScores: RootMoveScore[],
+): RootMoveScore[] {
+  if (searchDepth <= 1 || shallowScores.length <= 1) {
+    return shallowScores;
+  }
+
+  const candidates = getSelectiveDeepeningCandidates(shallowScores);
+  const deepSearchDepth = getDeepSearchDepth(board, searchDepth);
+  const deepenedScores = new Map<number, number>();
+  let alpha = Number.NEGATIVE_INFINITY;
+
+  for (const { move } of candidates) {
+    const score = minimax(
+      placeDisc(board, move, disc),
+      getNextDisc(disc),
+      disc,
+      deepSearchDepth - 1,
+      alpha,
+      Number.POSITIVE_INFINITY,
+    );
+
+    deepenedScores.set(move, score);
+    alpha = Math.max(alpha, score);
+  }
+
+  return shallowScores.map(({ move, score }) => ({
+    move,
+    score: deepenedScores.get(move) ?? score,
+  }));
+}
+
+function getSelectiveDeepeningCandidates(
+  shallowScores: RootMoveScore[],
+): RootMoveScore[] {
+  const sortedScores = [...shallowScores].sort(
+    (firstMove, secondMove) => secondMove.score - firstMove.score,
+  );
+  const bestScore = sortedScores[0].score;
+
+  return sortedScores
+    .filter(({ score }) => bestScore - score <= selectiveDeepeningScoreMargin)
+    .slice(0, selectiveDeepeningMaxCandidates);
+}
+
+function chooseBestRootMove(scores: RootMoveScore[]): number | null {
+  if (scores.length === 0) {
+    return null;
+  }
+
+  return scores.reduce((bestScore, score) =>
+    score.score > bestScore.score ? score : bestScore,
+  ).move;
+}
+
 function getOrderedMoves(
   board: Board,
   currentDisc: DiscColor,
@@ -158,4 +244,33 @@ function getSearchDepth(board: Board, requestedDepth: number): number {
   }
 
   return requestedDepth;
+}
+
+function getDeepSearchDepth(board: Board, searchDepth: number): number {
+  return getSearchDepth(board, searchDepth + selectiveDeepeningExtraDepth);
+}
+
+function evaluateBoardWithCache(board: Board, disc: DiscColor): number {
+  const cacheKey = getEvaluationCacheKey(board, disc);
+  const cachedScore = evaluationCache.get(cacheKey);
+
+  if (cachedScore !== undefined) {
+    return cachedScore;
+  }
+
+  const score = strategicEvaluateBoard(board, disc);
+
+  if (evaluationCache.size >= maxEvaluationCacheSize) {
+    evaluationCache.clear();
+  }
+
+  evaluationCache.set(cacheKey, score);
+
+  return score;
+}
+
+function getEvaluationCacheKey(board: Board, disc: DiscColor): string {
+  return `${disc}:${board
+    .map((cell) => cell?.[0] ?? "-")
+    .join("")}`;
 }
