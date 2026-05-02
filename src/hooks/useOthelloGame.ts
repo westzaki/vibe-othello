@@ -1,4 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  playFlipDiscSound,
+  playPlaceDiscSound,
+  unlockGameAudio,
+} from "../audio/gameSounds";
 import { chooseCpuMove } from "../cpu/cpu";
 import type { DiscColor } from "../game/othello";
 import {
@@ -14,6 +19,9 @@ import {
   startNewGame,
   type GameSession,
 } from "../game/session";
+
+const firstFlipSoundDelayMs = 110;
+const flipSoundDelayMs = 70;
 
 export function useOthelloGame() {
   const [session, setSession] = useState(createGameSession);
@@ -75,12 +83,34 @@ export function useOthelloGame() {
     session.currentDisc,
   ]);
 
+  useEffect(() => {
+    if (flipAnimationId === 0) {
+      return;
+    }
+
+    playPlaceDiscSound();
+
+    const timeoutIds = lastFlippedSquares.map((_, index) =>
+      window.setTimeout(
+        playFlipDiscSound,
+        firstFlipSoundDelayMs + index * flipSoundDelayMs,
+      ),
+    );
+
+    return () => {
+      for (const timeoutId of timeoutIds) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [flipAnimationId, lastFlippedSquares]);
+
   function handleReplaceSession(nextSession: GameSession) {
     setSession(nextSession);
     clearAnimationState();
   }
 
   function handleStartNewGame() {
+    unlockGameAudio();
     setSession(startNewGame());
     clearAnimationState();
   }
