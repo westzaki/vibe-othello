@@ -1,6 +1,15 @@
+import { lazy, Suspense } from "react";
 import { Board } from "./components/Board";
 import { GameHeader } from "./components/GameHeader";
 import { useOthelloGame } from "./hooks/useOthelloGame";
+
+const DevDebugPanel = import.meta.env.DEV
+  ? lazy(() =>
+      import("./debug/DebugPanel").then((module) => ({
+        default: module.DebugPanel,
+      })),
+    )
+  : null;
 
 export default function App() {
   const game = useOthelloGame();
@@ -24,6 +33,12 @@ export default function App() {
           legalMoves={game.legalMoves}
           onSquareClick={game.placeCurrentDisc}
         />
+
+        {DevDebugPanel !== null && (
+          <Suspense fallback={null}>
+            <DevDebugPanel onReplaceSession={game.replaceSession} />
+          </Suspense>
+        )}
       </section>
     </main>
   );

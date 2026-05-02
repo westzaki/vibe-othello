@@ -5,6 +5,7 @@ import {
   getSessionLegalMoves,
   placeCurrentDisc,
   startNewGame,
+  type GameSession,
 } from "../game/session";
 
 export function useOthelloGame() {
@@ -22,6 +23,7 @@ export function useOthelloGame() {
     endGame: () => setSession((currentSession) => endGame(currentSession)),
     placeCurrentDisc: (square: number) =>
       setSession((currentSession) => placeCurrentDisc(currentSession, square)),
+    replaceSession: (nextSession: GameSession) => setSession(nextSession),
     startNewGame: () => setSession(startNewGame()),
   };
 }
