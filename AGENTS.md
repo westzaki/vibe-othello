@@ -87,8 +87,8 @@ For code, documentation, or configuration changes, prefer this flow:
 3. Make changes in a meaningful unit
 4. Make small, clear local commits
 5. Run verification commands
-6. Push the work branch to the remote repository
-7. Create a GitHub pull request targeting main
+6. Push the work branch to the remote repository using local git
+7. Create a GitHub pull request targeting main using GitHub CLI (gh)
 8. Stop and wait for the user to review and merge
 
 Before creating a work branch, make sure local main is up to date with origin/main.
@@ -107,7 +107,32 @@ If there are uncommitted local changes, stop and report them instead of overwrit
 
 If git pull --ff-only fails, stop and report the issue instead of forcing the update.
 
-The agent may push feature, refactor, fix, or documentation branches to the remote repository only for the purpose of creating pull requests.
+Use local git and GitHub CLI (gh) for branch push and pull request creation.
+
+Do not rely on the ChatGPT GitHub connector or GitHub integration to create branches, update files, push commits, or open pull requests.
+
+The GitHub connector may be used for reading repository files, inspecting pull requests, or reviewing diffs, but write operations should be done through local git and gh.
+
+Before pushing a branch or creating a pull request, verify GitHub CLI authentication:
+
+- gh auth status
+
+If gh auth status reports an authentication problem, stop and report it to the user.
+
+Do not attempt to create a pull request until GitHub CLI authentication is working.
+
+Preferred pull request creation flow:
+
+- git push -u origin <branch-name>
+- gh pr create --base main --head <branch-name> --title "<title>" --body-file <body-file>
+
+Use the repository pull request template when creating pull requests.
+
+If .github/pull_request_template.md exists, create a pull request body file based on that template and pass it with --body-file.
+
+Pull request descriptions must be written in Japanese unless the user requests otherwise.
+
+The agent may push feature, refactor, fix, CI, or documentation branches to the remote repository only for the purpose of creating pull requests.
 
 The agent must not:
 
@@ -119,6 +144,13 @@ The agent must not:
 - Change remote configuration
 - Change repository ownership, visibility, or hosting settings
 - Change GitHub repository settings unless explicitly requested
+- Use GitHub connector write actions for creating branches, updating files, pushing commits, creating pull requests, or merging pull requests
+
+If a push reports “Bypassed rule violations” for main, treat it as a mistake and stop.
+
+Do not rely on bypass permissions.
+
+All changes must go through pull requests unless the user explicitly requests otherwise.
 
 Pull requests should be created in meaningful units.
 
@@ -127,6 +159,7 @@ Prefer one pull request for one purpose, such as:
 - One feature
 - One bounded refactor
 - One bug fix
+- One CI/workflow change
 - One documentation update
 - One test improvement
 
@@ -143,6 +176,7 @@ Examples:
 - refactor/architecture-sweep-1
 - refactor/review-boundaries
 - fix/review-playback-practice-start
+- ci/add-github-actions
 - docs/update-agents-pr-rules
 
 Commit messages should be clear and meaningful.
@@ -153,23 +187,16 @@ Prefer conventional-style commit messages such as:
 - refactor(hooks): gate game effects by enabled option
 - refactor(game): extract practice session helpers
 - fix(review): correct practice start position
+- ci(actions): add pull request checks
 - docs(agents): update pull request rules
 
 Pull request titles should be clear and concise.
-
-Pull request descriptions must be written in Japanese unless the user requests otherwise.
-
-Use the repository pull request template when creating pull requests.
-
-If `.github/pull_request_template.md` exists, follow that template and fill it out carefully.
-
-If no pull request template exists, write a clear Japanese description with summary, purpose, changes, verification results, and review points.
 
 Before creating a pull request, run:
 
 - npm run build
 - npm run lint
-- npm test:run if available
+- npm run test:run
 
 If any verification command fails, do not hide the failure.
 
