@@ -76,14 +76,117 @@ Examples of steps that are too large:
 - Refactor CPU architecture and add new CPU strength at the same time
 - Add teacher review analysis, UI, and Japanese messages all at once
 
-## Repository / Git Rules
+## Repository / Git / Pull Request Rules
 
-- Local git commits are allowed.
-- Do not push to any remote repository.
-- The user will handle all remote pushes manually.
-- Do not create or modify remote configuration.
-- Do not change repository ownership, visibility, or hosting settings.
-- Keep changes logically small and easy to review.
+Work should be done through pull requests.
+
+For code, documentation, or configuration changes, prefer this flow:
+
+1. Start from the latest main
+2. Create a new work branch
+3. Make changes in a meaningful unit
+4. Make small, clear local commits
+5. Run verification commands
+6. Push the work branch to the remote repository
+7. Create a GitHub pull request targeting main
+8. Stop and wait for the user to review and merge
+
+Before creating a work branch, make sure local main is up to date with origin/main.
+
+Preferred branch start flow:
+
+- git status
+- git switch main
+- git fetch origin
+- git pull --ff-only origin main
+- git switch -c <branch-name>
+
+The agent must not discard, overwrite, stash, reset, or revert user changes unless explicitly requested by the user.
+
+If there are uncommitted local changes, stop and report them instead of overwriting them.
+
+If git pull --ff-only fails, stop and report the issue instead of forcing the update.
+
+The agent may push feature, refactor, fix, or documentation branches to the remote repository only for the purpose of creating pull requests.
+
+The agent must not:
+
+- Push directly to main
+- Merge pull requests
+- Squash and merge pull requests
+- Rebase or force-push shared branches unless explicitly requested
+- Delete remote branches unless explicitly requested
+- Change remote configuration
+- Change repository ownership, visibility, or hosting settings
+- Change GitHub repository settings unless explicitly requested
+
+Pull requests should be created in meaningful units.
+
+Prefer one pull request for one purpose, such as:
+
+- One feature
+- One bounded refactor
+- One bug fix
+- One documentation update
+- One test improvement
+
+Avoid mixing unrelated changes in the same pull request.
+
+If a requested task becomes too large, split it into multiple pull requests and explain the proposed split.
+
+Branch names should be clear and scoped.
+
+Examples:
+
+- feature/teacher-review-turning-points
+- feature/settings-screen
+- refactor/architecture-sweep-1
+- refactor/review-boundaries
+- fix/review-playback-practice-start
+- docs/update-agents-pr-rules
+
+Commit messages should be clear and meaningful.
+
+Prefer conventional-style commit messages such as:
+
+- feat(review): add turning point analysis
+- refactor(hooks): gate game effects by enabled option
+- refactor(game): extract practice session helpers
+- fix(review): correct practice start position
+- docs(agents): update pull request rules
+
+Pull request titles should be clear and concise.
+
+Pull request descriptions must be written in Japanese unless the user requests otherwise.
+
+Use the repository pull request template when creating pull requests.
+
+If `.github/pull_request_template.md` exists, follow that template and fill it out carefully.
+
+If no pull request template exists, write a clear Japanese description with summary, purpose, changes, verification results, and review points.
+
+Before creating a pull request, run:
+
+- npm run build
+- npm run lint
+- npm test:run if available
+
+If any verification command fails, do not hide the failure.
+
+Report:
+
+- Which command failed
+- The relevant error summary
+- Whether a fix was attempted
+- What remains unresolved
+
+Do not create a pull request with failing checks unless the user explicitly asks for a draft or work-in-progress pull request.
+
+If creating a draft or work-in-progress pull request, clearly mark it as such in the title and description.
+
+The user will review and merge pull requests manually, usually with Squash and merge.
+
+The agent must stop after creating the pull request and must not merge it.
 
 ## Tech Stack
 
