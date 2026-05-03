@@ -4,6 +4,7 @@ import type { DiscColor, SquareIndex } from "../game/othello";
 import {
   createDefaultPlayerSettings,
   type CpuLevel,
+  type PlayerSettings,
   type PlayerType,
 } from "../game/players";
 import {
@@ -106,6 +107,10 @@ export function useOthelloGame() {
     }));
   }
 
+  function handlePlayerSettingsChange(nextPlayers: PlayerSettings) {
+    setPlayers(nextPlayers);
+  }
+
   return {
     board: session.board,
     canHumanPlay,
@@ -126,6 +131,7 @@ export function useOthelloGame() {
     endGame: handleEndGame,
     placeCurrentDisc: handlePlaceCurrentDisc,
     setCpuLevel: handleCpuLevelChange,
+    setPlayers: handlePlayerSettingsChange,
     setPlayerType: handlePlayerTypeChange,
     replaceSession: handleReplaceSession,
     resetGame: handleResetGame,
