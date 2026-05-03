@@ -149,19 +149,35 @@ Use this mental model:
   - In 1P mode, choose the human disc color: Black or White
   - If the human chooses Black, the human plays first
   - If the human chooses White, the CPU plays Black and moves first
+
 - Game screen:
   - Contains both the active playing state and the completed result phase
   - The board should remain in the same central position when the game ends
   - Do not navigate to a separate result screen that hides or relocates the final board
+  - The completed result should be treated as a phase inside the Game screen, not as a separate app-level screen
+
 - Review screen:
   - Shows teacher/coach review after a completed game
   - Uses completed game history
   - Should feel encouraging and educational
+  - Allows move playback and board inspection
+  - Selecting reviewed moves should not mutate the completed game session
+
+- Practice screen:
+  - Allows the user to restart from a reviewed position
+  - Uses a separate practice game session
+  - Must not mutate or overwrite the completed match being reviewed
+  - Should allow returning to the Review screen when appropriate
 
 Major app-level screens should be:
-
 ```text
-start -> game -> review
+start -> game -> review -> practice
 ```
+Important distinction:
 
-The completed result should be treated as a phase inside the Game screen, not as a separate app-level screen.
+- result = a phase inside Game screen
+- practice = a separate app-level screen/session
+
+The completed match and the practice session should be kept separate.
+
+Practice mode should start from a reviewed position by creating a new playable session from a board snapshot, such as `boardBefore`, instead of rewinding or mutating the completed match.
