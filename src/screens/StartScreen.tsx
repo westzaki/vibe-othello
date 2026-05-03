@@ -35,7 +35,7 @@ export function StartScreen({
 
       <div className="start-panel" aria-label="Match setup">
         <div className="start-panel__section">
-          <h2 className="start-panel__title">Mode</h2>
+          <h2 className="start-panel__title">あそびかた</h2>
           <div className="mode-selector">
             <button
               aria-pressed={mode === "onePlayer"}
@@ -43,7 +43,7 @@ export function StartScreen({
               onClick={() => setMode("onePlayer")}
               type="button"
             >
-              1P
+              1人であそぶ
             </button>
             <button
               aria-pressed={mode === "twoPlayer"}
@@ -51,7 +51,7 @@ export function StartScreen({
               onClick={() => setMode("twoPlayer")}
               type="button"
             >
-              2P
+              2人であそぶ
             </button>
           </div>
         </div>
@@ -59,7 +59,7 @@ export function StartScreen({
         {mode === "onePlayer" && (
           <>
             <div className="start-panel__section">
-              <h2 className="start-panel__title">Your Disc</h2>
+              <h2 className="start-panel__title">じぶんの色</h2>
               <div className="disc-selector">
                 <button
                   aria-pressed={humanDisc === "black"}
@@ -68,7 +68,7 @@ export function StartScreen({
                   type="button"
                 >
                   <span className="disc-selector__disc disc-selector__disc--black" />
-                  Black
+                  黒であそぶ
                 </button>
                 <button
                   aria-pressed={humanDisc === "white"}
@@ -77,17 +77,17 @@ export function StartScreen({
                   type="button"
                 >
                   <span className="disc-selector__disc disc-selector__disc--white" />
-                  White
+                  白であそぶ
                 </button>
               </div>
             </div>
 
             <div className="start-panel__section">
-              <h2 className="start-panel__title">CPU Level</h2>
+              <h2 className="start-panel__title">つよさ</h2>
               <div className="cpu-level-grid">
                 {cpuLevels.map((level, index) => (
                   <button
-                    aria-label={`CPU level ${index + 1}, ${cpuLevelLabels[level]}`}
+                    aria-label={`つよさ ${index + 1}, ${cpuLevelLabels[level]}`}
                     aria-pressed={cpuLevel === level}
                     className={[
                       "cpu-level-button",
@@ -115,7 +115,7 @@ export function StartScreen({
           onClick={() => onStart(mode, cpuLevel, humanDisc)}
           type="button"
         >
-          Start Match
+          スタート
         </button>
       </div>
     </section>

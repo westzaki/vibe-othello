@@ -24,7 +24,7 @@ body {
   display: grid;
   min-height: 100vh;
   place-items: center;
-  padding: clamp(18px, 3vw, 34px);
+  padding: clamp(14px, 3vw, 34px);
   background:
     radial-gradient(
       circle at top left,
@@ -36,14 +36,20 @@ body {
 
 .game-shell {
   display: grid;
+  min-width: 0;
   align-items: center;
   width: min(100%, 1180px);
-  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
-  gap: clamp(22px, 4vw, 48px);
+  grid-template-columns: minmax(260px, 330px) minmax(0, 1fr);
+  grid-template-areas:
+    "sidebar board"
+    "history board";
+  gap: clamp(16px, 3vw, 32px);
 }
 
 .game-sidebar {
   display: grid;
+  grid-area: sidebar;
+  min-width: 0;
   align-content: center;
   gap: 18px;
   width: 100%;
@@ -79,10 +85,9 @@ body {
 
 .practice-banner span {
   color: #bfb6a3;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 950;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0;
 }
 
 .practice-banner strong {
@@ -93,6 +98,8 @@ body {
 
 .game-table {
   display: grid;
+  grid-area: board;
+  min-width: 0;
   width: 100%;
   justify-items: center;
   border: 1px solid rgba(255, 244, 214, 0.12);
@@ -110,6 +117,12 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.09);
 }
 
+.game-history-panel {
+  display: grid;
+  grid-area: history;
+  min-width: 0;
+}
+
 .game-heading {
   display: grid;
   gap: 14px;
@@ -119,26 +132,27 @@ body {
 
 .start-screen {
   display: grid;
-  width: min(100%, 860px);
+  min-width: 0;
+  width: min(100%, 900px);
   justify-items: center;
-  gap: clamp(20px, 4vw, 34px);
+  gap: clamp(12px, 2.4vw, 22px);
   text-align: center;
 }
 
 .start-screen__header {
   display: grid;
-  gap: 12px;
+  gap: 8px;
 }
 
 .start-screen__board-preview {
   display: grid;
-  width: min(60vw, 240px);
+  width: min(38vw, 180px);
   aspect-ratio: 1;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  border: 12px solid #59371f;
+  gap: 10px;
+  border: 10px solid #59371f;
   border-radius: 8px;
-  padding: 22px;
+  padding: 18px;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.08), transparent 42%), #1f8a53;
   box-shadow:
@@ -175,8 +189,9 @@ body {
 
 .start-panel {
   display: grid;
-  width: min(100%, 620px);
-  gap: 20px;
+  min-width: 0;
+  width: min(100%, 640px);
+  gap: 16px;
   border: 1px solid rgba(255, 244, 214, 0.15);
   border-radius: 8px;
   padding: clamp(16px, 3vw, 24px);
@@ -201,13 +216,13 @@ body {
 .start-panel__title {
   margin: 0;
   color: #f7df9b;
-  font-size: 0.84rem;
+  font-size: 0.95rem;
   font-weight: 900;
-  text-transform: uppercase;
 }
 
 .mode-selector {
   display: grid;
+  min-width: 0;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
@@ -215,6 +230,7 @@ body {
 .mode-selector__button,
 .disc-selector__button,
 .cpu-level-button {
+  min-width: 0;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 8px;
   color: #f8f1df;
@@ -222,17 +238,21 @@ body {
   cursor: pointer;
   font: inherit;
   font-weight: 900;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .disc-selector {
   display: grid;
+  min-width: 0;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
 .mode-selector__button {
   min-height: 58px;
-  font-size: 1.4rem;
+  padding-inline: 12px;
+  font-size: 1.08rem;
 }
 
 .disc-selector__button {
@@ -241,6 +261,7 @@ body {
   justify-content: center;
   gap: 10px;
   min-height: 54px;
+  padding-inline: 10px;
   font-size: 1rem;
 }
 
@@ -274,13 +295,14 @@ body {
 
 .cpu-level-grid {
   display: grid;
+  min-width: 0;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 
 .cpu-level-button {
   display: grid;
-  min-height: 70px;
+  min-height: 64px;
   place-items: center;
   gap: 2px;
   padding: 10px 8px;
@@ -346,7 +368,7 @@ body {
 h1 {
   margin: 0;
   color: #fffaf0;
-  font-size: clamp(2rem, 4vw, 3.4rem);
+  font-size: clamp(2rem, 4vw, 3.05rem);
   font-weight: 900;
   letter-spacing: 0;
   line-height: 0.95;
@@ -357,7 +379,7 @@ h1 {
   align-items: center;
   flex-wrap: wrap;
   justify-content: flex-start;
-  gap: 10px 16px;
+  gap: 10px 12px;
 }
 
 .score-row {
@@ -374,7 +396,8 @@ h1 {
   justify-content: center;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
-  padding: 6px 12px;
+  min-height: 42px;
+  padding: 8px 12px;
   color: #ece4d1;
   background: rgba(255, 255, 255, 0.08);
   font-size: 0.88rem;
@@ -483,7 +506,8 @@ h1 {
 }
 
 .game-action {
-  min-width: 132px;
+  min-width: 128px;
+  min-height: 44px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 8px;
   padding: 10px 14px;
@@ -496,6 +520,8 @@ h1 {
   font: inherit;
   font-size: 0.92rem;
   font-weight: 700;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .game-action:hover:not(:disabled) {
@@ -659,7 +685,7 @@ h1 {
 .move-history__list {
   display: grid;
   overflow: auto;
-  max-height: 210px;
+  max-height: 180px;
   margin: 0;
   padding: 0;
   gap: 6px;
@@ -879,12 +905,13 @@ h1 {
 
 .review-screen {
   display: grid;
-  width: min(100%, 1080px);
+  width: min(100%, 1120px);
   place-items: center;
 }
 
 .review-panel {
   display: grid;
+  min-width: 0;
   width: 100%;
   justify-items: stretch;
   gap: 18px;
@@ -930,8 +957,9 @@ h1 {
 
 .review-layout {
   display: grid;
+  min-width: 0;
   align-items: start;
-  grid-template-columns: minmax(300px, 0.92fr) minmax(320px, 1fr);
+  grid-template-columns: minmax(320px, 0.95fr) minmax(320px, 1fr);
   gap: clamp(16px, 3vw, 28px);
   text-align: left;
 }
@@ -939,6 +967,7 @@ h1 {
 .review-board-panel {
   display: grid;
   align-content: start;
+  justify-items: stretch;
   gap: 12px;
 }
 
@@ -1020,6 +1049,12 @@ h1 {
   background: rgba(240, 200, 107, 0.12);
 }
 
+.review-summary__item--selected {
+  box-shadow:
+    inset 4px 0 0 #f0c86b,
+    0 0 0 1px rgba(240, 200, 107, 0.28);
+}
+
 .review-summary__item:focus-visible {
   outline: 3px solid #f0c86b;
   outline-offset: 2px;
@@ -1065,14 +1100,14 @@ h1 {
 
 .review-playback {
   display: grid;
-  grid-template-columns: minmax(92px, auto) minmax(74px, 1fr) minmax(92px, auto);
+  grid-template-columns: minmax(96px, auto) minmax(78px, 1fr) minmax(96px, auto);
   align-items: center;
   gap: 8px;
 }
 
 .review-playback .game-action {
   width: 100%;
-  min-height: 38px;
+  min-height: 44px;
 }
 
 .review-playback .game-action:disabled {
@@ -1082,7 +1117,7 @@ h1 {
 
 .review-playback__status {
   display: grid;
-  min-height: 38px;
+  min-height: 44px;
   place-items: center;
   border: 1px solid rgba(214, 179, 106, 0.28);
   border-radius: 7px;
@@ -1094,11 +1129,12 @@ h1 {
 
 .review-playback__practice {
   width: 100%;
-  min-height: 40px;
+  min-height: 46px;
 }
 
 .review-board {
-  width: min(100%, 440px);
+  width: min(100%, 480px);
+  min-width: 0;
   color: #cfc5af;
 }
 
@@ -1143,7 +1179,8 @@ h1 {
   top: 4px;
   left: 4px;
   border-radius: 4px;
-  padding: 2px 4px;
+  min-width: 22px;
+  padding: 3px 5px;
   color: #111310;
   background: #fff8e8;
   font-size: clamp(0.52rem, 1.5vw, 0.64rem);
@@ -1303,7 +1340,7 @@ h1 {
 }
 
 .board-frame {
-  width: min(100%, 640px);
+  width: min(100%, 680px);
   padding: clamp(12px, 2.8vw, 22px);
   border: 1px solid rgba(255, 244, 214, 0.24);
   border-radius: 8px;
@@ -1532,21 +1569,24 @@ h1 {
 
 @media (max-width: 520px) {
   .app {
-    padding: 24px 14px;
+    align-items: start;
+    padding: 18px 12px;
   }
 
   .game-shell {
     grid-template-columns: 1fr;
-    gap: 16px;
+    grid-template-areas:
+      "sidebar"
+      "board"
+      "history";
+    gap: 14px;
   }
 
   .game-sidebar {
-    order: 2;
     padding: 14px;
   }
 
   .game-table {
-    order: 1;
     padding: 10px;
   }
 
@@ -1559,8 +1599,34 @@ h1 {
     justify-content: center;
   }
 
+  .game-action {
+    flex: 1 1 128px;
+  }
+
   h1 {
     font-size: 2rem;
+  }
+
+  .start-screen {
+    width: calc(100vw - 24px);
+    gap: 14px;
+  }
+
+  .start-screen__board-preview {
+    width: min(46vw, 170px);
+    border-width: 10px;
+    gap: 8px;
+    padding: 16px;
+  }
+
+  .start-panel {
+    width: 100%;
+    gap: 16px;
+  }
+
+  .mode-selector,
+  .disc-selector {
+    grid-template-columns: 1fr;
   }
 
   .cpu-level-grid {
@@ -1568,10 +1634,23 @@ h1 {
   }
 
   .board-frame {
-    width: min(92vw, 560px);
+    width: min(100%, 560px);
   }
 
   .review-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .review-panel {
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .review-board {
+    width: min(100%, 560px);
+  }
+
+  .review-playback {
     grid-template-columns: 1fr;
   }
 
@@ -1583,10 +1662,13 @@ h1 {
 @media (min-width: 521px) and (max-width: 900px) {
   .game-shell {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "sidebar"
+      "board"
+      "history";
   }
 
   .game-sidebar {
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr);
     align-items: start;
   }
 

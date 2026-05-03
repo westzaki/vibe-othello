@@ -47,15 +47,15 @@ export function GameScreen({
       <aside className="game-sidebar" aria-label="Game controls and status">
         {mode === "practice" && (
           <div className="practice-banner" aria-label="Practice session">
-            <span>Practice</span>
-            <strong>分岐練習中</strong>
+            <span>練習モード</span>
+            <strong>ふりかえりから練習中</strong>
             {onBackToReview !== undefined && (
               <button
                 className="game-action"
                 onClick={onBackToReview}
                 type="button"
               >
-                ふりかえりに戻る
+                ふりかえりへ
               </button>
             )}
           </div>
@@ -92,7 +92,6 @@ export function GameScreen({
           </>
         )}
 
-        <MoveHistory moves={game.moveHistory} />
       </aside>
 
       <div className="game-table">
@@ -105,6 +104,10 @@ export function GameScreen({
           legalMoves={game.canHumanPlay ? game.legalMoves : []}
           onSquareClick={game.placeCurrentDisc}
         />
+      </div>
+
+      <div className="game-history-panel">
+        <MoveHistory moves={game.moveHistory} />
       </div>
 
       {DevDebugPanel !== null && (

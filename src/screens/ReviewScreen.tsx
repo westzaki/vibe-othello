@@ -146,10 +146,10 @@ export function ReviewScreen({
             onClick={onBackToResult}
             type="button"
           >
-            Result に戻る
+            結果に戻る
           </button>
           <button className="game-action" onClick={onBackToStart} type="button">
-            Title Screen
+            タイトルへ
           </button>
         </div>
       </div>
