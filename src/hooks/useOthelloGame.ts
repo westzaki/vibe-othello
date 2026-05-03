@@ -12,7 +12,9 @@ import {
   getSessionLegalMoves,
   placeCurrentDisc,
   startNewGame,
+  startPracticeSession,
   type GameSession,
+  type PracticeSessionOptions,
 } from "../game/session";
 import { useCpuTurn } from "./useCpuTurn";
 import { useMoveSounds } from "./useMoveSounds";
@@ -78,6 +80,12 @@ export function useOthelloGame() {
     clearAnimationState();
   }
 
+  function handleStartPracticeSession(options: PracticeSessionOptions) {
+    unlockGameAudio();
+    setSession(startPracticeSession(options));
+    clearAnimationState();
+  }
+
   function handlePlayerTypeChange(disc: DiscColor, playerType: PlayerType) {
     setPlayers((currentPlayers) => ({
       ...currentPlayers,
@@ -122,5 +130,6 @@ export function useOthelloGame() {
     replaceSession: handleReplaceSession,
     resetGame: handleResetGame,
     startNewGame: handleStartNewGame,
+    startPracticeSession: handleStartPracticeSession,
   };
 }

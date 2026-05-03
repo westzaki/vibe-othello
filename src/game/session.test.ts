@@ -5,6 +5,7 @@ import {
   getSessionLegalMoves,
   placeCurrentDisc,
   startNewGame,
+  startPracticeSession,
   type GameSession,
 } from "./session";
 import type { Board } from "./othello";
@@ -37,6 +38,54 @@ describe("game session", () => {
     expect(session.moveHistory).toEqual([]);
     expect(session.winner).toBeNull();
     expect(getSessionLegalMoves(session)).toEqual([19, 26, 37, 44]);
+  });
+
+  it("starts a practice session from a provided board", () => {
+    const sourceSession = placeCurrentDisc(startNewGame(), 19).session;
+    const practiceSession = startPracticeSession({
+      board: sourceSession.board,
+      lastMove: sourceSession.lastMove,
+      nextDisc: sourceSession.currentDisc,
+    });
+
+    expect(practiceSession.status).toBe("playing");
+    expect(practiceSession.currentDisc).toBe("white");
+    expect(practiceSession.discCounts).toEqual({ black: 4, white: 1 });
+    expect(practiceSession.lastMove).toBe(19);
+    expect(practiceSession.message).toBeNull();
+    expect(practiceSession.moveHistory).toEqual([]);
+    expect(getSessionLegalMoves(practiceSession)).toEqual([18, 20, 34]);
+  });
+
+  it("passes the turn when starting practice from a position with no move for the next player", () => {
+    const board = createBoardFixture(
+      {
+        1: "white",
+        2: null,
+        4: "white",
+        5: null,
+      },
+      "black",
+    );
+    const sourceSession = placeCurrentDisc(
+      createPlayingSession(board, "black"),
+      2,
+    ).session;
+
+    const practiceSession = startPracticeSession({
+      board: sourceSession.board,
+      lastMove: sourceSession.lastMove,
+      nextDisc: "white",
+    });
+
+    expect(practiceSession.status).toBe("playing");
+    expect(practiceSession.currentDisc).toBe("black");
+    expect(practiceSession.lastMove).toBe(2);
+    expect(practiceSession.message).toBe(
+      "White has no legal moves. Black plays again.",
+    );
+    expect(practiceSession.moveHistory).toEqual([]);
+    expect(getSessionLegalMoves(practiceSession)).toEqual([5]);
   });
 
   it("abandons the current game without a winner", () => {

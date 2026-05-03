@@ -1,13 +1,14 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ReviewBoard } from "../components/ReviewBoard";
 import {
   createInitialBoard,
+  getNextDisc,
   type Board,
   type DiscColor,
   type SquareIndex,
 } from "../game/othello";
 import type { PlayerSettings } from "../game/players";
-import type { MoveRecord } from "../game/session";
+import type { MoveRecord, PracticeSessionOptions } from "../game/session";
 import type { useOthelloGame } from "../hooks/useOthelloGame";
 import {
   createGameReviewMessages,
@@ -20,19 +21,22 @@ import {
 } from "../teacher";
 
 type ReviewScreenProps = {
+  currentMoveNumber: number;
   game: ReturnType<typeof useOthelloGame>;
   onBackToResult: () => void;
   onBackToStart: () => void;
+  onMoveNumberChange: (moveNumber: number) => void;
+  onStartPractice: (options: PracticeSessionOptions) => void;
 };
 
 export function ReviewScreen({
+  currentMoveNumber,
   game,
   onBackToResult,
   onBackToStart,
+  onMoveNumberChange,
+  onStartPractice,
 }: ReviewScreenProps) {
-  const [currentMoveNumber, setCurrentMoveNumber] = useState(
-    game.moveHistory.length,
-  );
   const reviewedDisc = getReviewedDisc(game.players);
   const playbackBoards = useMemo(
     () => createPlaybackBoards(game.moveHistory),
@@ -72,11 +76,31 @@ export function ReviewScreen({
     selectableMoves.find((move) => move.moveNumber === safeMoveNumber) ?? null;
 
   function goToMove(moveNumber: number) {
-    setCurrentMoveNumber(clampMoveNumber(moveNumber, maxMoveNumber));
+    onMoveNumberChange(clampMoveNumber(moveNumber, maxMoveNumber));
   }
 
   function selectReviewMove(moveNumber: number) {
     goToMove(moveNumber);
+  }
+
+  function startPractice() {
+    const practiceMoveNumber = safeMoveNumber === 0 ? 0 : safeMoveNumber - 1;
+    const practiceBoard =
+      playbackBoards[practiceMoveNumber] ?? createInitialBoard();
+    const practiceLastMove =
+      practiceMoveNumber === 0
+        ? null
+        : (game.moveHistory[practiceMoveNumber - 1]?.square ?? null);
+    const nextDisc = getNextDiscForMoveNumber(
+      game.moveHistory,
+      practiceMoveNumber,
+    );
+
+    onStartPractice({
+      board: practiceBoard,
+      lastMove: practiceLastMove,
+      nextDisc,
+    });
   }
 
   return (
@@ -107,6 +131,7 @@ export function ReviewScreen({
                 currentMoveNumber={safeMoveNumber}
                 maxMoveNumber={maxMoveNumber}
                 onGoToMove={goToMove}
+                onStartPractice={startPractice}
               />
               <ReviewLegend />
             </section>
@@ -288,31 +313,42 @@ type ReviewPlaybackControlsProps = {
   currentMoveNumber: number;
   maxMoveNumber: number;
   onGoToMove: (moveNumber: number) => void;
+  onStartPractice: () => void;
 };
 
 function ReviewPlaybackControls({
   currentMoveNumber,
   maxMoveNumber,
   onGoToMove,
+  onStartPractice,
 }: ReviewPlaybackControlsProps) {
   return (
-    <div className="review-playback">
+    <div className="review-playback-group">
+      <div className="review-playback">
+        <button
+          className="game-action"
+          disabled={currentMoveNumber === 0}
+          onClick={() => onGoToMove(currentMoveNumber - 1)}
+          type="button"
+        >
+          前へ
+        </button>
+        <span className="review-playback__status">{currentMoveNumber}手目</span>
+        <button
+          className="game-action"
+          disabled={currentMoveNumber === maxMoveNumber}
+          onClick={() => onGoToMove(currentMoveNumber + 1)}
+          type="button"
+        >
+          次へ
+        </button>
+      </div>
       <button
-        className="game-action"
-        disabled={currentMoveNumber === 0}
-        onClick={() => onGoToMove(currentMoveNumber - 1)}
+        className="game-action game-action--primary review-playback__practice"
+        onClick={onStartPractice}
         type="button"
       >
-        前へ
-      </button>
-      <span className="review-playback__status">{currentMoveNumber}手目</span>
-      <button
-        className="game-action"
-        disabled={currentMoveNumber === maxMoveNumber}
-        onClick={() => onGoToMove(currentMoveNumber + 1)}
-        type="button"
-      >
-        次へ
+        {currentMoveNumber === 0 ? "初期盤面から練習" : "この手の前から練習"}
       </button>
     </div>
   );
@@ -358,6 +394,19 @@ function createPlaybackBoards(moveHistory: MoveRecord[]): Board[] {
 
 function clampMoveNumber(moveNumber: number, maxMoveNumber: number): number {
   return Math.max(0, Math.min(moveNumber, maxMoveNumber));
+}
+
+function getNextDiscForMoveNumber(
+  moveHistory: MoveRecord[],
+  moveNumber: number,
+): DiscColor {
+  if (moveNumber === 0) {
+    return "black";
+  }
+
+  const move = moveHistory[moveNumber - 1];
+
+  return move === undefined ? "black" : getNextDisc(move.disc);
 }
 
 function formatSquare(square: SquareIndex): string {

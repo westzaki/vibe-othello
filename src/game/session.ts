@@ -49,6 +49,12 @@ export type PlaceCurrentDiscResult = {
   session: GameSession;
 };
 
+export type PracticeSessionOptions = {
+  board: Board;
+  lastMove: SquareIndex | null;
+  nextDisc: DiscColor;
+};
+
 export function createGameSession(): GameSession {
   const board = createInitialBoard();
 
@@ -75,6 +81,49 @@ export function startNewGame(): GameSession {
     endReason: null,
     lastMove: null,
     message: null,
+    moveHistory: [],
+    status: "playing",
+    winner: null,
+  };
+}
+
+export function startPracticeSession({
+  board,
+  lastMove,
+  nextDisc,
+}: PracticeSessionOptions): GameSession {
+  const practiceBoard = [...board];
+  const discCounts = countDiscs(practiceBoard);
+
+  if (isGameOver(practiceBoard)) {
+    return {
+      board: practiceBoard,
+      currentDisc: nextDisc,
+      discCounts,
+      endReason: "completed",
+      lastMove,
+      message: null,
+      moveHistory: [],
+      status: "ended",
+      winner: getWinner(practiceBoard),
+    };
+  }
+
+  const nextDiscCanMove = hasLegalMove(practiceBoard, nextDisc);
+  const otherDisc = getNextDisc(nextDisc);
+  const currentDisc = nextDiscCanMove ? nextDisc : otherDisc;
+
+  return {
+    board: practiceBoard,
+    currentDisc,
+    discCounts,
+    endReason: null,
+    lastMove,
+    message: nextDiscCanMove
+      ? null
+      : `${formatDisc(nextDisc)} has no legal moves. ${formatDisc(
+          otherDisc,
+        )} plays again.`,
     moveHistory: [],
     status: "playing",
     winner: null,

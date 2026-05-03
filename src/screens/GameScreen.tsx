@@ -17,6 +17,8 @@ const DevDebugPanel = import.meta.env.DEV
 
 type GameScreenProps = {
   game: ReturnType<typeof useOthelloGame>;
+  mode?: "match" | "practice";
+  onBackToReview?: () => void;
   onBackToStart: () => void;
   onEndGame: () => void;
   onOpenReview: () => void;
@@ -25,6 +27,8 @@ type GameScreenProps = {
 
 export function GameScreen({
   game,
+  mode = "match",
+  onBackToReview,
   onBackToStart,
   onEndGame,
   onOpenReview,
@@ -41,11 +45,29 @@ export function GameScreen({
   return (
     <section className="game-shell" aria-label="Othello game">
       <aside className="game-sidebar" aria-label="Game controls and status">
+        {mode === "practice" && (
+          <div className="practice-banner" aria-label="Practice session">
+            <span>Practice</span>
+            <strong>分岐練習中</strong>
+            {onBackToReview !== undefined && (
+              <button
+                className="game-action"
+                onClick={onBackToReview}
+                type="button"
+              >
+                ふりかえりに戻る
+              </button>
+            )}
+          </div>
+        )}
+
         {resultWinner !== null ? (
           <GameResultOverlay
             discCounts={game.discCounts}
             onBackToStart={onBackToStart}
-            onOpenReview={canOpenReview(game) ? onOpenReview : undefined}
+            onOpenReview={
+              mode === "match" && canOpenReview(game) ? onOpenReview : undefined
+            }
             onPlayAgain={onPlayAgain}
             winner={resultWinner}
           />
