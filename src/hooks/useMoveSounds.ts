@@ -6,16 +6,18 @@ const firstFlipSoundDelayMs = 110;
 const flipSoundDelayMs = 70;
 
 type UseMoveSoundsParams = {
+  enabled: boolean;
   flipAnimationId: number;
   flippedSquares: SquareIndex[];
 };
 
 export function useMoveSounds({
+  enabled,
   flipAnimationId,
   flippedSquares,
 }: UseMoveSoundsParams) {
   useEffect(() => {
-    if (flipAnimationId === 0) {
+    if (!enabled || flipAnimationId === 0) {
       return;
     }
 
@@ -33,5 +35,5 @@ export function useMoveSounds({
         window.clearTimeout(timeoutId);
       }
     };
-  }, [flipAnimationId, flippedSquares]);
+  }, [enabled, flipAnimationId, flippedSquares]);
 }

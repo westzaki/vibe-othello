@@ -16,9 +16,9 @@ import { StartScreen } from "./screens/StartScreen";
 type AppScreen = "start" | "game" | "review" | "practice";
 
 export default function App() {
-  const game = useOthelloGame();
-  const practiceGame = useOthelloGame();
   const [screen, setScreen] = useState<AppScreen>("start");
+  const game = useOthelloGame({ enabled: screen === "game" });
+  const practiceGame = useOthelloGame({ enabled: screen === "practice" });
   const [practiceStart, setPracticeStart] =
     useState<PracticeSessionOptions | null>(null);
   const [reviewMoveNumber, setReviewMoveNumber] = useState<number | null>(null);
