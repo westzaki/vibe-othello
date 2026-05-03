@@ -1,6 +1,6 @@
 import type { Board, DiscColor } from "../game/othello";
 import { chooseHighestScoredMove, getScoredMoves } from "./moveSelection";
-import { strategicEvaluateBoard } from "./strategicEvaluateBoard";
+import { strategicEvaluateBoard } from "./evaluation/strategicEvaluateBoard";
 
 export function chooseStrategicMove(
   board: Board,

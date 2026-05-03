@@ -8,9 +8,9 @@ import {
   type DiscColor,
   type SquareIndex,
 } from "../game/othello";
-import { countEmptySquares } from "./evaluationFeatures";
+import { countEmptySquares } from "./evaluation/evaluationFeatures";
+import { strategicEvaluateBoard } from "./evaluation/strategicEvaluateBoard";
 import { getScoredMoves, orderMovesByScore } from "./moveSelection";
-import { strategicEvaluateBoard } from "./strategicEvaluateBoard";
 
 const grandmasterTimeLimitMs = 300;
 const iterativeDeepeningMinDepth = 1;

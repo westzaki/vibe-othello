@@ -1,4 +1,4 @@
-import type { Board, DiscColor } from "../game/othello";
+import type { Board, DiscColor } from "../../game/othello";
 import {
   getCornerDifference,
   getDiscCountDifference,

@@ -6,10 +6,10 @@ import {
   type Board,
   type DiscColor,
   type SquareIndex,
-} from "../game/othello";
-import { countEmptySquares } from "./evaluationFeatures";
-import { getScoredMoves, orderMovesByScore } from "./moveSelection";
-import { strategicEvaluateBoard } from "./strategicEvaluateBoard";
+} from "../../game/othello";
+import { countEmptySquares } from "../evaluation/evaluationFeatures";
+import { strategicEvaluateBoard } from "../evaluation/strategicEvaluateBoard";
+import { getScoredMoves, orderMovesByScore } from "../moveSelection";
 
 const defaultSearchDepth = 4;
 const endGameExtensionEmptyThreshold = 8;

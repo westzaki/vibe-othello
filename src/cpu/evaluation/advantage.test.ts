@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createInitialBoard } from "../game/othello";
-import { createBoardFixture } from "../test/boardFixtures";
+import { createInitialBoard } from "../../game/othello";
+import { createBoardFixture } from "../../test/boardFixtures";
 import { calculateAdvantage } from "./advantage";
 
 describe("advantage calculation", () => {

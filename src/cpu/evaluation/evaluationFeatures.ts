@@ -5,7 +5,7 @@ import {
   getNextDisc,
   type Board,
   type DiscColor,
-} from "../game/othello";
+} from "../../game/othello";
 
 export function countEmptySquares(board: Board): number {
   return board.filter((cell) => cell === null).length;
