@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { chooseCpuMove } from "../cpu/cpu";
+import { chooseCpuMove } from "../cpu";
 import type { SquareIndex } from "../game/othello";
 import type { PlayerConfig } from "../game/players";
 import type { GameSession } from "../game/session";

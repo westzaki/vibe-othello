@@ -1,6 +1,8 @@
-import { getMobilityDifference } from "../cpu/evaluationFeatures";
-import { getMinimaxMoveScores } from "../cpu/minimaxSearch";
-import { strategicEvaluateBoard } from "../cpu/strategicEvaluateBoard";
+import {
+  getMinimaxMoveScores,
+  getMobilityDifference,
+  strategicEvaluateBoard,
+} from "../cpu";
 import {
   CORNER_SQUARES,
   getLegalMoves,

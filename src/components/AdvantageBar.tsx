@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import type { Advantage } from "../cpu/advantage";
+import type { Advantage } from "../cpu";
 
 type AdvantageBarProps = {
   advantage: Advantage;

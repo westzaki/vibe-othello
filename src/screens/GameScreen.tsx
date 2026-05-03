@@ -1,5 +1,5 @@
 import { lazy, Suspense, useMemo } from "react";
-import { calculateAdvantage } from "../cpu/advantage";
+import { calculateAdvantage } from "../cpu";
 import { AdvantageBar } from "../components/AdvantageBar";
 import { Board } from "../components/Board";
 import { GameHeader } from "../components/GameHeader";
