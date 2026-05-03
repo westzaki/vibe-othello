@@ -857,7 +857,7 @@ h1 {
 .review-panel {
   display: grid;
   width: min(100%, 620px);
-  justify-items: center;
+  justify-items: stretch;
   gap: 18px;
   border: 1px solid rgba(255, 244, 214, 0.15);
   border-radius: 8px;
@@ -875,6 +875,11 @@ h1 {
     0 24px 58px rgba(0, 0, 0, 0.28);
 }
 
+.review-panel > .eyebrow,
+.review-panel > h1 {
+  text-align: center;
+}
+
 .review-panel__status {
   margin: 0;
   border: 1px solid rgba(214, 179, 106, 0.34);
@@ -884,6 +889,76 @@ h1 {
   background: rgba(20, 22, 18, 0.54);
   font-size: 0.92rem;
   font-weight: 900;
+  text-align: center;
+}
+
+.review-summary {
+  display: grid;
+  gap: 14px;
+  text-align: left;
+}
+
+.review-summary__section {
+  display: grid;
+  gap: 9px;
+}
+
+.review-summary__title {
+  margin: 0;
+  color: #f7df9b;
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.review-summary__list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.review-summary__item,
+.review-summary__advice,
+.review-summary__empty {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.review-summary__item {
+  display: grid;
+  gap: 7px;
+}
+
+.review-summary__move-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #bfb6a3;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.review-summary__move-line strong {
+  color: #fff8e8;
+  font-size: 0.94rem;
+}
+
+.review-summary__item p,
+.review-summary__advice,
+.review-summary__empty {
+  margin: 0;
+  color: #e2d8c4;
+  font-size: 0.86rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.review-summary__suggestion {
+  color: #f7df9b;
 }
 
 .review-panel__actions {

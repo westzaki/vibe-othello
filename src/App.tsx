@@ -72,6 +72,7 @@ export default function App() {
         />
       ) : screen === "review" ? (
         <ReviewScreen
+          game={game}
           onBackToResult={handleBackToResult}
           onBackToStart={handleBackToStart}
         />
