@@ -1,21 +1,26 @@
 import { useState } from "react";
+import type { DiscColor } from "../game/othello";
 import { cpuLevelLabels, cpuLevels, type CpuLevel } from "../game/players";
 
 export type GameMode = "onePlayer" | "twoPlayer";
+export type HumanDisc = DiscColor;
 
 type StartScreenProps = {
   initialCpuLevel: CpuLevel;
+  initialHumanDisc: HumanDisc;
   initialMode: GameMode;
-  onStart: (mode: GameMode, cpuLevel: CpuLevel) => void;
+  onStart: (mode: GameMode, cpuLevel: CpuLevel, humanDisc: HumanDisc) => void;
 };
 
 export function StartScreen({
   initialCpuLevel,
+  initialHumanDisc,
   initialMode,
   onStart,
 }: StartScreenProps) {
   const [mode, setMode] = useState<GameMode>(initialMode);
   const [cpuLevel, setCpuLevel] = useState<CpuLevel>(initialCpuLevel);
+  const [humanDisc, setHumanDisc] = useState<HumanDisc>(initialHumanDisc);
 
   return (
     <section className="start-screen" aria-labelledby="start-title">
@@ -55,34 +60,62 @@ export function StartScreen({
         </div>
 
         {mode === "onePlayer" && (
-          <div className="start-panel__section">
-            <h2 className="start-panel__title">CPU Level</h2>
-            <div className="cpu-level-grid">
-              {cpuLevels.map((level, index) => (
+          <>
+            <div className="start-panel__section">
+              <h2 className="start-panel__title">Your Disc</h2>
+              <div className="disc-selector">
                 <button
-                  aria-label={`CPU level ${index + 1}, ${cpuLevelLabels[level]}`}
-                  aria-pressed={cpuLevel === level}
-                  className={[
-                    "cpu-level-button",
-                    cpuLevel === level ? "cpu-level-button--selected" : "",
-                  ].join(" ")}
-                  key={level}
-                  onClick={() => setCpuLevel(level)}
+                  aria-pressed={humanDisc === "black"}
+                  className={getDiscButtonClass("black", humanDisc)}
+                  onClick={() => setHumanDisc("black")}
                   type="button"
                 >
-                  <span className="cpu-level-button__number">{index + 1}</span>
-                  <span className="cpu-level-button__label">
-                    {cpuLevelLabels[level]}
-                  </span>
+                  <span className="disc-selector__disc disc-selector__disc--black" />
+                  Black
                 </button>
-              ))}
+                <button
+                  aria-pressed={humanDisc === "white"}
+                  className={getDiscButtonClass("white", humanDisc)}
+                  onClick={() => setHumanDisc("white")}
+                  type="button"
+                >
+                  <span className="disc-selector__disc disc-selector__disc--white" />
+                  White
+                </button>
+              </div>
             </div>
-          </div>
+
+            <div className="start-panel__section">
+              <h2 className="start-panel__title">CPU Level</h2>
+              <div className="cpu-level-grid">
+                {cpuLevels.map((level, index) => (
+                  <button
+                    aria-label={`CPU level ${index + 1}, ${cpuLevelLabels[level]}`}
+                    aria-pressed={cpuLevel === level}
+                    className={[
+                      "cpu-level-button",
+                      cpuLevel === level ? "cpu-level-button--selected" : "",
+                    ].join(" ")}
+                    key={level}
+                    onClick={() => setCpuLevel(level)}
+                    type="button"
+                  >
+                    <span className="cpu-level-button__number">
+                      {index + 1}
+                    </span>
+                    <span className="cpu-level-button__label">
+                      {cpuLevelLabels[level]}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
         )}
 
         <button
           className="game-action game-action--primary start-panel__start"
-          onClick={() => onStart(mode, cpuLevel)}
+          onClick={() => onStart(mode, cpuLevel, humanDisc)}
           type="button"
         >
           Start Match
@@ -90,6 +123,13 @@ export function StartScreen({
       </div>
     </section>
   );
+}
+
+function getDiscButtonClass(disc: HumanDisc, humanDisc: HumanDisc): string {
+  return [
+    "disc-selector__button",
+    humanDisc === disc ? "disc-selector__button--selected" : "",
+  ].join(" ");
 }
 
 function getModeButtonClass(isSelected: boolean): string {
