@@ -1,9 +1,6 @@
 import { useState } from "react";
-import type { DiscColor } from "../game/othello";
+import type { GameMode, HumanDisc } from "../game/matchSetup";
 import { cpuLevelLabels, cpuLevels, type CpuLevel } from "../game/players";
-
-export type GameMode = "onePlayer" | "twoPlayer";
-export type HumanDisc = DiscColor;
 
 type StartScreenProps = {
   initialCpuLevel: CpuLevel;

@@ -55,36 +55,23 @@ export type PracticeSessionOptions = {
   nextDisc: DiscColor;
 };
 
-export function createGameSession(): GameSession {
-  const board = createInitialBoard();
+type CreateSessionOptions = {
+  board: Board;
+  currentDisc: DiscColor;
+  endReason?: GameEndReason | null;
+  lastMove?: SquareIndex | null;
+  message?: string | null;
+  moveHistory?: MoveRecord[];
+  status: GameStatus;
+  winner?: Winner | null;
+};
 
-  return {
-    board,
-    currentDisc: "black",
-    discCounts: countDiscs(board),
-    endReason: null,
-    lastMove: null,
-    message: null,
-    moveHistory: [],
-    status: "notStarted",
-    winner: null,
-  };
+export function createGameSession(): GameSession {
+  return createInitialSession("notStarted");
 }
 
 export function startNewGame(): GameSession {
-  const board = createInitialBoard();
-
-  return {
-    board,
-    currentDisc: "black",
-    discCounts: countDiscs(board),
-    endReason: null,
-    lastMove: null,
-    message: null,
-    moveHistory: [],
-    status: "playing",
-    winner: null,
-  };
+  return createInitialSession("playing");
 }
 
 export function startPracticeSession({
@@ -93,41 +80,34 @@ export function startPracticeSession({
   nextDisc,
 }: PracticeSessionOptions): GameSession {
   const practiceBoard = [...board];
-  const discCounts = countDiscs(practiceBoard);
 
   if (isGameOver(practiceBoard)) {
-    return {
+    return createSession({
       board: practiceBoard,
       currentDisc: nextDisc,
-      discCounts,
       endReason: "completed",
       lastMove,
       message: null,
       moveHistory: [],
       status: "ended",
       winner: getWinner(practiceBoard),
-    };
+    });
   }
 
   const nextDiscCanMove = hasLegalMove(practiceBoard, nextDisc);
   const otherDisc = getNextDisc(nextDisc);
   const currentDisc = nextDiscCanMove ? nextDisc : otherDisc;
 
-  return {
+  return createSession({
     board: practiceBoard,
     currentDisc,
-    discCounts,
     endReason: null,
     lastMove,
-    message: nextDiscCanMove
-      ? null
-      : `${formatDisc(nextDisc)} has no legal moves. ${formatDisc(
-          otherDisc,
-        )} plays again.`,
+    message: nextDiscCanMove ? null : createPassMessage(nextDisc, otherDisc),
     moveHistory: [],
     status: "playing",
     winner: null,
-  };
+  });
 }
 
 export function endGame(session: GameSession): GameSession {
@@ -220,12 +200,47 @@ export function placeCurrentDisc(
       lastMove: square,
       message: nextDiscCanMove
         ? null
-        : `${formatDisc(nextDisc)} has no legal moves. ${formatDisc(
-            session.currentDisc,
-          )} plays again.`,
+        : createPassMessage(nextDisc, session.currentDisc),
       moveHistory: nextMoveHistory,
     },
   };
+}
+
+function createInitialSession(status: GameStatus): GameSession {
+  return createSession({
+    board: createInitialBoard(),
+    currentDisc: "black",
+    status,
+  });
+}
+
+function createSession({
+  board,
+  currentDisc,
+  endReason = null,
+  lastMove = null,
+  message = null,
+  moveHistory = [],
+  status,
+  winner = null,
+}: CreateSessionOptions): GameSession {
+  return {
+    board,
+    currentDisc,
+    discCounts: countDiscs(board),
+    endReason,
+    lastMove,
+    message,
+    moveHistory,
+    status,
+    winner,
+  };
+}
+
+function createPassMessage(skippedDisc: DiscColor, nextDisc: DiscColor): string {
+  return `${formatDisc(skippedDisc)} has no legal moves. ${formatDisc(
+    nextDisc,
+  )} plays again.`;
 }
 
 function formatDisc(disc: DiscColor): string {

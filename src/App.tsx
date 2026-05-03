@@ -1,11 +1,17 @@
 import { useState } from "react";
 import type { DiscColor } from "./game/othello";
 import type { CpuLevel } from "./game/players";
+import {
+  createMatchPlayerSettings,
+  getInitialGameMode,
+  getInitialHumanDisc,
+  type GameMode,
+} from "./game/matchSetup";
 import type { PracticeSessionOptions } from "./game/session";
 import { useOthelloGame } from "./hooks/useOthelloGame";
 import { GameScreen } from "./screens/GameScreen";
 import { ReviewScreen } from "./screens/ReviewScreen";
-import { StartScreen, type GameMode } from "./screens/StartScreen";
+import { StartScreen } from "./screens/StartScreen";
 
 type AppScreen = "start" | "game" | "review" | "practice";
 
@@ -22,16 +28,7 @@ export default function App() {
     cpuLevel: CpuLevel,
     humanDisc: DiscColor,
   ) {
-    const cpuDisc = humanDisc === "black" ? "white" : "black";
-
-    game.setPlayerType("black", "human");
-    game.setPlayerType("white", "human");
-
-    if (mode === "onePlayer") {
-      game.setPlayerType(cpuDisc, "cpu");
-      game.setCpuLevel(cpuDisc, cpuLevel);
-    }
-
+    game.setPlayers(createMatchPlayerSettings(mode, cpuLevel, humanDisc));
     game.startNewGame();
     setReviewMoveNumber(null);
     setPracticeStart(null);
@@ -89,15 +86,8 @@ export default function App() {
       {screen === "start" ? (
         <StartScreen
           initialCpuLevel={game.players.white.cpuLevel}
-          initialHumanDisc={
-            game.players.black.type === "cpu" ? "white" : "black"
-          }
-          initialMode={
-            game.players.black.type === "cpu" ||
-            game.players.white.type === "cpu"
-              ? "onePlayer"
-              : "twoPlayer"
-          }
+          initialHumanDisc={getInitialHumanDisc(game.players)}
+          initialMode={getInitialGameMode(game.players)}
           onStart={handleStartMatch}
         />
       ) : screen === "review" ? (
@@ -136,8 +126,5 @@ function copyPlayers(
   source: ReturnType<typeof useOthelloGame>,
   target: ReturnType<typeof useOthelloGame>,
 ) {
-  target.setPlayerType("black", source.players.black.type);
-  target.setCpuLevel("black", source.players.black.cpuLevel);
-  target.setPlayerType("white", source.players.white.type);
-  target.setCpuLevel("white", source.players.white.cpuLevel);
+  target.setPlayers(source.players);
 }
