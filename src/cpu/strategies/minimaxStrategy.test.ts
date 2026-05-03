@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { Board } from "../game/othello";
-import { createBoardFixture } from "../test/boardFixtures";
-import { chooseMinimaxMove } from "./minimaxCpu";
+import type { Board } from "../../game/othello";
+import { createBoardFixture } from "../../test/boardFixtures";
+import { chooseMinimaxMove } from "./minimaxStrategy";
 
 describe("minimax CPU", () => {
   it("chooses the highest evaluated move when search depth is one", () => {

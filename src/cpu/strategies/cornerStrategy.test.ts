@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { Board } from "../game/othello";
-import { createBoardFixture } from "../test/boardFixtures";
-import { chooseCornerMove } from "./cornerCpu";
+import type { Board } from "../../game/othello";
+import { createBoardFixture } from "../../test/boardFixtures";
+import { chooseCornerMove } from "./cornerStrategy";
 
 describe("corner CPU", () => {
   it("chooses a corner when one is legal", () => {

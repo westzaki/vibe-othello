@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { Board } from "../game/othello";
-import { createBoardFixture } from "../test/boardFixtures";
-import { chooseStrategicMove } from "./strategicCpu";
+import type { Board } from "../../game/othello";
+import { createBoardFixture } from "../../test/boardFixtures";
+import { chooseStrategicMove } from "./strategicStrategy";
 
 describe("strategic CPU", () => {
   it("chooses the legal move with the highest strategic evaluation", () => {

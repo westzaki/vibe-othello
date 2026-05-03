@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { createInitialBoard, getLegalMoves } from "../game/othello";
-import { createBoardFixture } from "../test/boardFixtures";
+import { createInitialBoard, getLegalMoves } from "../../game/othello";
+import { createBoardFixture } from "../../test/boardFixtures";
 import {
   chooseGrandmasterMove,
   chooseIterativeDeepeningMove,
   choosePerfectEndgameMove,
-} from "./grandmasterCpu";
+} from "./grandmasterStrategy";
 
 describe("grandmaster CPU", () => {
   it("uses iterative deepening before the endgame", () => {

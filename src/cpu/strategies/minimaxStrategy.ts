@@ -1,8 +1,8 @@
-import type { Board, DiscColor, SquareIndex } from "../game/othello";
+import type { Board, DiscColor, SquareIndex } from "../../game/othello";
 import {
   getMinimaxMoveScores,
   type MinimaxMoveScore,
-} from "./search/minimaxSearch";
+} from "../search/minimaxSearch";
 
 const defaultSearchDepth = 4;
 

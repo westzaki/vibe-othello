@@ -1,11 +1,11 @@
 import type { CpuLevel } from "../game/players";
 import type { Board, DiscColor } from "../game/othello";
-import { chooseCornerMove } from "./cornerCpu";
-import { chooseGrandmasterMove } from "./grandmasterCpu";
-import { chooseFixedDepthMinimaxMove } from "./minimaxCpu";
-import { chooseOnePlyMove } from "./onePlyCpu";
-import { chooseRandomMove } from "./randomCpu";
-import { chooseStrategicMove } from "./strategicCpu";
+import { chooseCornerMove } from "./strategies/cornerStrategy";
+import { chooseGrandmasterMove } from "./strategies/grandmasterStrategy";
+import { chooseFixedDepthMinimaxMove } from "./strategies/minimaxStrategy";
+import { chooseOnePlyMove } from "./strategies/onePlyStrategy";
+import { chooseRandomMove } from "./strategies/randomStrategy";
+import { chooseStrategicMove } from "./strategies/strategicStrategy";
 
 export function chooseCpuMove(
   board: Board,
