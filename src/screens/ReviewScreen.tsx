@@ -1,6 +1,5 @@
 import { useMemo } from "react";
-import { createInitialBoard, type DiscColor } from "../game/othello";
-import type { PlayerSettings } from "../game/players";
+import { createInitialBoard } from "../game/othello";
 import type { PracticeSessionOptions } from "../game/session";
 import type { useOthelloGame } from "../hooks/useOthelloGame";
 import {
@@ -17,6 +16,7 @@ import {
   createPracticeOptionsFromMoveNumber,
   getNextDiscForMoveNumber,
 } from "./review/reviewPlayback";
+import { getReviewedDisc } from "./review/reviewPlayers";
 
 type ReviewScreenProps = {
   currentMoveNumber: number;
@@ -41,7 +41,7 @@ export function ReviewScreen({
     [game.moveHistory],
   );
   const maxMoveNumber = playbackBoards.length - 1;
-  const safeMoveNumber = Math.min(currentMoveNumber, maxMoveNumber);
+  const safeMoveNumber = clampMoveNumber(currentMoveNumber, maxMoveNumber);
   const currentBoard = playbackBoards[safeMoveNumber] ?? createInitialBoard();
   const currentMove =
     safeMoveNumber === 0
@@ -85,10 +85,6 @@ export function ReviewScreen({
     onMoveNumberChange(clampMoveNumber(moveNumber, maxMoveNumber));
   }
 
-  function selectReviewMove(moveNumber: number) {
-    goToMove(moveNumber);
-  }
-
   function startPractice() {
     onStartPractice(
       createPracticeOptionsFromMoveNumber(
@@ -124,7 +120,7 @@ export function ReviewScreen({
                 emptyText="今回は大きく流れを良くした手は少なめでした。"
                 messages={messages}
                 moves={review.highlights.goodMoves}
-                onSelectMove={selectReviewMove}
+                onSelectMove={goToMove}
                 selectedMoveNumber={activeReviewedMove?.moveNumber ?? null}
                 title="良かった手"
               />
@@ -132,7 +128,7 @@ export function ReviewScreen({
                 emptyText="今回は目立った失着はありませんでした。"
                 messages={messages}
                 moves={review.highlights.badMoves}
-                onSelectMove={selectReviewMove}
+                onSelectMove={goToMove}
                 selectedMoveNumber={activeReviewedMove?.moveNumber ?? null}
                 title="もったいなかった手"
               />
@@ -159,16 +155,4 @@ export function ReviewScreen({
       </div>
     </section>
   );
-}
-
-function getReviewedDisc(players: PlayerSettings): DiscColor | null {
-  if (players.black.type === "human" && players.white.type === "cpu") {
-    return "black";
-  }
-
-  if (players.white.type === "human" && players.black.type === "cpu") {
-    return "white";
-  }
-
-  return null;
 }
