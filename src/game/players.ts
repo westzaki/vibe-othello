@@ -47,7 +47,7 @@ export function createDefaultPlayerSettings(): PlayerSettings {
     },
     white: {
       cpuLevel: "level1",
-      type: "human",
+      type: "cpu",
     },
   };
 }
