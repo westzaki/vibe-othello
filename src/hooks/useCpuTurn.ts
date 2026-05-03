@@ -16,9 +16,12 @@ export function useCpuTurn({
   currentPlayer,
   onPlaceDisc,
   session,
-}: UseCpuTurnParams) {
+}: UseCpuTurnParams): boolean {
+  const isCpuThinking =
+    session.status === "playing" && currentPlayer.type === "cpu";
+
   useEffect(() => {
-    if (session.status !== "playing" || currentPlayer.type !== "cpu") {
+    if (!isCpuThinking) {
       return;
     }
 
@@ -35,5 +38,7 @@ export function useCpuTurn({
     }, cpuMoveDelayMs);
 
     return () => window.clearTimeout(timeoutId);
-  }, [currentPlayer, onPlaceDisc, session]);
+  }, [currentPlayer, isCpuThinking, onPlaceDisc, session]);
+
+  return isCpuThinking;
 }
