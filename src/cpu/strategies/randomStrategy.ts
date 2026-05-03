@@ -3,7 +3,7 @@ import {
   type Board,
   type DiscColor,
   type SquareIndex,
-} from "../game/othello";
+} from "../../game/othello";
 
 export function chooseRandomMove(
   board: Board,

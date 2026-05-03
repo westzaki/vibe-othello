@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { createInitialBoard } from "../game/othello";
-import { createBoardFixture } from "../test/boardFixtures";
-import { chooseRandomMove } from "./randomCpu";
+import { createInitialBoard } from "../../game/othello";
+import { createBoardFixture } from "../../test/boardFixtures";
+import { chooseRandomMove } from "./randomStrategy";
 
 describe("random CPU", () => {
   it("chooses a legal move from the current board", () => {

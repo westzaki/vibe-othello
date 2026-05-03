@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Board } from "../game/othello";
+import type { Board } from "../../game/othello";
 import { strategicEvaluateBoard } from "./strategicEvaluateBoard";
 
 describe("strategic board evaluation", () => {

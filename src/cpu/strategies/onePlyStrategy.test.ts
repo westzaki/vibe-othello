@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { Board } from "../game/othello";
-import { createBoardFixture } from "../test/boardFixtures";
-import { chooseOnePlyMove } from "./onePlyCpu";
+import type { Board } from "../../game/othello";
+import { createBoardFixture } from "../../test/boardFixtures";
+import { chooseOnePlyMove } from "./onePlyStrategy";
 
 describe("one-ply CPU", () => {
   it("chooses the move with the highest evaluated resulting board", () => {

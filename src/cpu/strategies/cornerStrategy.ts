@@ -4,8 +4,8 @@ import {
   type Board,
   type DiscColor,
   type SquareIndex,
-} from "../game/othello";
-import { chooseRandomMove } from "./randomCpu";
+} from "../../game/othello";
+import { chooseRandomMove } from "./randomStrategy";
 
 export function chooseCornerMove(
   board: Board,

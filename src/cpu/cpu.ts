@@ -1,36 +1,11 @@
 import type { CpuLevel } from "../game/players";
 import type { Board, DiscColor } from "../game/othello";
-import { chooseCornerMove } from "./cornerCpu";
-import { chooseGrandmasterMove } from "./grandmasterCpu";
-import { chooseFixedDepthMinimaxMove } from "./minimaxCpu";
-import { chooseOnePlyMove } from "./onePlyCpu";
-import { chooseRandomMove } from "./randomCpu";
-import { chooseStrategicMove } from "./strategicCpu";
+import { getCpuLevelPreset } from "./presets/cpuLevelPresets";
 
 export function chooseCpuMove(
   board: Board,
   disc: DiscColor,
   level: CpuLevel,
 ): number | null {
-  if (level === "level6") {
-    return chooseGrandmasterMove(board, disc);
-  }
-
-  if (level === "level5") {
-    return chooseFixedDepthMinimaxMove(board, disc, 4);
-  }
-
-  if (level === "level4") {
-    return chooseStrategicMove(board, disc);
-  }
-
-  if (level === "level3") {
-    return chooseOnePlyMove(board, disc);
-  }
-
-  if (level === "level2") {
-    return chooseCornerMove(board, disc);
-  }
-
-  return chooseRandomMove(board, disc);
+  return getCpuLevelPreset(level).chooseMove(board, disc);
 }

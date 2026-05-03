@@ -1,4 +1,9 @@
-import { getWinner, isGameOver, type Board, type DiscColor } from "../game/othello";
+import {
+  getWinner,
+  isGameOver,
+  type Board,
+  type DiscColor,
+} from "../../game/othello";
 import { strategicEvaluateBoard } from "./strategicEvaluateBoard";
 
 export type Advantage = {
