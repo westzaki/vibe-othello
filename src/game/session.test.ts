@@ -1,14 +1,17 @@
 import { describe, expect, it } from "vitest";
 import {
+  canUndoSessionMove,
   createGameSession,
   endGame,
   getSessionLegalMoves,
   placeCurrentDisc,
   startNewGame,
   startPracticeSession,
+  undoSessionMove,
   type GameSession,
 } from "./session";
-import type { Board } from "./othello";
+import type { Board, DiscColor } from "./othello";
+import type { PlayerSettings } from "./players";
 import { createBoardFixture } from "../test/boardFixtures";
 
 describe("game session", () => {
@@ -198,7 +201,109 @@ describe("game session", () => {
     );
     expect(getSessionLegalMoves(result.session)).toEqual([]);
   });
+
+  it("does not allow undo at the start of a game", () => {
+    const session = startNewGame();
+    const players = createTwoPlayerSettings();
+
+    expect(canUndoSessionMove(session, players)).toBe(false);
+    expect(undoSessionMove(session, players)).toBeNull();
+  });
+
+  it("undoes the last single move in a two-player game", () => {
+    const session = startNewGame();
+    const afterBlackMove = placeCurrentDisc(session, 19).session;
+    const players = createTwoPlayerSettings();
+
+    const undoneSession = undoSessionMove(afterBlackMove, players);
+
+    expect(undoneSession).not.toBeNull();
+    expect(undoneSession?.board).toEqual(session.board);
+    expect(undoneSession?.currentDisc).toBe("black");
+    expect(undoneSession?.discCounts).toEqual({ black: 2, white: 2 });
+    expect(undoneSession?.lastMove).toBeNull();
+    expect(undoneSession?.message).toBeNull();
+    expect(undoneSession?.moveHistory).toEqual([]);
+    expect(undoneSession?.status).toBe("playing");
+  });
+
+  it("undoes a human black move and CPU reply as one pair in a one-player game", () => {
+    const session = startNewGame();
+    const afterHumanMove = placeCurrentDisc(session, 19).session;
+    const afterCpuReply = placeCurrentDisc(afterHumanMove, 18).session;
+    const players = createOnePlayerSettings("black");
+
+    const undoneSession = undoSessionMove(afterCpuReply, players);
+
+    expect(undoneSession).not.toBeNull();
+    expect(undoneSession?.board).toEqual(session.board);
+    expect(undoneSession?.currentDisc).toBe("black");
+    expect(undoneSession?.moveHistory).toEqual([]);
+    expect(undoneSession?.lastMove).toBeNull();
+  });
+
+  it("undoes a human white move and CPU reply back to before the human move", () => {
+    const session = startNewGame();
+    const afterOpeningCpuMove = placeCurrentDisc(session, 19).session;
+    const afterHumanMove = placeCurrentDisc(afterOpeningCpuMove, 18).session;
+    const cpuReply = getSessionLegalMoves(afterHumanMove)[0];
+    const afterCpuReply = placeCurrentDisc(afterHumanMove, cpuReply).session;
+    const players = createOnePlayerSettings("white");
+
+    const undoneSession = undoSessionMove(afterCpuReply, players);
+
+    expect(undoneSession).not.toBeNull();
+    expect(undoneSession?.board).toEqual(afterOpeningCpuMove.board);
+    expect(undoneSession?.currentDisc).toBe("white");
+    expect(undoneSession?.moveHistory).toEqual(
+      afterOpeningCpuMove.moveHistory,
+    );
+    expect(undoneSession?.lastMove).toBe(afterOpeningCpuMove.lastMove);
+  });
+
+  it("does not corrupt move history when undoing a two-player move", () => {
+    const afterFirstMove = placeCurrentDisc(startNewGame(), 19).session;
+    const afterSecondMove = placeCurrentDisc(afterFirstMove, 18).session;
+    const afterThirdMove = placeCurrentDisc(afterSecondMove, 17).session;
+    const players = createTwoPlayerSettings();
+
+    const undoneSession = undoSessionMove(afterThirdMove, players);
+
+    expect(undoneSession).not.toBeNull();
+    expect(undoneSession?.board).toEqual(afterSecondMove.board);
+    expect(undoneSession?.moveHistory).toEqual(afterSecondMove.moveHistory);
+    expect(undoneSession?.moveHistory.map((move) => move.moveNumber)).toEqual([
+      1, 2,
+    ]);
+    expect(undoneSession?.lastMove).toBe(afterSecondMove.lastMove);
+  });
 });
+
+function createTwoPlayerSettings(): PlayerSettings {
+  return {
+    black: {
+      cpuLevel: "level1",
+      type: "human",
+    },
+    white: {
+      cpuLevel: "level1",
+      type: "human",
+    },
+  };
+}
+
+function createOnePlayerSettings(humanDisc: DiscColor): PlayerSettings {
+  return {
+    black: {
+      cpuLevel: "level1",
+      type: humanDisc === "black" ? "human" : "cpu",
+    },
+    white: {
+      cpuLevel: "level1",
+      type: humanDisc === "white" ? "human" : "cpu",
+    },
+  };
+}
 
 function createPlayingSession(
   board: Board,

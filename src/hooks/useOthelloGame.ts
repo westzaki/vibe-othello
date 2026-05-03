@@ -8,12 +8,14 @@ import {
   type PlayerType,
 } from "../game/players";
 import {
+  canUndoSessionMove,
   createGameSession,
   endGame,
   getSessionLegalMoves,
   placeCurrentDisc,
   startNewGame,
   startPracticeSession,
+  undoSessionMove,
   type GameSession,
   type PracticeSessionOptions,
 } from "../game/session";
@@ -32,6 +34,7 @@ export function useOthelloGame() {
   const currentPlayer = players[session.currentDisc];
   const currentPlayerType = currentPlayer.type;
   const canHumanPlay = isPlaying && currentPlayerType === "human";
+  const canUndo = canUndoSessionMove(session, players);
 
   function clearAnimationState() {
     setLastFlippedSquares([]);
@@ -55,7 +58,7 @@ export function useOthelloGame() {
     });
   }, []);
 
-  useCpuTurn({
+  const isCpuThinking = useCpuTurn({
     currentPlayer,
     onPlaceDisc: handlePlaceCurrentDisc,
     session,
@@ -87,6 +90,19 @@ export function useOthelloGame() {
     clearAnimationState();
   }
 
+  function handleUndoMove() {
+    if (isCpuThinking) {
+      return;
+    }
+
+    setSession((currentSession) => {
+      const undoneSession = undoSessionMove(currentSession, players);
+
+      return undoneSession ?? currentSession;
+    });
+    clearAnimationState();
+  }
+
   function handlePlayerTypeChange(disc: DiscColor, playerType: PlayerType) {
     setPlayers((currentPlayers) => ({
       ...currentPlayers,
@@ -114,6 +130,7 @@ export function useOthelloGame() {
   return {
     board: session.board,
     canHumanPlay,
+    canUndo,
     currentDisc: session.currentDisc,
     currentPlayerType,
     discCounts: session.discCounts,
@@ -121,6 +138,7 @@ export function useOthelloGame() {
     flipAnimationId,
     flippedSquares: lastFlippedSquares,
     gameStatus: session.status,
+    isCpuThinking,
     isPlaying: session.status === "playing",
     lastMove: session.lastMove,
     legalMoves,
@@ -130,6 +148,7 @@ export function useOthelloGame() {
     winner: session.winner,
     endGame: handleEndGame,
     placeCurrentDisc: handlePlaceCurrentDisc,
+    undoMove: handleUndoMove,
     setCpuLevel: handleCpuLevelChange,
     setPlayers: handlePlayerSettingsChange,
     setPlayerType: handlePlayerTypeChange,

@@ -7,7 +7,10 @@ type GameHeaderProps = {
   endReason: GameEndReason | null;
   gameStatus: GameStatus;
   isPlaying: boolean;
+  isUndoDisabled: boolean;
   message: string | null;
+  onUndo: () => void;
+  showUndo: boolean;
   onEndGame: () => void;
   onNewGame: () => void;
   winner: Winner | null;
@@ -19,9 +22,12 @@ export function GameHeader({
   endReason,
   gameStatus,
   isPlaying,
+  isUndoDisabled,
   message,
   onEndGame,
   onNewGame,
+  onUndo,
+  showUndo,
   winner,
 }: GameHeaderProps) {
   return (
@@ -63,9 +69,21 @@ export function GameHeader({
       )}
       <div className="game-actions" aria-label="Game controls">
         {isPlaying ? (
-          <button className="game-action" onClick={onEndGame} type="button">
-            Stop Match
-          </button>
+          <>
+            {showUndo && (
+              <button
+                className="game-action"
+                disabled={isUndoDisabled}
+                onClick={onUndo}
+                type="button"
+              >
+                まった / Undo
+              </button>
+            )}
+            <button className="game-action" onClick={onEndGame} type="button">
+              Stop Match
+            </button>
+          </>
         ) : (
           <button
             className="game-action game-action--primary"

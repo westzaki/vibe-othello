@@ -13,6 +13,7 @@ import {
   type SquareIndex,
   type Winner,
 } from "./othello";
+import type { PlayerSettings } from "./players";
 
 export type GameStatus = "notStarted" | "playing" | "ended";
 export type GameEndReason = "completed" | "abandoned";
@@ -129,6 +130,42 @@ export function getSessionLegalMoves(session: GameSession): SquareIndex[] {
   return getLegalMoves(session.board, session.currentDisc);
 }
 
+export function canUndoSessionMove(
+  session: GameSession,
+  players: PlayerSettings,
+): boolean {
+  return getUndoTargetMove(session, players) !== null;
+}
+
+export function undoSessionMove(
+  session: GameSession,
+  players: PlayerSettings,
+): GameSession | null {
+  const targetMove = getUndoTargetMove(session, players);
+
+  if (targetMove === null) {
+    return null;
+  }
+
+  const nextMoveHistory = session.moveHistory.slice(
+    0,
+    targetMove.moveNumber - 1,
+  );
+  const previousMove = nextMoveHistory.at(-1) ?? null;
+  const currentDisc = targetMove.disc;
+
+  return createSession({
+    board: [...targetMove.boardBefore],
+    currentDisc,
+    endReason: null,
+    lastMove: previousMove?.square ?? null,
+    message: getUndoMessage(currentDisc, previousMove),
+    moveHistory: nextMoveHistory,
+    status: "playing",
+    winner: null,
+  });
+}
+
 export function placeCurrentDisc(
   session: GameSession,
   square: SquareIndex,
@@ -204,6 +241,57 @@ export function placeCurrentDisc(
       moveHistory: nextMoveHistory,
     },
   };
+}
+
+function getUndoTargetMove(
+  session: GameSession,
+  players: PlayerSettings,
+): MoveRecord | null {
+  if (session.status !== "playing" || session.moveHistory.length === 0) {
+    return null;
+  }
+
+  const lastMove = session.moveHistory.at(-1);
+
+  if (lastMove === undefined) {
+    return null;
+  }
+
+  const humanDisc = getSingleHumanDisc(players);
+
+  if (humanDisc === null) {
+    return lastMove;
+  }
+
+  if (lastMove.disc === humanDisc) {
+    return lastMove;
+  }
+
+  const previousMove = session.moveHistory.at(-2);
+
+  return previousMove?.disc === humanDisc ? previousMove : null;
+}
+
+function getSingleHumanDisc(players: PlayerSettings): DiscColor | null {
+  const blackIsHuman = players.black.type === "human";
+  const whiteIsHuman = players.white.type === "human";
+
+  if (blackIsHuman === whiteIsHuman) {
+    return null;
+  }
+
+  return blackIsHuman ? "black" : "white";
+}
+
+function getUndoMessage(
+  currentDisc: DiscColor,
+  previousMove: MoveRecord | null,
+): string | null {
+  if (previousMove === null || previousMove.disc !== currentDisc) {
+    return null;
+  }
+
+  return createPassMessage(getNextDisc(currentDisc), currentDisc);
 }
 
 function createInitialSession(status: GameStatus): GameSession {
