@@ -8,7 +8,7 @@ type ReviewBoardProps = {
   bestSquare: SquareIndex | null;
   board: Board;
   legalMoves: SquareIndex[];
-  playedSquare: SquareIndex;
+  playedSquare: SquareIndex | null;
 };
 
 export function ReviewBoard({
@@ -18,7 +18,7 @@ export function ReviewBoard({
   playedSquare,
 }: ReviewBoardProps) {
   return (
-    <div className="review-board" aria-label="Review board before the move">
+    <div className="review-board" aria-label="Review playback board">
       <div className="board-coordinate-shell">
         <div className="board-coordinate-corner" aria-hidden="true" />
         <div className="board-column-labels" aria-hidden="true">

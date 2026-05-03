@@ -1,7 +1,13 @@
 import { useMemo, useState } from "react";
 import { ReviewBoard } from "../components/ReviewBoard";
-import type { DiscColor, SquareIndex } from "../game/othello";
+import {
+  createInitialBoard,
+  type Board,
+  type DiscColor,
+  type SquareIndex,
+} from "../game/othello";
 import type { PlayerSettings } from "../game/players";
+import type { MoveRecord } from "../game/session";
 import type { useOthelloGame } from "../hooks/useOthelloGame";
 import {
   createGameReviewMessages,
@@ -24,10 +30,21 @@ export function ReviewScreen({
   onBackToResult,
   onBackToStart,
 }: ReviewScreenProps) {
-  const [selectedMoveNumber, setSelectedMoveNumber] = useState<number | null>(
-    null,
+  const [currentMoveNumber, setCurrentMoveNumber] = useState(
+    game.moveHistory.length,
   );
   const reviewedDisc = getReviewedDisc(game.players);
+  const playbackBoards = useMemo(
+    () => createPlaybackBoards(game.moveHistory),
+    [game.moveHistory],
+  );
+  const maxMoveNumber = playbackBoards.length - 1;
+  const safeMoveNumber = Math.min(currentMoveNumber, maxMoveNumber);
+  const currentBoard = playbackBoards[safeMoveNumber] ?? createInitialBoard();
+  const currentMove =
+    safeMoveNumber === 0
+      ? null
+      : (game.moveHistory[safeMoveNumber - 1] ?? null);
   const review = useMemo(
     () =>
       reviewedDisc === null
@@ -51,10 +68,16 @@ export function ReviewScreen({
           ),
     [review],
   );
-  const selectedMove =
-    selectableMoves.find((move) => move.moveNumber === selectedMoveNumber) ??
-    selectableMoves[0] ??
-    null;
+  const activeReviewedMove =
+    selectableMoves.find((move) => move.moveNumber === safeMoveNumber) ?? null;
+
+  function goToMove(moveNumber: number) {
+    setCurrentMoveNumber(clampMoveNumber(moveNumber, maxMoveNumber));
+  }
+
+  function selectReviewMove(moveNumber: number) {
+    goToMove(moveNumber);
+  }
 
   return (
     <section className="review-screen" aria-labelledby="review-title">
@@ -67,23 +90,25 @@ export function ReviewScreen({
         ) : (
           <div className="review-layout">
             <section className="review-board-panel">
-              <h2 className="review-summary__title">選んだ手の局面</h2>
-              {selectedMove === null ? (
-                <p className="review-summary__empty">
-                  表示できる注目手はありません。
-                </p>
-              ) : (
-                <>
-                  <ReviewMoveDetail move={selectedMove} />
-                  <ReviewBoard
-                    bestSquare={selectedMove.review.bestSquare}
-                    board={selectedMove.boardBefore}
-                    legalMoves={selectedMove.legalMovesBefore}
-                    playedSquare={selectedMove.square}
-                  />
-                  <ReviewLegend />
-                </>
-              )}
+              <h2 className="review-summary__title">棋譜再生</h2>
+              <ReviewPlaybackDetail
+                currentMove={currentMove}
+                currentMoveNumber={safeMoveNumber}
+                maxMoveNumber={maxMoveNumber}
+                reviewedMove={activeReviewedMove}
+              />
+              <ReviewBoard
+                bestSquare={activeReviewedMove?.review.bestSquare ?? null}
+                board={currentBoard}
+                legalMoves={activeReviewedMove?.legalMovesBefore ?? []}
+                playedSquare={currentMove?.square ?? null}
+              />
+              <ReviewPlaybackControls
+                currentMoveNumber={safeMoveNumber}
+                maxMoveNumber={maxMoveNumber}
+                onGoToMove={goToMove}
+              />
+              <ReviewLegend />
             </section>
 
             <div className="review-summary">
@@ -91,16 +116,16 @@ export function ReviewScreen({
                 emptyText="今回は大きく流れを良くした手は少なめでした。"
                 messages={messages}
                 moves={review.highlights.goodMoves}
-                onSelectMove={setSelectedMoveNumber}
-                selectedMoveNumber={selectedMove?.moveNumber ?? null}
+                onSelectMove={selectReviewMove}
+                selectedMoveNumber={activeReviewedMove?.moveNumber ?? null}
                 title="良かった手"
               />
               <ReviewMoveSection
                 emptyText="今回は目立った失着はありませんでした。"
                 messages={messages}
                 moves={review.highlights.badMoves}
-                onSelectMove={setSelectedMoveNumber}
-                selectedMoveNumber={selectedMove?.moveNumber ?? null}
+                onSelectMove={selectReviewMove}
+                selectedMoveNumber={activeReviewedMove?.moveNumber ?? null}
                 title="もったいなかった手"
               />
               <section className="review-summary__section">
@@ -208,34 +233,88 @@ function ReviewMoveItem({
   );
 }
 
-type ReviewMoveDetailProps = {
-  move: ReviewedMove;
+type ReviewPlaybackDetailProps = {
+  currentMove: MoveRecord | null;
+  currentMoveNumber: number;
+  maxMoveNumber: number;
+  reviewedMove: ReviewedMove | null;
 };
 
-function ReviewMoveDetail({ move }: ReviewMoveDetailProps) {
+function ReviewPlaybackDetail({
+  currentMove,
+  currentMoveNumber,
+  maxMoveNumber,
+  reviewedMove,
+}: ReviewPlaybackDetailProps) {
   return (
     <dl className="review-detail">
       <div>
-        <dt>実際の手</dt>
-        <dd>{formatSquare(move.square)}</dd>
-      </div>
-      <div>
-        <dt>おすすめ</dt>
+        <dt>手数</dt>
         <dd>
-          {move.review.bestSquare === null
-            ? "なし"
-            : formatSquare(move.review.bestSquare)}
+          {currentMoveNumber} / {maxMoveNumber}
         </dd>
       </div>
       <div>
-        <dt>合法手</dt>
+        <dt>直前の手</dt>
         <dd>
-          {move.legalMovesBefore.length === 0
-            ? "なし"
-            : `${move.legalMovesBefore.length}か所`}
+          {currentMove === null ? "初期盤面" : formatSquare(currentMove.square)}
         </dd>
       </div>
+      {reviewedMove !== null && (
+        <>
+          <div>
+            <dt>おすすめ</dt>
+            <dd>
+              {reviewedMove.review.bestSquare === null
+                ? "なし"
+                : formatSquare(reviewedMove.review.bestSquare)}
+            </dd>
+          </div>
+          <div>
+            <dt>合法手</dt>
+            <dd>
+              {reviewedMove.legalMovesBefore.length === 0
+                ? "なし"
+                : `${reviewedMove.legalMovesBefore.length}か所`}
+            </dd>
+          </div>
+        </>
+      )}
     </dl>
+  );
+}
+
+type ReviewPlaybackControlsProps = {
+  currentMoveNumber: number;
+  maxMoveNumber: number;
+  onGoToMove: (moveNumber: number) => void;
+};
+
+function ReviewPlaybackControls({
+  currentMoveNumber,
+  maxMoveNumber,
+  onGoToMove,
+}: ReviewPlaybackControlsProps) {
+  return (
+    <div className="review-playback">
+      <button
+        className="game-action"
+        disabled={currentMoveNumber === 0}
+        onClick={() => onGoToMove(currentMoveNumber - 1)}
+        type="button"
+      >
+        前へ
+      </button>
+      <span className="review-playback__status">{currentMoveNumber}手目</span>
+      <button
+        className="game-action"
+        disabled={currentMoveNumber === maxMoveNumber}
+        onClick={() => onGoToMove(currentMoveNumber + 1)}
+        type="button"
+      >
+        次へ
+      </button>
+    </div>
   );
 }
 
@@ -268,6 +347,17 @@ function getReviewedDisc(players: PlayerSettings): DiscColor | null {
   }
 
   return null;
+}
+
+function createPlaybackBoards(moveHistory: MoveRecord[]): Board[] {
+  return [
+    moveHistory[0]?.boardBefore ?? createInitialBoard(),
+    ...moveHistory.map((move) => move.boardAfter),
+  ];
+}
+
+function clampMoveNumber(moveNumber: number, maxMoveNumber: number): number {
+  return Math.max(0, Math.min(moveNumber, maxMoveNumber));
 }
 
 function formatSquare(square: SquareIndex): string {

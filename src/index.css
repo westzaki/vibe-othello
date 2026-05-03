@@ -1029,6 +1029,35 @@ h1 {
   justify-content: center;
 }
 
+.review-playback {
+  display: grid;
+  grid-template-columns: minmax(92px, auto) minmax(74px, 1fr) minmax(92px, auto);
+  align-items: center;
+  gap: 8px;
+}
+
+.review-playback .game-action {
+  width: 100%;
+  min-height: 38px;
+}
+
+.review-playback .game-action:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.review-playback__status {
+  display: grid;
+  min-height: 38px;
+  place-items: center;
+  border: 1px solid rgba(214, 179, 106, 0.28);
+  border-radius: 7px;
+  color: #f7df9b;
+  background: rgba(20, 22, 18, 0.54);
+  font-size: 0.86rem;
+  font-weight: 950;
+}
+
 .review-board {
   width: min(100%, 440px);
   color: #cfc5af;
