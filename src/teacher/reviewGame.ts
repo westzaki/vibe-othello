@@ -142,7 +142,7 @@ function getMoveReasons(
     reasons.push("dangerSquare");
   }
 
-  if (givesCorner(move.boardAfter, move.disc)) {
+  if (newlyGivesCorner(move.boardBefore, move.boardAfter, move.disc)) {
     reasons.push("cornerGiven");
   }
 
@@ -205,10 +205,22 @@ function getScoreGap(review: MoveReview): number {
   return review.bestScore === null ? 0 : review.bestScore - review.playedScore;
 }
 
-function givesCorner(boardAfter: ReviewContext["boardAfter"], disc: DiscColor) {
+function newlyGivesCorner(
+  boardBefore: ReviewContext["boardBefore"],
+  boardAfter: ReviewContext["boardAfter"],
+  disc: DiscColor,
+) {
   const opponentDisc = getNextDisc(disc);
+  const cornerMovesBefore = getLegalMoves(boardBefore, opponentDisc).filter(
+    isCorner,
+  );
+  const cornerMovesAfter = getLegalMoves(boardAfter, opponentDisc).filter(
+    isCorner,
+  );
 
-  return getLegalMoves(boardAfter, opponentDisc).some((move) => isCorner(move));
+  return cornerMovesAfter.some(
+    (cornerMove) => !cornerMovesBefore.includes(cornerMove),
+  );
 }
 
 function isCorner(square: SquareIndex): boolean {
