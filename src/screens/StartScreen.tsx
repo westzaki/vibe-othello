@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { GameMode, HumanDisc } from "../game/matchSetup";
-import { cpuLevelLabels, cpuLevels, type CpuLevel } from "../game/players";
+import { cpuLevels, type CpuLevel } from "../game/players";
 
 type StartScreenProps = {
   initialCpuLevel: CpuLevel;
@@ -18,12 +18,16 @@ export function StartScreen({
   const [mode, setMode] = useState<GameMode>(initialMode);
   const [cpuLevel, setCpuLevel] = useState<CpuLevel>(initialCpuLevel);
   const [humanDisc, setHumanDisc] = useState<HumanDisc>(initialHumanDisc);
+  const cpuLevelIndex = Math.max(0, cpuLevels.indexOf(cpuLevel));
+  const isOnePlayer = mode === "onePlayer";
 
   return (
     <section className="start-screen" aria-labelledby="start-title">
       <div className="start-screen__header">
-        <p className="eyebrow">Othello Arena</p>
-        <h1 id="start-title">Vibe Othello</h1>
+        <h1 id="start-title">Vibe オセロ</h1>
+        <p className="start-screen__lead">
+          あそびかたをえらんで対局をはじめよう
+        </p>
       </div>
 
       <div className="start-screen__board-preview" aria-hidden="true">
@@ -35,7 +39,10 @@ export function StartScreen({
 
       <div className="start-panel" aria-label="Match setup">
         <div className="start-panel__section">
-          <h2 className="start-panel__title">あそびかた</h2>
+          <h2 className="start-panel__title">
+            <span className="start-panel__step">1</span>
+            対戦モード
+          </h2>
           <div className="mode-selector">
             <button
               aria-pressed={mode === "onePlayer"}
@@ -43,7 +50,8 @@ export function StartScreen({
               onClick={() => setMode("onePlayer")}
               type="button"
             >
-              1人であそぶ
+              <span aria-hidden="true">{mode === "onePlayer" ? "✓" : ""}</span>
+              ひとりであそぶ
             </button>
             <button
               aria-pressed={mode === "twoPlayer"}
@@ -51,70 +59,84 @@ export function StartScreen({
               onClick={() => setMode("twoPlayer")}
               type="button"
             >
-              2人であそぶ
+              <span aria-hidden="true">{mode === "twoPlayer" ? "✓" : ""}</span>
+              ふたりであそぶ
             </button>
           </div>
         </div>
 
-        {mode === "onePlayer" && (
-          <>
-            <div className="start-panel__section">
-              <h2 className="start-panel__title">じぶんの色</h2>
-              <div className="disc-selector">
-                <button
-                  aria-pressed={humanDisc === "black"}
-                  className={getDiscButtonClass("black", humanDisc)}
-                  onClick={() => setHumanDisc("black")}
-                  type="button"
-                >
-                  <span className="disc-selector__disc disc-selector__disc--black" />
-                  黒であそぶ
-                </button>
-                <button
-                  aria-pressed={humanDisc === "white"}
-                  className={getDiscButtonClass("white", humanDisc)}
-                  onClick={() => setHumanDisc("white")}
-                  type="button"
-                >
-                  <span className="disc-selector__disc disc-selector__disc--white" />
-                  白であそぶ
-                </button>
-              </div>
-            </div>
+        <div
+          className={[
+            "start-panel__section",
+            !isOnePlayer ? "start-panel__section--inactive" : "",
+          ].join(" ")}
+        >
+          <div className="start-panel__section-header">
+            <h2 className="start-panel__title">
+              <span className="start-panel__step">2</span>
+              CPUの強さ
+            </h2>
+            <p className="start-panel__helper">
+              {isOnePlayer
+                ? "星が多いほど強くなります"
+                : "ふたりであそぶ時は使いません"}
+            </p>
+          </div>
+          <div className="cpu-star-selector" aria-label="CPUの強さ">
+            {cpuLevels.map((level, index) => (
+              <button
+                aria-label={`CPUの強さ ${index + 1}`}
+                aria-pressed={cpuLevelIndex === index}
+                className={[
+                  "cpu-star-selector__button",
+                  index <= cpuLevelIndex
+                    ? "cpu-star-selector__button--filled"
+                    : "",
+                ].join(" ")}
+                disabled={!isOnePlayer}
+                key={level}
+                onClick={() => setCpuLevel(level)}
+                type="button"
+              >
+                ★
+              </button>
+            ))}
+          </div>
+        </div>
 
-            <div className="start-panel__section">
-              <h2 className="start-panel__title">つよさ</h2>
-              <div className="cpu-level-grid">
-                {cpuLevels.map((level, index) => (
-                  <button
-                    aria-label={`つよさ ${index + 1}, ${cpuLevelLabels[level]}`}
-                    aria-pressed={cpuLevel === level}
-                    className={[
-                      "cpu-level-button",
-                      cpuLevel === level ? "cpu-level-button--selected" : "",
-                    ].join(" ")}
-                    key={level}
-                    onClick={() => setCpuLevel(level)}
-                    type="button"
-                  >
-                    <span className="cpu-level-button__number">
-                      {index + 1}
-                    </span>
-                    <span className="cpu-level-button__label">
-                      {cpuLevelLabels[level]}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
+        <div className="start-panel__section">
+          <h2 className="start-panel__title">
+            <span className="start-panel__step">3</span>
+            あなたの色
+          </h2>
+          <div className="disc-selector">
+            <button
+              aria-pressed={humanDisc === "black"}
+              className={getDiscButtonClass("black", humanDisc)}
+              onClick={() => setHumanDisc("black")}
+              type="button"
+            >
+              <span className="disc-selector__disc disc-selector__disc--black" />
+              黒
+            </button>
+            <button
+              aria-pressed={humanDisc === "white"}
+              className={getDiscButtonClass("white", humanDisc)}
+              onClick={() => setHumanDisc("white")}
+              type="button"
+            >
+              <span className="disc-selector__disc disc-selector__disc--white" />
+              白
+            </button>
+          </div>
+        </div>
 
         <button
           className="game-action game-action--primary start-panel__start"
           onClick={() => onStart(mode, cpuLevel, humanDisc)}
           type="button"
         >
+          <span className="start-panel__start-step">4</span>
           スタート
         </button>
       </div>
