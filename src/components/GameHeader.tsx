@@ -35,11 +35,11 @@ export function GameHeader({
       <h1 id="game-title">Vibe Othello</h1>
       <div className="score-row" aria-label="Current score">
         <span className="score-chip score-chip--black">
-          Black
+          黒
           <strong>{discCounts.black}</strong>
         </span>
         <span className="score-chip score-chip--white">
-          White
+          白
           <strong>{discCounts.white}</strong>
         </span>
       </div>
@@ -58,7 +58,7 @@ export function GameHeader({
             <span className={`turn-disc turn-disc--${currentDisc}`}>
               {formatDisc(currentDisc)}
             </span>
-            Turn
+            の番
           </p>
         )}
       </div>
@@ -77,11 +77,11 @@ export function GameHeader({
                 onClick={onUndo}
                 type="button"
               >
-                まった / Undo
+                まった
               </button>
             )}
             <button className="game-action" onClick={onEndGame} type="button">
-              Stop Match
+              やめる
             </button>
           </>
         ) : (
@@ -90,7 +90,7 @@ export function GameHeader({
             onClick={onNewGame}
             type="button"
           >
-            Title Screen
+            タイトルへ
           </button>
         )}
       </div>
@@ -102,14 +102,14 @@ function getResultLabel(winner: Winner, discCounts: DiscCounts): string {
   const score = `${discCounts.black} - ${discCounts.white}`;
 
   if (winner === "draw") {
-    return `Draw ${score}`;
+    return `ひきわけ ${score}`;
   }
 
-  return `${winner} wins ${score}`;
+  return `${winner === "black" ? "黒" : "白"}の勝ち ${score}`;
 }
 
 function formatDisc(disc: DiscColor): string {
-  return disc === "black" ? "Black" : "White";
+  return disc === "black" ? "黒" : "白";
 }
 
 function getStatusLabel(
@@ -117,12 +117,12 @@ function getStatusLabel(
   endReason: GameEndReason | null,
 ): string {
   if (gameStatus === "playing") {
-    return "In Play";
+    return "対局中";
   }
 
   if (gameStatus === "ended") {
-    return endReason === "completed" ? "Final Board" : "Stopped";
+    return endReason === "completed" ? "最終盤面" : "中断";
   }
 
-  return "Match Setup";
+  return "準備中";
 }

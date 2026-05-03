@@ -24,7 +24,7 @@ export function GameResultOverlay({
     >
       <div className="result-overlay__burst" aria-hidden="true" />
       <div className="result-overlay__content">
-        <p className="result-overlay__eyebrow">Game Over</p>
+        <p className="result-overlay__eyebrow">対局終了</p>
         <h2 id="result-title" className="result-overlay__title">
           {getResultTitle(winner)}
         </h2>
@@ -40,7 +40,7 @@ export function GameResultOverlay({
               onClick={onOpenReview}
               type="button"
             >
-              Review
+              ふりかえり
             </button>
           )}
           <button
@@ -51,10 +51,10 @@ export function GameResultOverlay({
             onClick={onPlayAgain}
             type="button"
           >
-            Play Again
+            もう一回
           </button>
           <button className="game-action" onClick={onBackToStart} type="button">
-            Title Screen
+            タイトルへ
           </button>
         </div>
       </div>
@@ -64,8 +64,8 @@ export function GameResultOverlay({
 
 function getResultTitle(winner: Winner): string {
   if (winner === "draw") {
-    return "Draw";
+    return "ひきわけ";
   }
 
-  return `${winner} wins`;
+  return `${winner === "black" ? "黒" : "白"}の勝ち`;
 }

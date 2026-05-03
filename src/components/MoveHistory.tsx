@@ -12,15 +12,15 @@ export function MoveHistory({ moves }: MoveHistoryProps) {
     <section className="move-history" aria-labelledby="move-history-title">
       <div className="move-history__header">
         <h2 id="move-history-title" className="move-history__title">
-          Move History
+          棋譜
         </h2>
         <span className="move-history__count">{moves.length}</span>
       </div>
 
       {recentMoves.length === 0 ? (
-        <p className="move-history__empty">No moves yet</p>
+        <p className="move-history__empty">まだ手はありません</p>
       ) : (
-        <ol className="move-history__list" aria-label="Played moves">
+        <ol className="move-history__list" aria-label="打った手">
           {recentMoves.map((move) => (
             <li className="move-history__item" key={move.moveNumber}>
               <span

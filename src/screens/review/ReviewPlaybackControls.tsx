@@ -37,7 +37,7 @@ export function ReviewPlaybackControls({
         onClick={onStartPractice}
         type="button"
       >
-        {currentMoveNumber === 0 ? "初期盤面から練習" : "この手の前から練習"}
+        ここから練習
       </button>
     </div>
   );
