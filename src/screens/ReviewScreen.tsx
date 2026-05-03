@@ -1,8 +1,11 @@
 import { useMemo } from "react";
 import { ReviewBoard } from "../components/ReviewBoard";
+import { getMinimaxMoveScores } from "../cpu";
 import {
   createInitialBoard,
+  getLegalMoves,
   getNextDisc,
+  isGameOver,
   type Board,
   type DiscColor,
   type SquareIndex,
@@ -49,6 +52,14 @@ export function ReviewScreen({
     safeMoveNumber === 0
       ? null
       : (game.moveHistory[safeMoveNumber - 1] ?? null);
+  const positionReview = useMemo(
+    () =>
+      createPlaybackPositionReview(
+        currentBoard,
+        getNextDiscForMoveNumber(game.moveHistory, safeMoveNumber),
+      ),
+    [currentBoard, game.moveHistory, safeMoveNumber],
+  );
   const review = useMemo(
     () =>
       reviewedDisc === null
@@ -119,12 +130,12 @@ export function ReviewScreen({
                 currentMove={currentMove}
                 currentMoveNumber={safeMoveNumber}
                 maxMoveNumber={maxMoveNumber}
-                reviewedMove={activeReviewedMove}
+                positionReview={positionReview}
               />
               <ReviewBoard
-                bestSquare={activeReviewedMove?.review.bestSquare ?? null}
+                bestSquare={positionReview.bestSquare}
                 board={currentBoard}
-                legalMoves={activeReviewedMove?.legalMovesBefore ?? []}
+                legalMoves={positionReview.legalMoves}
                 playedSquare={currentMove?.square ?? null}
               />
               <ReviewPlaybackControls
@@ -262,14 +273,14 @@ type ReviewPlaybackDetailProps = {
   currentMove: MoveRecord | null;
   currentMoveNumber: number;
   maxMoveNumber: number;
-  reviewedMove: ReviewedMove | null;
+  positionReview: PlaybackPositionReview;
 };
 
 function ReviewPlaybackDetail({
   currentMove,
   currentMoveNumber,
   maxMoveNumber,
-  reviewedMove,
+  positionReview,
 }: ReviewPlaybackDetailProps) {
   return (
     <dl className="review-detail">
@@ -285,26 +296,16 @@ function ReviewPlaybackDetail({
           {currentMove === null ? "初期盤面" : formatSquare(currentMove.square)}
         </dd>
       </div>
-      {reviewedMove !== null && (
-        <>
-          <div>
-            <dt>おすすめ</dt>
-            <dd>
-              {reviewedMove.review.bestSquare === null
-                ? "なし"
-                : formatSquare(reviewedMove.review.bestSquare)}
-            </dd>
-          </div>
-          <div>
-            <dt>合法手</dt>
-            <dd>
-              {reviewedMove.legalMovesBefore.length === 0
-                ? "なし"
-                : `${reviewedMove.legalMovesBefore.length}か所`}
-            </dd>
-          </div>
-        </>
-      )}
+      <div>
+        <dt>おすすめ</dt>
+        <dd>
+          {positionReview.bestSquare === null
+            ? "なし"
+            : `${formatDisc(positionReview.disc)} ${formatSquare(
+                positionReview.bestSquare,
+              )}`}
+        </dd>
+      </div>
     </dl>
   );
 }
@@ -396,6 +397,42 @@ function clampMoveNumber(moveNumber: number, maxMoveNumber: number): number {
   return Math.max(0, Math.min(moveNumber, maxMoveNumber));
 }
 
+type PlaybackPositionReview = {
+  bestSquare: SquareIndex | null;
+  disc: DiscColor;
+  legalMoves: SquareIndex[];
+};
+
+function createPlaybackPositionReview(
+  board: Board,
+  nextDisc: DiscColor,
+): PlaybackPositionReview {
+  if (isGameOver(board)) {
+    return {
+      bestSquare: null,
+      disc: nextDisc,
+      legalMoves: [],
+    };
+  }
+
+  const nextDiscLegalMoves = getLegalMoves(board, nextDisc);
+  const disc = nextDiscLegalMoves.length > 0 ? nextDisc : getNextDisc(nextDisc);
+  const legalMoves =
+    nextDiscLegalMoves.length > 0
+      ? nextDiscLegalMoves
+      : getLegalMoves(board, disc);
+  const bestSquare =
+    getMinimaxMoveScores(board, disc, {
+      searchDepth: defaultTeacherReviewConfig.searchDepth,
+    })[0]?.move ?? null;
+
+  return {
+    bestSquare,
+    disc,
+    legalMoves,
+  };
+}
+
 function getNextDiscForMoveNumber(
   moveHistory: MoveRecord[],
   moveNumber: number,
@@ -414,4 +451,8 @@ function formatSquare(square: SquareIndex): string {
   const row = Math.floor(square / 8) + 1;
 
   return `${column}${row}`;
+}
+
+function formatDisc(disc: DiscColor): string {
+  return disc === "black" ? "黒" : "白";
 }
