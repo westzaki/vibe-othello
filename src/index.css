@@ -850,13 +850,13 @@ h1 {
 
 .review-screen {
   display: grid;
-  width: min(100%, 760px);
+  width: min(100%, 1080px);
   place-items: center;
 }
 
 .review-panel {
   display: grid;
-  width: min(100%, 620px);
+  width: 100%;
   justify-items: stretch;
   gap: 18px;
   border: 1px solid rgba(255, 244, 214, 0.15);
@@ -894,8 +894,54 @@ h1 {
 
 .review-summary {
   display: grid;
+  align-content: start;
   gap: 14px;
   text-align: left;
+}
+
+.review-layout {
+  display: grid;
+  align-items: start;
+  grid-template-columns: minmax(300px, 0.92fr) minmax(320px, 1fr);
+  gap: clamp(16px, 3vw, 28px);
+  text-align: left;
+}
+
+.review-board-panel {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.review-detail {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.review-detail div {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  padding: 9px 10px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.review-detail dt {
+  color: #bfb6a3;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.review-detail dd {
+  margin: 0;
+  color: #fff8e8;
+  font-size: 0.84rem;
+  font-weight: 850;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .review-summary__section {
@@ -929,7 +975,25 @@ h1 {
 
 .review-summary__item {
   display: grid;
+  width: 100%;
   gap: 7px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.review-summary__item:hover,
+.review-summary__item--selected {
+  border-color: rgba(240, 200, 107, 0.64);
+  background: rgba(240, 200, 107, 0.12);
+}
+
+.review-summary__item:focus-visible {
+  outline: 3px solid #f0c86b;
+  outline-offset: 2px;
 }
 
 .review-summary__move-line {
@@ -963,6 +1027,95 @@ h1 {
 
 .review-panel__actions {
   justify-content: center;
+}
+
+.review-board {
+  width: min(100%, 440px);
+  color: #cfc5af;
+}
+
+.review-board__square {
+  cursor: default;
+}
+
+.review-board__square--legal::after {
+  display: none;
+}
+
+.review-board__legal-dot {
+  position: absolute;
+  z-index: 1;
+  inset: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 248, 232, 0.82);
+  box-shadow: 0 0 10px rgba(255, 248, 232, 0.45);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.review-board__square--played {
+  box-shadow: inset 0 0 0 3px rgba(238, 101, 101, 0.72);
+}
+
+.review-board__square--best {
+  box-shadow: inset 0 0 0 3px rgba(240, 200, 107, 0.82);
+}
+
+.review-board__square--played.review-board__square--best {
+  box-shadow:
+    inset 0 0 0 3px rgba(240, 200, 107, 0.82),
+    inset 0 0 0 6px rgba(238, 101, 101, 0.7);
+}
+
+.review-board__marker {
+  position: absolute;
+  z-index: 2;
+  top: 4px;
+  left: 4px;
+  border-radius: 4px;
+  padding: 2px 4px;
+  color: #111310;
+  background: #fff8e8;
+  font-size: clamp(0.52rem, 1.5vw, 0.64rem);
+  font-weight: 950;
+  line-height: 1;
+}
+
+.review-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  color: #d8cdb8;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.review-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.review-legend__marker {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.review-legend__marker--played {
+  border: 2px solid rgba(238, 101, 101, 0.9);
+}
+
+.review-legend__marker--best {
+  border: 2px solid rgba(240, 200, 107, 0.95);
+}
+
+.review-legend__marker--legal {
+  border-radius: 50%;
+  background: rgba(255, 248, 232, 0.5);
 }
 
 @keyframes result-overlay-enter {
@@ -1349,6 +1502,14 @@ h1 {
   .board-frame {
     width: min(92vw, 560px);
   }
+
+  .review-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .review-detail div {
+    grid-template-columns: 70px minmax(0, 1fr);
+  }
 }
 
 @media (min-width: 521px) and (max-width: 900px) {
@@ -1359,5 +1520,9 @@ h1 {
   .game-sidebar {
     grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr);
     align-items: start;
+  }
+
+  .review-layout {
+    grid-template-columns: 1fr;
   }
 }
