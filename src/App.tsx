@@ -3,9 +3,10 @@ import type { DiscColor } from "./game/othello";
 import type { CpuLevel } from "./game/players";
 import { useOthelloGame } from "./hooks/useOthelloGame";
 import { GameScreen } from "./screens/GameScreen";
+import { ReviewScreen } from "./screens/ReviewScreen";
 import { StartScreen, type GameMode } from "./screens/StartScreen";
 
-type AppScreen = "start" | "game";
+type AppScreen = "start" | "game" | "review";
 
 export default function App() {
   const game = useOthelloGame();
@@ -45,6 +46,14 @@ export default function App() {
     setScreen("start");
   }
 
+  function handleOpenReview() {
+    setScreen("review");
+  }
+
+  function handleBackToResult() {
+    setScreen("game");
+  }
+
   return (
     <main className="app">
       {screen === "start" ? (
@@ -61,11 +70,17 @@ export default function App() {
           }
           onStart={handleStartMatch}
         />
+      ) : screen === "review" ? (
+        <ReviewScreen
+          onBackToResult={handleBackToResult}
+          onBackToStart={handleBackToStart}
+        />
       ) : (
         <GameScreen
           game={game}
           onBackToStart={handleBackToStart}
           onEndGame={handleEndGame}
+          onOpenReview={handleOpenReview}
           onPlayAgain={handlePlayAgain}
         />
       )}

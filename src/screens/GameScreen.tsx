@@ -19,6 +19,7 @@ type GameScreenProps = {
   game: ReturnType<typeof useOthelloGame>;
   onBackToStart: () => void;
   onEndGame: () => void;
+  onOpenReview: () => void;
   onPlayAgain: () => void;
 };
 
@@ -26,6 +27,7 @@ export function GameScreen({
   game,
   onBackToStart,
   onEndGame,
+  onOpenReview,
   onPlayAgain,
 }: GameScreenProps) {
   const advantage = useMemo(() => calculateAdvantage(game.board), [game.board]);
@@ -43,6 +45,7 @@ export function GameScreen({
           <GameResultOverlay
             discCounts={game.discCounts}
             onBackToStart={onBackToStart}
+            onOpenReview={canOpenReview(game) ? onOpenReview : undefined}
             onPlayAgain={onPlayAgain}
             winner={resultWinner}
           />
@@ -85,5 +88,16 @@ export function GameScreen({
         </Suspense>
       )}
     </section>
+  );
+}
+
+function canOpenReview(game: ReturnType<typeof useOthelloGame>): boolean {
+  return (
+    game.gameStatus === "ended" &&
+    game.endReason === "completed" &&
+    ((game.players.black.type === "human" &&
+      game.players.white.type === "cpu") ||
+      (game.players.white.type === "human" &&
+        game.players.black.type === "cpu"))
   );
 }

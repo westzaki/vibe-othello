@@ -3,6 +3,7 @@ import type { DiscCounts, Winner } from "../game/othello";
 type GameResultOverlayProps = {
   discCounts: DiscCounts;
   onBackToStart: () => void;
+  onOpenReview?: () => void;
   onPlayAgain: () => void;
   winner: Winner;
 };
@@ -10,6 +11,7 @@ type GameResultOverlayProps = {
 export function GameResultOverlay({
   discCounts,
   onBackToStart,
+  onOpenReview,
   onPlayAgain,
   winner,
 }: GameResultOverlayProps) {
@@ -32,8 +34,20 @@ export function GameResultOverlay({
           <span className="result-overlay__disc result-overlay__disc--white" />
         </div>
         <div className="result-overlay__actions">
+          {onOpenReview !== undefined && (
+            <button
+              className="game-action game-action--primary"
+              onClick={onOpenReview}
+              type="button"
+            >
+              Review
+            </button>
+          )}
           <button
-            className="game-action game-action--primary"
+            className={[
+              "game-action",
+              onOpenReview === undefined ? "game-action--primary" : "",
+            ].join(" ")}
             onClick={onPlayAgain}
             type="button"
           >
