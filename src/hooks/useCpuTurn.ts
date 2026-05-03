@@ -8,17 +8,19 @@ const cpuMoveDelayMs = 350;
 
 type UseCpuTurnParams = {
   currentPlayer: PlayerConfig;
+  enabled: boolean;
   onPlaceDisc: (square: SquareIndex) => void;
   session: GameSession;
 };
 
 export function useCpuTurn({
   currentPlayer,
+  enabled,
   onPlaceDisc,
   session,
 }: UseCpuTurnParams): boolean {
   const isCpuThinking =
-    session.status === "playing" && currentPlayer.type === "cpu";
+    enabled && session.status === "playing" && currentPlayer.type === "cpu";
 
   useEffect(() => {
     if (!isCpuThinking) {

@@ -22,7 +22,11 @@ import {
 import { useCpuTurn } from "./useCpuTurn";
 import { useMoveSounds } from "./useMoveSounds";
 
-export function useOthelloGame() {
+type UseOthelloGameOptions = {
+  enabled?: boolean;
+};
+
+export function useOthelloGame({ enabled = true }: UseOthelloGameOptions = {}) {
   const [session, setSession] = useState(createGameSession);
   const [players, setPlayers] = useState(createDefaultPlayerSettings);
   const [lastFlippedSquares, setLastFlippedSquares] = useState<SquareIndex[]>(
@@ -60,10 +64,12 @@ export function useOthelloGame() {
 
   const isCpuThinking = useCpuTurn({
     currentPlayer,
+    enabled,
     onPlaceDisc: handlePlaceCurrentDisc,
     session,
   });
   useMoveSounds({
+    enabled,
     flipAnimationId,
     flippedSquares: lastFlippedSquares,
   });
