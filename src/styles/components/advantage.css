@@ -1,16 +1,8 @@
 .advantage-panel {
   display: grid;
-  gap: 9px;
-  border: 1px solid rgba(184, 176, 225, 0.28);
-  border-radius: 18px;
-  padding: 10px;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.82),
-      rgba(255, 250, 243, 0.72)
-    ),
-    #ffffff;
+  gap: 8px;
+  border-block-start: 1px solid rgba(184, 176, 225, 0.28);
+  padding-block-start: 14px;
 }
 
 .advantage-panel__header,
@@ -23,7 +15,7 @@
 
 .advantage-panel__header {
   color: #7770b8;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -37,7 +29,7 @@
 .advantage-bar {
   display: flex;
   overflow: hidden;
-  height: 18px;
+  height: 16px;
   border: 1px solid rgba(184, 176, 225, 0.34);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.82);
@@ -67,7 +59,7 @@
 
 .advantage-panel__scores {
   color: #5c5866;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 850;
 }
 

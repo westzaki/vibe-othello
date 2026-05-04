@@ -3,13 +3,13 @@
   align-items: center;
   flex-wrap: wrap;
   justify-content: flex-start;
-  gap: 10px 12px;
+  gap: 8px 10px;
 }
 
 .score-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .score-chip {
@@ -19,9 +19,9 @@
   min-width: 0;
   justify-content: center;
   border: 1px solid rgba(184, 176, 225, 0.32);
-  border-radius: 999px;
-  min-height: 42px;
-  padding: 8px 12px;
+  border-radius: 16px;
+  min-height: 48px;
+  padding: 8px 10px;
   color: #5c5866;
   background: rgba(255, 255, 255, 0.76);
   font-size: 0.88rem;
@@ -29,15 +29,15 @@
 }
 
 .score-chip::before {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   content: "";
 }
 
 .score-chip strong {
   color: #34323e;
-  font-size: 1rem;
+  font-size: 1.16rem;
 }
 
 .score-chip--black::before {
@@ -65,7 +65,7 @@
   align-items: center;
   margin: 0;
   color: #5c5866;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 600;
 }
 
@@ -76,6 +76,7 @@
 .session-status {
   border: 1px solid rgba(117, 190, 169, 0.46);
   border-radius: 999px;
+  min-height: 34px;
   padding: 5px 12px;
   color: #347967;
   background: rgba(219, 246, 236, 0.8);
@@ -84,6 +85,7 @@
 .result-status {
   border: 1px solid rgba(255, 173, 153, 0.46);
   border-radius: 999px;
+  min-height: 34px;
   padding: 5px 12px;
   color: #b85c52;
   background: rgba(255, 231, 225, 0.78);
@@ -94,20 +96,21 @@
   margin: 0;
   border: 1px solid rgba(255, 204, 112, 0.42);
   border-radius: 16px;
-  padding: 8px 12px;
+  padding: 9px 12px;
   color: #7d5d19;
   background: rgba(255, 248, 222, 0.9);
   font-size: 0.88rem;
   font-weight: 700;
+  line-height: 1.5;
 }
 
 .turn-disc {
   display: inline-flex;
-  min-width: 58px;
+  min-width: 54px;
   justify-content: center;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 999px;
-  padding: 4px 10px;
+  padding: 5px 10px;
   font-size: 0.78rem;
   text-transform: capitalize;
 }

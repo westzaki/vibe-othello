@@ -1,17 +1,8 @@
 .move-history {
   display: grid;
-  gap: 10px;
-  min-height: 0;
-  border: 1px solid rgba(184, 176, 225, 0.3);
-  border-radius: 18px;
-  padding: 10px;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.86),
-      rgba(255, 250, 243, 0.76)
-    ),
-    #ffffff;
+  gap: 8px;
+  min-height: 214px;
+  grid-template-rows: auto 1fr;
 }
 
 .move-history__header {
@@ -24,7 +15,7 @@
 .move-history__title {
   margin: 0;
   color: #7770b8;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 900;
   text-transform: uppercase;
 }
@@ -43,6 +34,9 @@
 }
 
 .move-history__empty {
+  display: grid;
+  min-height: 168px;
+  align-content: start;
   margin: 0;
   color: #777384;
   font-size: 0.84rem;
@@ -52,7 +46,7 @@
 .move-history__list {
   display: grid;
   overflow: auto;
-  max-height: 180px;
+  height: 168px;
   margin: 0;
   padding: 0;
   gap: 6px;
@@ -64,11 +58,11 @@
   grid-template-columns: 16px 1fr auto;
   align-items: center;
   gap: 9px;
-  min-height: 36px;
+  min-height: 34px;
   border: 1px solid rgba(184, 176, 225, 0.24);
   border-radius: 14px;
-  padding: 7px 9px;
-  background: rgba(255, 255, 255, 0.72);
+  padding: 6px 9px;
+  background: rgba(255, 255, 255, 0.54);
 }
 
 .move-history__disc {
