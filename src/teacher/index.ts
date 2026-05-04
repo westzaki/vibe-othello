@@ -24,8 +24,20 @@ export { createCoachHint } from "./createCoachHint";
 export type {
   CoachHint,
   CoachHintKind,
+  CoachHintMessageStyle,
   CreateCoachHintOptions,
 } from "./createCoachHint";
+export {
+  canShowCoachHint,
+  createCoachHintModel,
+  defaultCoachHintSettings,
+} from "./coachHintModel";
+export type {
+  CoachHintMode,
+  CoachHintModel,
+  CoachHintSettings,
+  CoachHintVisibilityContext,
+} from "./coachHintModel";
 export { createReviewLesson } from "./createReviewLesson";
 export { defaultTeacherReviewConfig } from "./reviewConfig";
 export type { TeacherReviewConfig } from "./reviewConfig";

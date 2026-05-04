@@ -19,14 +19,21 @@ export type CoachHint = {
   square: SquareIndex | null;
 };
 
-export type CreateCoachHintOptions = Partial<AnalyzeMoveCandidatesOptions>;
+export type CoachHintMessageStyle = "vague" | "specific";
+
+export type CreateCoachHintOptions = Partial<AnalyzeMoveCandidatesOptions> & {
+  messageStyle?: CoachHintMessageStyle;
+};
 
 const defaultCoachHintSearchDepth = 3;
 
 export function createCoachHint(
   board: Board,
   disc: DiscColor,
-  { searchDepth = defaultCoachHintSearchDepth }: CreateCoachHintOptions = {},
+  {
+    messageStyle = "specific",
+    searchDepth = defaultCoachHintSearchDepth,
+  }: CreateCoachHintOptions = {},
 ): CoachHint | null {
   const analysis = analyzeMoveCandidates(board, disc, { searchDepth });
   const bestCandidate = analysis.candidateMoves[0] ?? null;
@@ -39,9 +46,12 @@ export function createCoachHint(
     return createHint({
       candidate: bestCandidate,
       kind: "cornerOpportunity",
-      message: `角を取れる場所がありそう。${formatSquare(
-        bestCandidate.square,
-      )} を見てみよう。`,
+      message:
+        messageStyle === "vague"
+          ? "角を取れる場所がありそう。角まわりを見てみよう。"
+          : `角を取れる場所がありそう。${formatSquare(
+              bestCandidate.square,
+            )} を見てみよう。`,
     });
   }
 
@@ -55,9 +65,12 @@ export function createCoachHint(
     return createHint({
       candidate: cornerRiskCandidate,
       kind: "cornerRisk",
-      message: `角の近くは少し注意。${formatSquare(
-        cornerRiskCandidate.square,
-      )} の後に相手が角へ行けないか見てみよう。`,
+      message:
+        messageStyle === "vague"
+          ? "角の近くは少し注意。置いた後に相手が角へ行けないか見てみよう。"
+          : `角の近くは少し注意。${formatSquare(
+              cornerRiskCandidate.square,
+            )} の後に相手が角へ行けないか見てみよう。`,
     });
   }
 
@@ -65,9 +78,12 @@ export function createCoachHint(
     return createHint({
       candidate: bestCandidate,
       kind: "mobility",
-      message: `相手が少し動きづらくなる手がありそう。${formatSquare(
-        bestCandidate.square,
-      )} の後の形を見てみよう。`,
+      message:
+        messageStyle === "vague"
+          ? "相手が少し動きづらくなる手がありそう。次の形を見てみよう。"
+          : `相手が少し動きづらくなる手がありそう。${formatSquare(
+              bestCandidate.square,
+            )} の後の形を見てみよう。`,
     });
   }
 
@@ -75,9 +91,12 @@ export function createCoachHint(
     return createHint({
       candidate: bestCandidate,
       kind: "endgame",
-      message: `終盤は最後に残る石数を見たいところ。${formatSquare(
-        bestCandidate.square,
-      )} から試してみよう。`,
+      message:
+        messageStyle === "vague"
+          ? "終盤は最後に残る石数を見たいところ。候補を少し比べてみよう。"
+          : `終盤は最後に残る石数を見たいところ。${formatSquare(
+              bestCandidate.square,
+            )} から試してみよう。`,
     });
   }
 
