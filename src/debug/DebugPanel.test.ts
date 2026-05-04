@@ -9,7 +9,7 @@ describe("debug fixtures", () => {
 
     expect(session.status).toBe("ended");
     expect(session.winner).toBe("black");
-    expect(session.message).toBeNull();
+    expect(session.notice).toBeNull();
     expect(session.discCounts).toEqual({ black: 52, white: 12 });
     expect(session.moveHistory).toHaveLength(60);
     expect(session.lastMove).not.toBeNull();
@@ -56,6 +56,10 @@ describe("debug fixtures", () => {
 
     expect(result.status).toBe("playing");
     expect(result.currentDisc).toBe("white");
-    expect(result.message).toBe("Black has no legal moves. White plays again.");
+    expect(result.notice).toEqual({
+      nextDisc: "white",
+      skippedDisc: "black",
+      type: "pass",
+    });
   });
 });

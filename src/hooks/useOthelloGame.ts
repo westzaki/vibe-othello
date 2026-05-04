@@ -19,6 +19,7 @@ import {
   type GameSession,
   type PracticeSessionOptions,
 } from "../game/session";
+import { formatGameSessionNotice } from "./formatGameSessionNotice";
 import { useCpuTurn } from "./useCpuTurn";
 import { useMoveSounds } from "./useMoveSounds";
 
@@ -148,7 +149,7 @@ export function useOthelloGame({ enabled = true }: UseOthelloGameOptions = {}) {
     isPlaying: session.status === "playing",
     lastMove: session.lastMove,
     legalMoves,
-    message: session.message,
+    message: formatGameSessionNotice(session.notice),
     moveHistory: session.moveHistory,
     players,
     winner: session.winner,
