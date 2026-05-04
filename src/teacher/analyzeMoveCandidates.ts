@@ -1,8 +1,8 @@
 import {
   countEmptySquares,
+  getExactEndgameMoveScores as getCpuExactEndgameMoveScores,
   getMinimaxMoveScores,
   getMobilityDifference,
-  solveExactEndgameDiscDifference,
   type MinimaxMoveScore,
 } from "../cpu";
 import {
@@ -81,7 +81,7 @@ function getMoveScores(
   if (countEmptySquares(board) <= exactEndgameReviewEmptyThreshold) {
     return {
       evaluationSource: "exactEndgame",
-      scores: getExactEndgameMoveScores(board, disc),
+      scores: getWeightedExactEndgameMoveScores(board, disc),
     };
   }
 
@@ -118,21 +118,14 @@ function getTeacherAdjustedMoveScores(
     .sort((firstMove, secondMove) => secondMove.score - firstMove.score);
 }
 
-function getExactEndgameMoveScores(
+function getWeightedExactEndgameMoveScores(
   board: Board,
   disc: DiscColor,
 ): MinimaxMoveScore[] {
-  return getLegalMoves(board, disc)
-    .map((move) => ({
-      move,
-      score:
-        solveExactEndgameDiscDifference(
-          placeDisc(board, move, disc),
-          getNextDisc(disc),
-          disc,
-        ) * exactEndgameReviewScoreWeight,
-    }))
-    .sort((firstMove, secondMove) => secondMove.score - firstMove.score);
+  return getCpuExactEndgameMoveScores(board, disc).map(({ move, score }) => ({
+    move,
+    score: score * exactEndgameReviewScoreWeight,
+  }));
 }
 
 export function getMoveCandidateReasons(
