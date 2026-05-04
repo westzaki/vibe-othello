@@ -1,11 +1,14 @@
 import type { CSSProperties } from "react";
 import type { Advantage } from "../cpu";
+import type { PlayerSettings } from "../game/players";
+import { getAdvantageLabel } from "./gameHudLabels";
 
 type AdvantageBarProps = {
   advantage: Advantage;
+  players: PlayerSettings;
 };
 
-export function AdvantageBar({ advantage }: AdvantageBarProps) {
+export function AdvantageBar({ advantage, players }: AdvantageBarProps) {
   const barStyle = {
     "--black-advantage": `${advantage.blackPercent}%`,
   } as CSSProperties;
@@ -17,7 +20,7 @@ export function AdvantageBar({ advantage }: AdvantageBarProps) {
     >
       <div className="advantage-panel__header">
         <span>今の流れ</span>
-        <strong>{getAdvantageLabel(advantage)}</strong>
+        <strong>{getAdvantageLabel(advantage, players)}</strong>
       </div>
       <div className="advantage-bar" style={barStyle} aria-hidden="true">
         <span className="advantage-bar__segment advantage-bar__segment--black" />
@@ -29,16 +32,4 @@ export function AdvantageBar({ advantage }: AdvantageBarProps) {
       </div>
     </section>
   );
-}
-
-function getAdvantageLabel(advantage: Advantage): string {
-  if (advantage.leadingDisc === null) {
-    return "いい勝負";
-  }
-
-  return `${formatDisc(advantage.leadingDisc)}が少しリード`;
-}
-
-function formatDisc(disc: "black" | "white"): string {
-  return disc === "black" ? "黒" : "白";
 }

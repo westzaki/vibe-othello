@@ -93,7 +93,7 @@
 
 .move-history__item {
   display: grid;
-  grid-template-columns: 16px 1fr auto;
+  grid-template-columns: 16px 1fr;
   align-items: center;
   gap: 9px;
   min-height: 36px;
@@ -139,7 +139,7 @@
 }
 
 .move-history__move-number,
-.move-history__flips {
+.move-history__square {
   color: var(--color-text-muted);
   font-size: 0.76rem;
   font-weight: 850;
@@ -149,8 +149,4 @@
   color: var(--color-text-strong);
   font-size: 0.92rem;
   font-weight: 950;
-}
-
-.move-history__flips {
-  color: var(--color-honey-strong);
 }

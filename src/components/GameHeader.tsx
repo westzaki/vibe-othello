@@ -1,7 +1,9 @@
 import { useState } from "react";
 import type { DiscColor, DiscCounts, Winner } from "../game/othello";
+import type { PlayerSettings } from "../game/players";
 import type { GameEndReason, GameStatus } from "../game/session";
 import { GameEndConfirmDialog } from "./GameEndConfirmDialog";
+import { getTurnLabel } from "./gameHudLabels";
 
 type GameHeaderProps = {
   currentDisc: DiscColor;
@@ -13,6 +15,7 @@ type GameHeaderProps = {
   isUndoDisabled: boolean;
   message: string | null;
   onUndo: () => void;
+  players: PlayerSettings;
   showUndo: boolean;
   onEndGame: () => void;
   onNewGame: () => void;
@@ -31,6 +34,7 @@ export function GameHeader({
   onEndGame,
   onNewGame,
   onUndo,
+  players,
   showUndo,
   winner,
 }: GameHeaderProps) {
@@ -74,17 +78,8 @@ export function GameHeader({
               />
               <span className="turn-status__copy">
                 <span className="turn-status__label">
-                  {isCpuThinking
-                    ? "ビビーが考え中"
-                    : `${formatDisc(currentDisc)}の番`}
+                  {getTurnLabel(currentDisc, isCpuThinking, players)}
                 </span>
-                {gameStatus === "playing" && (
-                  <span className="turn-status__hint">
-                    {isCpuThinking
-                      ? "ちょっとまってね"
-                      : "置ける場所が光っています"}
-                  </span>
-                )}
               </span>
             </p>
           )}
@@ -156,10 +151,6 @@ function getResultLabel(winner: Winner, discCounts: DiscCounts): string {
   }
 
   return `${winner === "black" ? "黒" : "白"}の勝ち ${score}`;
-}
-
-function formatDisc(disc: DiscColor): string {
-  return disc === "black" ? "黒" : "白";
 }
 
 function getStatusLabel(
