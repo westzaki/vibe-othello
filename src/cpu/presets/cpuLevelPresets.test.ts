@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cpuLevels } from "../../game/players";
+import { cpuLevels } from "../cpuLevels";
 import {
   cpuLevelPresets,
   getCpuLevelPreset,

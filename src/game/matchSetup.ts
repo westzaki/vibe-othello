@@ -1,7 +1,7 @@
+import type { CpuLevel } from "../cpu/cpuLevels";
 import type { DiscColor } from "./othello";
 import {
   createDefaultPlayerSettings,
-  type CpuLevel,
   type PlayerSettings,
 } from "./players";
 
