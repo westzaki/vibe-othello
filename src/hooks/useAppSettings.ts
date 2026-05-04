@@ -4,10 +4,12 @@ const appSettingsStorageKey = "vibe-othello-settings";
 
 export type AppSettings = {
   soundEnabled: boolean;
+  undoEnabled: boolean;
 };
 
 const defaultAppSettings: AppSettings = {
   soundEnabled: true,
+  undoEnabled: true,
 };
 
 export function useAppSettings() {
@@ -24,9 +26,17 @@ export function useAppSettings() {
     }));
   }
 
+  function updateUndoEnabled(undoEnabled: boolean) {
+    setSettings((currentSettings) => ({
+      ...currentSettings,
+      undoEnabled,
+    }));
+  }
+
   return {
     settings,
     updateSoundEnabled,
+    updateUndoEnabled,
   };
 }
 

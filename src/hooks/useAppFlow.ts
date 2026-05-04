@@ -84,18 +84,24 @@ export function appFlowReducer(
 
 type UseAppFlowOptions = {
   soundEnabled?: boolean;
+  undoEnabled?: boolean;
 };
 
-export function useAppFlow({ soundEnabled = true }: UseAppFlowOptions = {}) {
+export function useAppFlow({
+  soundEnabled = true,
+  undoEnabled = true,
+}: UseAppFlowOptions = {}) {
   const [state, dispatch] = useReducer(appFlowReducer, initialAppFlowState);
   const { screen } = state;
   const game = useOthelloGame({
     enabled: screen === "game",
     soundEnabled,
+    undoEnabled,
   });
   const practiceGame = useOthelloGame({
     enabled: screen === "practice",
     soundEnabled,
+    undoEnabled,
   });
   const reviewMoveNumber = getCurrentReviewMoveNumber(state);
   const practiceFeedback = getPracticeFeedback(state, practiceGame);

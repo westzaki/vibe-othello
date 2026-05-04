@@ -7,8 +7,11 @@ import { SettingsScreen } from "./screens/SettingsScreen";
 import { StartScreen } from "./screens/StartScreen";
 
 export default function App() {
-  const { settings, updateSoundEnabled } = useAppSettings();
-  const appFlow = useAppFlow({ soundEnabled: settings.soundEnabled });
+  const { settings, updateSoundEnabled, updateUndoEnabled } = useAppSettings();
+  const appFlow = useAppFlow({
+    soundEnabled: settings.soundEnabled,
+    undoEnabled: settings.undoEnabled,
+  });
   const { game, practiceFeedback, practiceGame, reviewMoveNumber, screen } =
     appFlow;
 
@@ -26,6 +29,7 @@ export default function App() {
         <SettingsScreen
           onBackToStart={appFlow.backToStart}
           onSoundEnabledChange={updateSoundEnabled}
+          onUndoEnabledChange={updateUndoEnabled}
           settings={settings}
         />
       ) : screen === "review" ? (
