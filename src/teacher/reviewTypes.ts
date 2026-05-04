@@ -75,6 +75,8 @@ export type GameReview = {
   };
 };
 
+export type ReviewOutcome = "win" | "loss" | "draw";
+
 export type ReviewCardKind = "niceMove" | "turningPoint" | "practiceTarget";
 
 export type ReviewCard = {
