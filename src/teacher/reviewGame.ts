@@ -25,6 +25,7 @@ import {
   createEvaluationTimeline,
   findTurningPointMoveNumbers,
 } from "./evaluationTimeline";
+import { compareLearningIssueMoves } from "./reviewLessonSelection";
 
 const defaultSearchDepth = 3;
 const defaultMaxHighlights = 2;
@@ -224,50 +225,12 @@ function getHighlightedMoves(
     .filter((move) => move.review.kind === kind)
     .sort((firstMove, secondMove) => {
       if (kind === "bad") {
-        return compareBadHighlights(firstMove, secondMove);
+        return compareLearningIssueMoves(firstMove, secondMove);
       }
 
       return getScoreGap(firstMove.review) - getScoreGap(secondMove.review);
     })
     .slice(0, maxHighlights);
-}
-
-function compareBadHighlights(
-  firstMove: ReviewedMove,
-  secondMove: ReviewedMove,
-): number {
-  const priorityDifference =
-    getBadMovePriority(secondMove.review) -
-    getBadMovePriority(firstMove.review);
-
-  if (priorityDifference !== 0) {
-    return priorityDifference;
-  }
-
-  return getScoreGap(secondMove.review) - getScoreGap(firstMove.review);
-}
-
-function getBadMovePriority(review: MoveReview): number {
-  if (
-    review.reasons.includes("turningPoint") &&
-    review.reasons.includes("cornerGiven")
-  ) {
-    return 5;
-  }
-
-  if (review.reasons.includes("turningPoint")) {
-    return 4;
-  }
-
-  if (review.reasons.includes("cornerGiven")) {
-    return 3;
-  }
-
-  if (review.reasons.includes("dangerSquare")) {
-    return 2;
-  }
-
-  return 1;
 }
 
 function getScoreGap(review: MoveReview): number {
