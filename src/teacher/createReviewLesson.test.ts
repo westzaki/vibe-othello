@@ -7,7 +7,8 @@ describe("createReviewLesson", () => {
   it("chooses one nice move and one turning point from existing highlights", () => {
     const niceMove = createReviewedMove({
       kind: "good",
-      moveNumber: 5,
+      moveNumber: 12,
+      reasons: ["mobilityGain"],
       square: 20,
     });
     const turningPoint = createReviewedMove({
@@ -33,10 +34,11 @@ describe("createReviewLesson", () => {
     ]);
   });
 
-  it("uses the nice move as the practice target when there is no turning point", () => {
+  it("does not turn a nice move into the practice target", () => {
     const niceMove = createReviewedMove({
       kind: "good",
-      moveNumber: 5,
+      moveNumber: 12,
+      reasons: ["mobilityGain"],
       square: 26,
     });
 
@@ -48,8 +50,8 @@ describe("createReviewLesson", () => {
     );
 
     expect(lesson.turningPointCandidate).toBeNull();
-    expect(lesson.practiceTarget).toBe(niceMove);
-    expect(lesson.cards[2].move).toBe(niceMove);
+    expect(lesson.practiceTarget).toBeNull();
+    expect(lesson.cards[2].move).toBeNull();
   });
 
   it("keeps all lesson moves empty when there are no highlighted moves", () => {
@@ -70,6 +72,7 @@ describe("createReviewLesson", () => {
     const earlyMove = createReviewedMove({
       kind: "good",
       moveNumber: 1,
+      reasons: ["nearBestMove"],
       square: 19,
     });
 
@@ -142,6 +145,28 @@ describe("createReviewLesson", () => {
     expect(lesson.turningPointCandidate).toBe(turningPoint);
     expect(lesson.practiceTarget).toBe(turningPoint);
   });
+
+  it("keeps practice target empty when the turning point has no trial move", () => {
+    const turningPoint = createReviewedMove({
+      bestSquare: null,
+      kind: "bad",
+      moveNumber: 30,
+      reasons: ["turningPoint"],
+      square: 21,
+    });
+
+    const lesson = createReviewLesson(
+      createGameReview({
+        badMoves: [turningPoint],
+        goodMoves: [],
+      }),
+    );
+
+    expect(lesson.turningPointCandidate).toBe(turningPoint);
+    expect(lesson.practiceTarget).toBeNull();
+    expect(lesson.cards[2].move).toBeNull();
+    expect(lesson.cards[2].actionLabel).toBeUndefined();
+  });
 });
 
 function createGameReview({
@@ -162,12 +187,14 @@ function createGameReview({
 }
 
 function createReviewedMove({
+  bestSquare,
   kind,
   moveNumber,
   playedScore = 0,
   reasons,
   square,
 }: {
+  bestSquare?: SquareIndex | null;
   kind: MoveReviewKind;
   moveNumber: number;
   playedScore?: number;
@@ -175,6 +202,7 @@ function createReviewedMove({
   square: SquareIndex;
 }): ReviewedMove {
   const board = createEmptyBoard();
+  const reviewedBestSquare = bestSquare === undefined ? square : bestSquare;
 
   return {
     boardAfter: board,
@@ -185,8 +213,8 @@ function createReviewedMove({
     legalMovesBefore: [square],
     moveNumber,
     review: {
-      bestScore: 0,
-      bestSquare: square,
+      bestScore: reviewedBestSquare === null ? null : 0,
+      bestSquare: reviewedBestSquare,
       disc: "black",
       kind,
       moveNumber,

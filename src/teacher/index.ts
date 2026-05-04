@@ -16,6 +16,14 @@ export {
   createGameReviewMessages,
   createMoveReviewMessage,
 } from "./reviewMessages";
+export {
+  compareLearningIssueMoves,
+  getLearningIssuePriority,
+  selectNiceMove,
+  selectPracticeTarget,
+  selectReviewLessonMoves,
+  selectTurningPointCandidate,
+} from "./reviewLessonSelection";
 export type {
   CandidateMoveReview,
   EvaluationTimelineEntry,
