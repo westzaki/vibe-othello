@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { createEmptyBoard, type SquareIndex } from "../game/othello";
+import { createEmptyBoard, type Board, type SquareIndex } from "../game/othello";
 import { placeCurrentDisc, startNewGame } from "../game/session";
+import { createBoardFixture } from "../test/boardFixtures";
 import { reviewGame } from "./reviewGame";
 import {
   createGameReviewMessages,
@@ -124,24 +125,69 @@ describe("teacher review messages", () => {
     expect(message.explanation).not.toContain("ミス");
     expect(message.explanation).not.toContain("ダメ");
   });
+
+  it("uses endgame copy when a bad move was reviewed with exact endgame evaluation", () => {
+    const message = createMoveReviewMessage(
+      createReviewedMove({
+        bestSquare: 0,
+        boardBefore: createEndgameBoard(),
+        candidateReasons: [],
+        reasons: ["missedBestMove", "scoreDrop"],
+        square: 2,
+      }),
+    );
+
+    expect(message.explanation).toContain("終盤");
+    expect(message.explanation).toContain("最後まで");
+    expect(message.suggestion).toContain("この終盤");
+    expect(message.comparison?.playedMove.explanation).toContain(
+      "最後まで",
+    );
+    expect(message.comparison?.trialMove?.explanation).toContain("最後まで");
+    expect(message.comparison?.nextFocus).toContain("最後に残る石数");
+  });
+
+  it("uses endgame advice when a highlighted bad move came from exact endgame evaluation", () => {
+    const reviewedMove = createReviewedMove({
+      bestSquare: 0,
+      boardBefore: createEndgameBoard(),
+      candidateReasons: [],
+      reasons: ["missedBestMove", "scoreDrop"],
+      square: 2,
+    });
+    const messages = createGameReviewMessages({
+      highlights: {
+        badMoves: [reviewedMove],
+        goodMoves: [],
+      },
+      moveCount: reviewedMove.moveNumber,
+      reviewedDisc: "black",
+      reviewedMoves: [reviewedMove],
+    });
+
+    expect(messages.advice).toContain("終盤");
+    expect(messages.advice).toContain("最後に石が残る手");
+  });
 });
 
 function createReviewedMove({
   bestSquare,
+  boardBefore = createEmptyBoard(),
   candidateReasons,
   reasons,
   square,
 }: {
   bestSquare: SquareIndex | null;
+  boardBefore?: Board;
   candidateReasons: MoveReviewReason[];
   reasons: MoveReviewReason[];
   square: SquareIndex;
 }): ReviewedMove {
-  const board = createEmptyBoard();
+  const boardAfter = [...boardBefore];
 
   return {
-    boardAfter: board,
-    boardBefore: board,
+    boardAfter,
+    boardBefore,
     candidateMoves:
       bestSquare === null
         ? []
@@ -171,4 +217,15 @@ function createReviewedMove({
     },
     square,
   };
+}
+
+function createEndgameBoard(): Board {
+  return createBoardFixture(
+    {
+      0: null,
+      1: null,
+      2: null,
+    },
+    "black",
+  );
 }
