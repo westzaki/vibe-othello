@@ -51,7 +51,6 @@ export function GameHeader({
 
   return (
     <div className="game-heading">
-      <h1 id="game-title">Vibe オセロ</h1>
       <div className="game-heading__status">
         <div className="game-status-row">
           {gameStatus !== "playing" && (
@@ -81,11 +80,6 @@ export function GameHeader({
             </p>
           )}
         </div>
-        {gameStatus === "playing" && (
-          <p className="game-focus-message">
-            {isCpuThinking ? "ちょっとまってね" : "置ける場所が光っています"}
-          </p>
-        )}
         <div className="score-row" aria-label="Current score">
           <span className="score-chip score-chip--black">
             黒
