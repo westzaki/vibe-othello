@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Advantage } from "../cpu";
 import type { PlayerSettings } from "../game/players";
 import type { GameSession } from "../game/session";
@@ -9,8 +9,6 @@ import {
 } from "../teacher";
 
 const coachHintPollMs = 250;
-const helpfulCoachHintVisibleMs = 5200;
-const riskCoachHintVisibleMs = 3200;
 
 type UsePlayCoachHintModelParams = {
   advantage: Advantage;
@@ -29,6 +27,7 @@ export function usePlayCoachHintModel({
   session,
   settings,
 }: UsePlayCoachHintModelParams): CoachHintModel | null {
+  const shownRiskHintKeysRef = useRef(new Set<string>());
   const hintKey = createHintKey({
     enabled,
     isCpuThinking,
@@ -43,6 +42,16 @@ export function usePlayCoachHintModel({
   useEffect(() => {
     if (
       !enabled ||
+      session.status !== "playing" ||
+      session.moveHistory.length === 0
+    ) {
+      shownRiskHintKeysRef.current.clear();
+    }
+  }, [enabled, session.moveHistory.length, session.status]);
+
+  useEffect(() => {
+    if (
+      !enabled ||
       isCpuThinking ||
       settings.mode === "off" ||
       session.status !== "playing"
@@ -51,7 +60,6 @@ export function usePlayCoachHintModel({
     }
 
     const startedAt = getCurrentTimeMs();
-    let hideTimeoutId: number | null = null;
     const intervalId = window.setInterval(() => {
       const nextModel = createCoachHintModel({
         advantage,
@@ -66,26 +74,29 @@ export function usePlayCoachHintModel({
         return;
       }
 
+      const riskHintKey = createRiskHintKey(nextModel);
+
+      if (
+        riskHintKey !== null &&
+        shownRiskHintKeysRef.current.has(riskHintKey)
+      ) {
+        window.clearInterval(intervalId);
+        return;
+      }
+
+      if (riskHintKey !== null) {
+        shownRiskHintKeysRef.current.add(riskHintKey);
+      }
+
       setModelState({
         key: hintKey,
         model: nextModel,
       });
-      hideTimeoutId = window.setTimeout(
-        () => {
-          setModelState((currentModelState) =>
-            currentModelState?.key === hintKey ? null : currentModelState,
-          );
-        },
-        getCoachHintVisibleMs(nextModel),
-      );
       window.clearInterval(intervalId);
     }, coachHintPollMs);
 
     return () => {
       window.clearInterval(intervalId);
-      if (hideTimeoutId !== null) {
-        window.clearTimeout(hideTimeoutId);
-      }
     };
   }, [
     advantage,
@@ -104,10 +115,12 @@ function getCurrentTimeMs(): number {
   return typeof performance === "undefined" ? Date.now() : performance.now();
 }
 
-function getCoachHintVisibleMs(model: CoachHintModel): number {
-  return model.hint.kind === "cornerRisk"
-    ? riskCoachHintVisibleMs
-    : helpfulCoachHintVisibleMs;
+function createRiskHintKey(model: CoachHintModel): string | null {
+  if (model.hint.kind !== "cornerRisk" || model.hint.square === null) {
+    return null;
+  }
+
+  return `${model.hint.kind}:${model.hint.square}`;
 }
 
 function createHintKey({
