@@ -67,35 +67,11 @@
   gap: 12px;
 }
 
-.review-detail {
-  display: grid;
-  gap: 8px;
+.review-board-panel__status {
   margin: 0;
-}
-
-.review-detail div {
-  display: grid;
-  grid-template-columns: 78px minmax(0, 1fr);
-  gap: 10px;
-  border: 1px solid rgba(184, 176, 225, 0.24);
-  border-radius: 14px;
-  padding: 9px 10px;
-  background: rgba(255, 255, 255, 0.72);
-}
-
-.review-detail dt {
-  color: #7770b8;
-  font-size: 0.76rem;
-  font-weight: 900;
-}
-
-.review-detail dd {
-  margin: 0;
-  color: #34323e;
+  color: #777384;
   font-size: 0.84rem;
-  font-weight: 850;
-  line-height: 1.45;
-  overflow-wrap: anywhere;
+  font-weight: 900;
 }
 
 .review-summary__section {

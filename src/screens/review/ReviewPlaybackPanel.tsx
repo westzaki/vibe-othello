@@ -4,7 +4,6 @@ import type { MoveRecord } from "../../game/session";
 import type { PositionReview } from "../../teacher";
 import { ReviewLegend } from "./ReviewLegend";
 import { ReviewPlaybackControls } from "./ReviewPlaybackControls";
-import { ReviewPlaybackDetail } from "./ReviewPlaybackDetail";
 import type { ReviewPlaybackMode } from "./reviewPlayback";
 
 type ReviewPlaybackPanelProps = {
@@ -31,13 +30,11 @@ export function ReviewPlaybackPanel({
   return (
     <section className="review-board-panel">
       <h2 className="review-summary__title">棋譜再生</h2>
-      <ReviewPlaybackDetail
-        currentMove={currentMove}
-        currentMoveNumber={currentMoveNumber}
-        maxMoveNumber={maxMoveNumber}
-        mode={mode}
-        positionReview={positionReview}
-      />
+      <p className="review-board-panel__status">
+        {mode === "reviewTarget"
+          ? `${currentMoveNumber}手目を打つ前`
+          : `${currentMoveNumber} / ${maxMoveNumber}`}
+      </p>
       <ReviewBoard
         bestSquare={positionReview.bestSquare}
         board={currentBoard}
@@ -51,7 +48,7 @@ export function ReviewPlaybackPanel({
         onStartPractice={onStartPractice}
       />
       <ReviewLegend
-        bestLabel={mode === "reviewTarget" ? "試してみたい手" : "次のおすすめ"}
+        bestLabel={mode === "reviewTarget" ? "試してみたい手" : "次に見たい手"}
       />
     </section>
   );

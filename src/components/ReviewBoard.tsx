@@ -76,14 +76,14 @@ export function ReviewBoard({
 
 function getMarkerText(isPlayed: boolean, isBest: boolean): string {
   if (isPlayed && isBest) {
-    return "実/推";
+    return "実/試";
   }
 
   if (isPlayed) {
     return "実";
   }
 
-  return "推";
+  return "試";
 }
 
 function getReviewSquareLabel(
@@ -93,9 +93,9 @@ function getReviewSquareLabel(
   isBest: boolean,
 ): string {
   const tags = [
-    isLegal ? "legal move" : null,
+    isLegal ? "placeable square" : null,
     isPlayed ? "played move" : null,
-    isBest ? "recommended move" : null,
+    isBest ? "try move" : null,
   ].filter(Boolean);
   const suffix = tags.length > 0 ? `: ${tags.join(", ")}` : "";
 
