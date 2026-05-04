@@ -202,18 +202,20 @@ describe("createReviewLesson", () => {
     );
 
     expect(lesson.cards.map((card) => card.title)).toEqual([
-      "今日のナイス",
       "勝てたポイント",
       "次も使ってみよう",
     ]);
     expect(lesson.cards.map((card) => card.title)).not.toContain(
       "ここが分かれ道だったかも",
     );
+    expect(lesson.cards.map((card) => card.title)).not.toContain(
+      "今日のナイス",
+    );
     expect(lesson.niceMove).toBe(niceMove);
     expect(lesson.turningPointCandidate).toBe(niceMove);
     expect(lesson.practiceTarget).toBeNull();
-    expect(lesson.cards[2].move).toBeNull();
-    expect(lesson.cards[2].actionLabel).toBeUndefined();
+    expect(lesson.cards[1].move).toBeNull();
+    expect(lesson.cards[1].actionLabel).toBeUndefined();
   });
 
   it("keeps the learning lesson for draw with gentler one-more-step copy", () => {

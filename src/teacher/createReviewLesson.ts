@@ -71,15 +71,6 @@ function createWinReviewLesson({
     cards: [
       {
         bodyText:
-          "勝ちにつながった良い判断を一つ見て、次も使える形にしてみよう。",
-        emptyText:
-          "勝てた一局でした。小さな良い判断が積み重なっていました。",
-        kind: "niceMove",
-        move: niceMove,
-        title: "今日のナイス",
-      },
-      {
-        bodyText:
           "流れを良くできた場面を見て、勝てた理由をつかんでみよう。",
         emptyText:
           "大きな一手だけではなく、落ち着いて選べた手が勝ちにつながっていました。",
