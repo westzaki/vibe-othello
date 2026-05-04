@@ -8,7 +8,11 @@ export { cpuLevelLabels, cpuLevels } from "./cpuLevels";
 export type { CpuLevel } from "./cpuLevels";
 export { getCpuLevelPreset } from "./presets/cpuLevelPresets";
 export type { CpuLevelPreset } from "./presets/cpuLevelPresets";
-export { getMobilityDifference } from "./evaluation/evaluationFeatures";
+export {
+  countEmptySquares,
+  getMobilityDifference,
+} from "./evaluation/evaluationFeatures";
+export { solveExactEndgameDiscDifference } from "./search/exactEndgame";
 export { getMinimaxMoveScores } from "./search/minimaxSearch";
 export type {
   MinimaxMoveScore,

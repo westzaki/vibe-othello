@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { createEmptyBoard, type Board } from "../game/othello";
+import {
+  createEmptyBoard,
+  placeDisc,
+  type Board,
+  type DiscColor,
+} from "../game/othello";
 import type { MoveRecord } from "../game/session";
 import { placeCurrentDisc, startNewGame } from "../game/session";
+import { createBoardFixture } from "../test/boardFixtures";
 import { reviewGame } from "./reviewGame";
 
 describe("teacher review", () => {
@@ -144,6 +150,54 @@ describe("teacher review", () => {
       expect.arrayContaining(["dangerSquare", "turningPoint"]),
     );
   });
+
+  it("uses exact endgame scores for reviewed endgame move candidates", () => {
+    const boardBefore = createBoardFixture(
+      {
+        0: null,
+        1: null,
+        2: null,
+        16: "white",
+      },
+      "black",
+    );
+    const boardAfter = placeDisc(boardBefore, 2, "white");
+    const review = reviewGame(
+      [
+        createMoveRecord({
+          boardAfter,
+          boardBefore,
+          disc: "white",
+          square: 2,
+        }),
+      ],
+      {
+        reviewedDisc: "white",
+        searchDepth: 1,
+      },
+    );
+    const reviewedMove = review.reviewedMoves[0];
+
+    expect(reviewedMove.candidateMoves).toEqual([
+      expect.objectContaining({
+        rank: 1,
+        score: -580,
+        square: 0,
+      }),
+      expect.objectContaining({
+        rank: 2,
+        score: -620,
+        square: 2,
+      }),
+    ]);
+    expect(reviewedMove.review.bestSquare).toBe(0);
+    expect(reviewedMove.review.bestScore).toBe(-580);
+    expect(reviewedMove.review.playedScore).toBe(-620);
+    expect(reviewedMove.review.kind).toBe("bad");
+    expect(reviewedMove.review.reasons).toEqual(
+      expect.arrayContaining(["missedBestMove", "scoreDrop"]),
+    );
+  });
 });
 
 function createCornerThreatBoard(): Board {
@@ -157,18 +211,20 @@ function createCornerThreatBoard(): Board {
 function createMoveRecord({
   boardAfter,
   boardBefore,
+  disc = "black",
   moveNumber = 1,
   square,
 }: {
   boardAfter: Board;
   boardBefore: Board;
+  disc?: DiscColor;
   moveNumber?: number;
   square: number;
 }): MoveRecord {
   return {
     boardAfter,
     boardBefore,
-    disc: "black",
+    disc,
     flippedSquares: [],
     legalMovesBefore: [square],
     moveNumber,

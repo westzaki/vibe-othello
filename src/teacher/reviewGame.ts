@@ -1,12 +1,17 @@
 import {
+  countEmptySquares,
   getMinimaxMoveScores,
   getMobilityDifference,
+  solveExactEndgameDiscDifference,
   strategicEvaluateBoard,
+  type MinimaxMoveScore,
 } from "../cpu";
 import {
   CORNER_SQUARES,
   getLegalMoves,
   getNextDisc,
+  placeDisc,
+  type Board,
   type DiscColor,
   type SquareIndex,
 } from "../game/othello";
@@ -31,6 +36,8 @@ const defaultSearchDepth = 3;
 const defaultMaxHighlights = 2;
 const goodMoveScoreGap = 8;
 const badMoveScoreGap = 28;
+const exactEndgameReviewEmptyThreshold = 10;
+const exactEndgameReviewScoreWeight = 10;
 const mobilitySwingThreshold = 3;
 const dangerSquaresByCorner = new Map<SquareIndex, SquareIndex[]>([
   [0, [1, 8, 9]],
@@ -82,9 +89,11 @@ function reviewMove(
   searchDepth: number,
   isTurningPoint: boolean,
 ): ReviewedMove {
-  const moveScores = getMinimaxMoveScores(move.boardBefore, move.disc, {
+  const moveScores = getReviewMoveScores(
+    move.boardBefore,
+    move.disc,
     searchDepth,
-  });
+  );
   const candidateMoves = moveScores.map<CandidateMoveReview>(
     ({ move: square, score }, index) => ({
       square,
@@ -126,6 +135,37 @@ function reviewMove(
       playedScore,
     },
   };
+}
+
+function getReviewMoveScores(
+  board: Board,
+  disc: DiscColor,
+  searchDepth: number,
+): MinimaxMoveScore[] {
+  if (countEmptySquares(board) <= exactEndgameReviewEmptyThreshold) {
+    return getExactEndgameMoveScores(board, disc);
+  }
+
+  return getMinimaxMoveScores(board, disc, {
+    searchDepth,
+  });
+}
+
+function getExactEndgameMoveScores(
+  board: Board,
+  disc: DiscColor,
+): MinimaxMoveScore[] {
+  return getLegalMoves(board, disc)
+    .map((move) => ({
+      move,
+      score:
+        solveExactEndgameDiscDifference(
+          placeDisc(board, move, disc),
+          getNextDisc(disc),
+          disc,
+        ) * exactEndgameReviewScoreWeight,
+    }))
+    .sort((firstMove, secondMove) => secondMove.score - firstMove.score);
 }
 
 function getCandidateReasons(context: ReviewContext): MoveReviewReason[] {
