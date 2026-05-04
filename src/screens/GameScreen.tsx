@@ -1,7 +1,11 @@
 import { lazy, Suspense, useMemo } from "react";
 import { calculateAdvantage } from "../cpu";
 import { AdvantageBar } from "../components/AdvantageBar";
-import { Board, type BoardHintTone } from "../components/Board";
+import {
+  Board,
+  type BoardHintMarker,
+  type BoardHintTone,
+} from "../components/Board";
 import { GameHeader } from "../components/GameHeader";
 import { GameResultOverlay } from "../components/GameResultOverlay";
 import { MoveHistory } from "../components/MoveHistory";
@@ -64,8 +68,10 @@ export function GameScreen({
     session: game.session,
     settings: coachHintSettings,
   });
-  const coachHintTone =
-    coachHintModel === null ? null : getCoachHintTone(coachHintModel);
+  const coachHintMarkers = useMemo(
+    () => createCoachHintMarkers(coachHintModel),
+    [coachHintModel],
+  );
   const resultWinner =
     game.gameStatus === "ended" &&
     game.endReason === "completed" &&
@@ -78,8 +84,7 @@ export function GameScreen({
       <div className="game-table">
         <Board
           board={game.board}
-          coachHintSquare={coachHintModel?.hint.square ?? null}
-          coachHintTone={coachHintTone}
+          coachHintMarkers={coachHintMarkers}
           currentDisc={game.currentDisc}
           flipAnimationId={game.flipAnimationId}
           flippedSquares={game.flippedSquares}
@@ -146,7 +151,7 @@ export function GameScreen({
 
               <AdvantageBar advantage={advantage} players={game.players} />
 
-              {coachHintModel !== null && (
+              {mode === "match" && coachHintSettings.mode !== "off" && (
                 <CoachHintPanel model={coachHintModel} />
               )}
             </>
@@ -171,29 +176,70 @@ export function GameScreen({
   );
 }
 
-function CoachHintPanel({ model }: { model: CoachHintModel }) {
-  const isRiskHint = model.hint.kind === "cornerRisk";
+function CoachHintPanel({ model }: { model: CoachHintModel | null }) {
+  if (model === null) {
+    return <div className="coach-hint coach-hint--empty" aria-hidden="true" />;
+  }
 
   return (
     <div
       className={[
         "coach-hint",
         `coach-hint--${model.mode}`,
-        isRiskHint ? "coach-hint--risk" : "coach-hint--helpful",
+        model.hints.some((hint) => hint.kind === "cornerRisk")
+          ? "coach-hint--has-risk"
+          : "coach-hint--helpful",
       ].join(" ")}
       role="status"
       aria-live="polite"
     >
-      <span className="coach-hint__label">
-        {isRiskHint ? "気をつけて" : "見てみよう"}
-      </span>
-      <p>{model.hint.message}</p>
+      {model.hints.map((hint) => {
+        const isRiskHint = hint.kind === "cornerRisk";
+
+        return (
+          <div
+            className={[
+              "coach-hint__item",
+              isRiskHint
+                ? "coach-hint__item--risk"
+                : "coach-hint__item--helpful",
+            ].join(" ")}
+            key={`${hint.kind}-${hint.square ?? "none"}`}
+          >
+            <span className="coach-hint__label">
+              {isRiskHint ? "気をつけて" : "見てみよう"}
+            </span>
+            <p>{hint.message}</p>
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-function getCoachHintTone(model: CoachHintModel): BoardHintTone {
-  return model.hint.kind === "cornerRisk" ? "risk" : "helpful";
+function createCoachHintMarkers(
+  model: CoachHintModel | null,
+): BoardHintMarker[] {
+  if (model === null) {
+    return [];
+  }
+
+  return model.hints.flatMap((hint) => {
+    if (hint.square === null) {
+      return [];
+    }
+
+    return [
+      {
+        square: hint.square,
+        tone: getCoachHintTone(hint),
+      },
+    ];
+  });
+}
+
+function getCoachHintTone(hint: CoachHintModel["hint"]): BoardHintTone {
+  return hint.kind === "cornerRisk" ? "risk" : "helpful";
 }
 
 function PassNoticeOverlay({ notice }: { notice: GameSessionNotice }) {

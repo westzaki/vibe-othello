@@ -4,6 +4,7 @@ import type { PlayerSettings } from "../game/players";
 import type { GameSession } from "../game/session";
 import {
   createCoachHintModel,
+  type CoachHint,
   type CoachHintModel,
   type CoachHintSettings,
 } from "../teacher";
@@ -74,23 +75,35 @@ export function usePlayCoachHintModel({
         return;
       }
 
-      const riskHintKey = createRiskHintKey(nextModel);
+      const visibleHints = nextModel.hints.filter((hint) => {
+        const riskHintKey = createRiskHintKey(hint);
 
-      if (
-        riskHintKey !== null &&
-        shownRiskHintKeysRef.current.has(riskHintKey)
-      ) {
+        return (
+          riskHintKey === null ||
+          !shownRiskHintKeysRef.current.has(riskHintKey)
+        );
+      });
+
+      if (visibleHints.length === 0) {
         window.clearInterval(intervalId);
         return;
       }
 
-      if (riskHintKey !== null) {
-        shownRiskHintKeysRef.current.add(riskHintKey);
+      for (const hint of visibleHints) {
+        const riskHintKey = createRiskHintKey(hint);
+
+        if (riskHintKey !== null) {
+          shownRiskHintKeysRef.current.add(riskHintKey);
+        }
       }
 
       setModelState({
         key: hintKey,
-        model: nextModel,
+        model: {
+          ...nextModel,
+          hint: visibleHints[0],
+          hints: visibleHints,
+        },
       });
       window.clearInterval(intervalId);
     }, coachHintPollMs);
@@ -115,12 +128,12 @@ function getCurrentTimeMs(): number {
   return typeof performance === "undefined" ? Date.now() : performance.now();
 }
 
-function createRiskHintKey(model: CoachHintModel): string | null {
-  if (model.hint.kind !== "cornerRisk" || model.hint.square === null) {
+function createRiskHintKey(hint: CoachHint): string | null {
+  if (hint.kind !== "cornerRisk" || hint.square === null) {
     return null;
   }
 
-  return `${model.hint.kind}:${model.hint.square}`;
+  return `${hint.kind}:${hint.square}`;
 }
 
 function createHintKey({

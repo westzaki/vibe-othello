@@ -1,6 +1,7 @@
 .coach-hint {
   display: grid;
   gap: 8px;
+  min-height: 156px;
   border: 1px solid
     color-mix(in srgb, var(--color-border-mint) 70%, var(--color-border));
   border-radius: var(--radius-md);
@@ -11,6 +12,10 @@
   box-shadow:
     var(--shadow-hairline),
     0 10px 20px rgba(101, 158, 143, 0.1);
+}
+
+.coach-hint--empty {
+  visibility: hidden;
 }
 
 .coach-hint--active.coach-hint--helpful {
@@ -24,7 +29,7 @@
     rgba(255, 255, 255, 0.54);
 }
 
-.coach-hint--risk {
+.coach-hint--has-risk {
   border-color: color-mix(
     in srgb,
     var(--color-border-peach) 76%,
@@ -36,6 +41,17 @@
   box-shadow:
     var(--shadow-hairline),
     0 10px 20px rgba(216, 126, 112, 0.1);
+}
+
+.coach-hint__item {
+  display: grid;
+  gap: 7px;
+}
+
+.coach-hint__item + .coach-hint__item {
+  border-block-start: 1px solid
+    color-mix(in srgb, var(--color-border) 62%, transparent);
+  padding-block-start: 9px;
 }
 
 .coach-hint__label {
@@ -54,7 +70,7 @@
   background: var(--color-accent-wash);
 }
 
-.coach-hint--risk .coach-hint__label {
+.coach-hint__item--risk .coach-hint__label {
   color: var(--color-peach-strong);
   background: rgba(255, 222, 210, 0.72);
 }
