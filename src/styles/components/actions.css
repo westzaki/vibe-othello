@@ -3,7 +3,7 @@
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 8px;
-  border-block-start: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  border-block-start: 1px solid color-mix(in srgb, var(--color-border) 48%, transparent);
   padding-block-start: 12px;
 }
 

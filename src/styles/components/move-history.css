@@ -67,7 +67,7 @@
 .move-history__body {
   display: grid;
   gap: 10px;
-  border-block-start: 1px solid var(--color-border);
+  border-block-start: 1px solid color-mix(in srgb, var(--color-border) 52%, transparent);
   padding: 10px;
 }
 
