@@ -87,6 +87,10 @@ function createPlayedMoveExplanation(review: MoveReview): string {
     return "たくさん返せても、次の自分の置ける場所が少し減ったかも。";
   }
 
+  if (review.reasons.includes("turningPoint")) {
+    return "このあと、相手が少し動きやすい流れになったかも。";
+  }
+
   return "自然な一手だったね。次は、置いた後の相手の置ける場所も一緒に見てみよう。";
 }
 
@@ -110,6 +114,10 @@ function createTrialMoveExplanation(
     return "返す数は少なくても、次の置き場所を残しやすいか比べてみたい手かも。";
   }
 
+  if (review.reasons.includes("turningPoint")) {
+    return "相手のチャンスを増やしにくい形か、比べてみたい手かも。";
+  }
+
   return "返す数だけでなく、相手にいい手をあげにくいか比べてみたい手かも。";
 }
 
@@ -124,6 +132,10 @@ function createComparisonFocus(review: MoveReview): string {
 
   if (review.reasons.includes("mobilityLoss")) {
     return "置いた後に、自分と相手がどこへ置けるか見てみよう。";
+  }
+
+  if (review.reasons.includes("turningPoint")) {
+    return "置いたあと、相手のチャンスが増えていないか見てみよう。";
   }
 
   return "置いた後に、相手がどこへ置けるか見てみよう。";
@@ -141,6 +153,12 @@ function createExplanation(review: MoveReview): string {
       return `${formatSquare(
         review.square,
       )} は角の近くだね。ここは急がず、もう一回だけ形を見てみるのもアリかも。`;
+    }
+
+    if (review.reasons.includes("turningPoint")) {
+      return `${formatSquare(
+        review.square,
+      )} はここで少し流れが変わったかも。このあと相手が動きやすくなっていないか見てみよう。`;
     }
 
     return `${formatSquare(
@@ -190,6 +208,10 @@ function createAdvice(reviewedMoves: ReviewedMove[]): string {
 
   if (badMoves.some((move) => move.review.reasons.includes("dangerSquare"))) {
     return "次は、角の近くを打つ前に少し立ち止まってみよう。急がず選べたら、かなりいい流れになりそう。";
+  }
+
+  if (badMoves.some((move) => move.review.reasons.includes("turningPoint"))) {
+    return "次は、置いたあとに相手のチャンスが増えていないか一回だけ見てみよう。流れを戻すきっかけが見つかりそう。";
   }
 
   if (badMoves.length > 0) {

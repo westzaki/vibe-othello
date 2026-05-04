@@ -90,6 +90,7 @@ describe("teacher review messages", () => {
     ["cornerGiven" as const, "相手が角へ近づける", "角チャンス"],
     ["dangerSquare" as const, "角の近く", "空いている角"],
     ["mobilityLoss" as const, "置ける場所", "自分と相手"],
+    ["turningPoint" as const, "流れ", "相手のチャンス"],
   ])("uses a natural comparison for %s", (reason, playedText, focusText) => {
     const message = createMoveReviewMessage(
       createReviewedMove({
@@ -102,6 +103,26 @@ describe("teacher review messages", () => {
 
     expect(message.comparison?.playedMove.explanation).toContain(playedText);
     expect(message.comparison?.nextFocus).toContain(focusText);
+  });
+
+  it("creates soft turning point copy", () => {
+    const message = createMoveReviewMessage({
+      bestScore: 18,
+      bestSquare: 26,
+      disc: "black",
+      kind: "bad",
+      playedScore: -12,
+      moveNumber: 24,
+      reasons: ["turningPoint"],
+      scoreAfter: -12,
+      scoreBefore: 30,
+      square: 19,
+    });
+
+    expect(message.explanation).toContain("流れが変わったかも");
+    expect(message.explanation).not.toContain("悪手");
+    expect(message.explanation).not.toContain("ミス");
+    expect(message.explanation).not.toContain("ダメ");
   });
 });
 

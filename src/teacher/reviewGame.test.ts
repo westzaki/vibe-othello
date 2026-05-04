@@ -69,6 +69,81 @@ describe("teacher review", () => {
 
     expect(review.reviewedMoves[0].review.reasons).toContain("cornerGiven");
   });
+
+  it("adds turningPoint when the reviewed move drops and does not recover soon", () => {
+    const boardBefore = createEmptyBoard();
+    boardBefore[0] = "black";
+    const boardAfter = createEmptyBoard();
+    boardAfter[0] = "white";
+    boardAfter[10] = "black";
+    const review = reviewGame(
+      [
+        createMoveRecord({
+          boardAfter,
+          boardBefore,
+          moveNumber: 12,
+          square: 10,
+        }),
+      ],
+      {
+        reviewedDisc: "black",
+        searchDepth: 1,
+      },
+    );
+
+    expect(review.reviewedMoves[0].review.reasons).toContain("turningPoint");
+    expect(review.reviewedMoves[0].review.kind).toBe("bad");
+  });
+
+  it("does not add turningPoint for small evaluation changes", () => {
+    const boardBefore = createEmptyBoard();
+    const boardAfter = createEmptyBoard();
+    boardAfter[27] = "black";
+    const review = reviewGame(
+      [
+        createMoveRecord({
+          boardAfter,
+          boardBefore,
+          moveNumber: 12,
+          square: 27,
+        }),
+      ],
+      {
+        reviewedDisc: "black",
+        searchDepth: 1,
+      },
+    );
+
+    expect(review.reviewedMoves[0].review.reasons).not.toContain(
+      "turningPoint",
+    );
+  });
+
+  it("keeps corner and danger reasons when turningPoint is added", () => {
+    const boardBefore = createEmptyBoard();
+    boardBefore[7] = "black";
+    const boardAfter = createEmptyBoard();
+    boardAfter[7] = "white";
+    boardAfter[9] = "black";
+    const review = reviewGame(
+      [
+        createMoveRecord({
+          boardAfter,
+          boardBefore,
+          moveNumber: 12,
+          square: 9,
+        }),
+      ],
+      {
+        reviewedDisc: "black",
+        searchDepth: 1,
+      },
+    );
+
+    expect(review.reviewedMoves[0].review.reasons).toEqual(
+      expect.arrayContaining(["dangerSquare", "turningPoint"]),
+    );
+  });
 });
 
 function createCornerThreatBoard(): Board {
@@ -82,10 +157,12 @@ function createCornerThreatBoard(): Board {
 function createMoveRecord({
   boardAfter,
   boardBefore,
+  moveNumber = 1,
   square,
 }: {
   boardAfter: Board;
   boardBefore: Board;
+  moveNumber?: number;
   square: number;
 }): MoveRecord {
   return {
@@ -94,7 +171,7 @@ function createMoveRecord({
     disc: "black",
     flippedSquares: [],
     legalMovesBefore: [square],
-    moveNumber: 1,
+    moveNumber,
     square,
   };
 }

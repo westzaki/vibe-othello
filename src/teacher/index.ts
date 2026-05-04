@@ -3,6 +3,11 @@
 // reaching into the engine/message modules directly.
 export { createPositionReview } from "./createPositionReview";
 export type { PositionReview } from "./createPositionReview";
+export {
+  createEvaluationTimeline,
+  defaultTurningPointAnalysisConfig,
+  findTurningPointMoveNumbers,
+} from "./evaluationTimeline";
 export { createReviewLesson } from "./createReviewLesson";
 export { defaultTeacherReviewConfig } from "./reviewConfig";
 export type { TeacherReviewConfig } from "./reviewConfig";
@@ -13,6 +18,7 @@ export {
 } from "./reviewMessages";
 export type {
   CandidateMoveReview,
+  EvaluationTimelineEntry,
   GameReview,
   GameReviewMessages,
   MoveReview,
@@ -25,4 +31,5 @@ export type {
   ReviewedMove,
   ReviewGameOptions,
   ReviewLesson,
+  TurningPointAnalysisConfig,
 } from "./reviewTypes";
