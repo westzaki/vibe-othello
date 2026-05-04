@@ -49,6 +49,23 @@ export type GameReview = {
   };
 };
 
+export type ReviewCardKind = "niceMove" | "turningPoint" | "practiceTarget";
+
+export type ReviewCard = {
+  bodyText: string;
+  emptyText: string;
+  kind: ReviewCardKind;
+  move: ReviewedMove | null;
+  title: string;
+};
+
+export type ReviewLesson = {
+  cards: ReviewCard[];
+  niceMove: ReviewedMove | null;
+  practiceTarget: ReviewedMove | null;
+  turningPointCandidate: ReviewedMove | null;
+};
+
 export type MoveReviewMessage = {
   explanation: string;
   suggestion?: string;

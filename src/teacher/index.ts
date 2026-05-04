@@ -3,6 +3,7 @@
 // reaching into the engine/message modules directly.
 export { createPositionReview } from "./createPositionReview";
 export type { PositionReview } from "./createPositionReview";
+export { createReviewLesson } from "./createReviewLesson";
 export { defaultTeacherReviewConfig } from "./reviewConfig";
 export type { TeacherReviewConfig } from "./reviewConfig";
 export { reviewGame } from "./reviewGame";
@@ -18,6 +19,9 @@ export type {
   MoveReviewKind,
   MoveReviewMessage,
   MoveReviewReason,
+  ReviewCard,
+  ReviewCardKind,
   ReviewedMove,
   ReviewGameOptions,
+  ReviewLesson,
 } from "./reviewTypes";
