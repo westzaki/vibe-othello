@@ -151,6 +151,7 @@ export function useOthelloGame({ enabled = true }: UseOthelloGameOptions = {}) {
     legalMoves,
     message: formatGameSessionNotice(session.notice),
     moveHistory: session.moveHistory,
+    notice: session.notice,
     players,
     winner: session.winner,
     endGame: handleEndGame,

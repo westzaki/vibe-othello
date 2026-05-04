@@ -9,14 +9,14 @@ export function formatGameSessionNotice(
   }
 
   if (notice.type === "pass") {
-    return `${formatDisc(notice.skippedDisc)} has no legal moves. ${formatDisc(
+    return `${formatDisc(notice.skippedDisc)}は置ける場所がないみたい。${formatDisc(
       notice.nextDisc,
-    )} plays again.`;
+    )}がもう一度打つよ。`;
   }
 
   return null;
 }
 
 function formatDisc(disc: DiscColor): string {
-  return disc === "black" ? "Black" : "White";
+  return disc === "black" ? "黒" : "白";
 }

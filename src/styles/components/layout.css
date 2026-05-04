@@ -49,6 +49,7 @@
 }
 
 .game-shell {
+  position: relative;
   display: grid;
   min-width: 0;
   align-items: center;

@@ -9,7 +9,7 @@ describe("formatGameSessionNotice", () => {
         skippedDisc: "white",
         type: "pass",
       }),
-    ).toBe("White has no legal moves. Black plays again.");
+    ).toBe("白は置ける場所がないみたい。黒がもう一度打つよ。");
   });
 
   it("returns null when there is no notice", () => {

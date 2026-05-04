@@ -5,6 +5,7 @@ import type { PlayerConfig } from "../game/players";
 import type { GameSession } from "../game/session";
 
 const cpuMoveDelayMs = 350;
+const cpuMoveDelayAfterPassMs = 2800;
 
 type UseCpuTurnParams = {
   currentPlayer: PlayerConfig;
@@ -26,6 +27,11 @@ export function useCpuTurn({
     if (!isCpuThinking) {
       return;
     }
+
+    const moveDelayMs =
+      session.notice?.type === "pass"
+        ? cpuMoveDelayAfterPassMs
+        : cpuMoveDelayMs;
 
     const timeoutId = window.setTimeout(() => {
       const move = chooseCpuMove(
@@ -49,7 +55,7 @@ export function useCpuTurn({
       }
 
       onPlaceDisc(move);
-    }, cpuMoveDelayMs);
+    }, moveDelayMs);
 
     return () => window.clearTimeout(timeoutId);
   }, [currentPlayer, isCpuThinking, onPlaceDisc, session]);
