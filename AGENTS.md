@@ -20,11 +20,12 @@ This is both a learning project and a product design project. The code should be
 
 ## Product Design References
 
-The product vision, coach persona, and learning design are defined in:
+The product vision, coach persona, learning design, and review experience design are defined in:
 
 - docs/product-vision.md
 - docs/coach-persona.md
 - docs/learning-design.md
+- docs/review-design.md
 
 All product, UI, coaching, review, practice, and learning-related changes must align with these documents.
 
