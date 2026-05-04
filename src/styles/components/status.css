@@ -1,0 +1,123 @@
+.game-status-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 10px 12px;
+}
+
+.score-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.score-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  justify-content: center;
+  border: 1px solid rgba(184, 176, 225, 0.32);
+  border-radius: 999px;
+  min-height: 42px;
+  padding: 8px 12px;
+  color: #5c5866;
+  background: rgba(255, 255, 255, 0.76);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.score-chip::before {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  content: "";
+}
+
+.score-chip strong {
+  color: #34323e;
+  font-size: 1rem;
+}
+
+.score-chip--black::before {
+  background: radial-gradient(
+    circle at 35% 28%,
+    #60645e 0%,
+    #20231f 36%,
+    #090a09 100%
+  );
+}
+
+.score-chip--white::before {
+  background: radial-gradient(
+    circle at 35% 28%,
+    #ffffff 0%,
+    #eee6d6 48%,
+    #c8baa1 100%
+  );
+}
+
+.session-status,
+.result-status,
+.turn-status {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  color: #5c5866;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.turn-status {
+  gap: 10px;
+}
+
+.session-status {
+  border: 1px solid rgba(117, 190, 169, 0.46);
+  border-radius: 999px;
+  padding: 5px 12px;
+  color: #347967;
+  background: rgba(219, 246, 236, 0.8);
+}
+
+.result-status {
+  border: 1px solid rgba(255, 173, 153, 0.46);
+  border-radius: 999px;
+  padding: 5px 12px;
+  color: #b85c52;
+  background: rgba(255, 231, 225, 0.78);
+  text-transform: capitalize;
+}
+
+.game-message {
+  margin: 0;
+  border: 1px solid rgba(255, 204, 112, 0.42);
+  border-radius: 16px;
+  padding: 8px 12px;
+  color: #7d5d19;
+  background: rgba(255, 248, 222, 0.9);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.turn-disc {
+  display: inline-flex;
+  min-width: 58px;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  text-transform: capitalize;
+}
+
+.turn-disc--black {
+  color: #f6f1e7;
+  background: #181a18;
+}
+
+.turn-disc--white {
+  color: #1f2620;
+  background: #f2eadb;
+}

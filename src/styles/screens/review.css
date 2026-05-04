@@ -1,0 +1,346 @@
+.review-screen {
+  display: grid;
+  width: min(100%, 1120px);
+  place-items: center;
+}
+
+.review-panel {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  width: 100%;
+  justify-items: stretch;
+  gap: 18px;
+  border: 1px solid rgba(184, 176, 225, 0.42);
+  border-radius: 26px;
+  padding: clamp(18px, 4vw, 32px);
+  text-align: center;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.96),
+      rgba(255, 252, 246, 0.94)
+    ),
+    #ffffff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 24px 54px rgba(118, 100, 88, 0.16);
+}
+
+.review-panel > .eyebrow,
+.review-panel > h1 {
+  text-align: center;
+}
+
+.review-panel__status {
+  margin: 0;
+  border: 1px solid rgba(117, 190, 169, 0.46);
+  border-radius: 999px;
+  padding: 7px 14px;
+  color: #347967;
+  background: rgba(219, 246, 236, 0.8);
+  font-size: 0.92rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.review-summary {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  text-align: left;
+}
+
+.review-layout {
+  display: grid;
+  min-width: 0;
+  align-items: start;
+  grid-template-columns: minmax(320px, 0.95fr) minmax(320px, 1fr);
+  gap: clamp(16px, 3vw, 28px);
+  text-align: left;
+}
+
+.review-board-panel {
+  display: grid;
+  align-content: start;
+  justify-items: stretch;
+  gap: 12px;
+}
+
+.review-detail {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.review-detail div {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 10px;
+  border: 1px solid rgba(184, 176, 225, 0.24);
+  border-radius: 14px;
+  padding: 9px 10px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.review-detail dt {
+  color: #7770b8;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.review-detail dd {
+  margin: 0;
+  color: #34323e;
+  font-size: 0.84rem;
+  font-weight: 850;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.review-summary__section {
+  display: grid;
+  gap: 9px;
+}
+
+.review-summary__title {
+  width: fit-content;
+  margin: 0;
+  border-radius: 999px;
+  padding: 4px 10px;
+  color: #7770b8;
+  background: rgba(250, 246, 255, 0.9);
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.review-summary__section:nth-child(1) .review-summary__title {
+  color: #347967;
+  background: rgba(219, 246, 236, 0.9);
+}
+
+.review-summary__section:nth-child(2) .review-summary__title {
+  color: #b85c52;
+  background: rgba(255, 231, 225, 0.9);
+}
+
+.review-summary__section:nth-child(3) .review-summary__title {
+  color: #7d5d19;
+  background: rgba(255, 248, 222, 0.92);
+}
+
+.review-summary__list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.review-summary__item,
+.review-summary__advice,
+.review-summary__empty {
+  border: 1px solid rgba(184, 176, 225, 0.24);
+  border-radius: 16px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.review-summary__item {
+  display: grid;
+  width: 100%;
+  gap: 7px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.review-summary__item:hover,
+.review-summary__item--selected {
+  border-color: rgba(117, 190, 169, 0.62);
+  background: rgba(233, 249, 243, 0.82);
+}
+
+.review-summary__item--selected {
+  box-shadow:
+    inset 4px 0 0 #75bea9,
+    0 0 0 1px rgba(117, 190, 169, 0.28);
+}
+
+.review-summary__item:focus-visible {
+  outline: 3px solid #f0c86b;
+  outline-offset: 2px;
+}
+
+.review-summary__move-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #777384;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.review-summary__move-line strong {
+  color: #34323e;
+  font-size: 0.94rem;
+}
+
+.review-summary__item p,
+.review-summary__advice,
+.review-summary__empty {
+  margin: 0;
+  color: #5c5866;
+  font-size: 0.86rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.review-summary__suggestion {
+  color: #347967;
+}
+
+.review-panel__actions {
+  justify-content: center;
+}
+
+.review-playback-group {
+  display: grid;
+  gap: 8px;
+}
+
+.review-playback {
+  display: grid;
+  grid-template-columns: minmax(96px, auto) minmax(78px, 1fr) minmax(96px, auto);
+  align-items: center;
+  gap: 8px;
+}
+
+.review-playback .game-action {
+  width: 100%;
+  min-height: 44px;
+}
+
+.review-playback .game-action:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.review-playback__status {
+  display: grid;
+  min-height: 44px;
+  place-items: center;
+  border: 1px solid rgba(255, 204, 112, 0.42);
+  border-radius: 16px;
+  color: #7d5d19;
+  background: rgba(255, 248, 222, 0.9);
+  font-size: 0.86rem;
+  font-weight: 950;
+}
+
+.review-playback__practice {
+  width: 100%;
+  min-height: 46px;
+}
+
+.review-board {
+  width: min(100%, 480px);
+  min-width: 0;
+  border: 10px solid #8a6847;
+  border-radius: 20px;
+  padding: 10px;
+  color: #f7f3e9;
+  background: linear-gradient(135deg, #ad875f, #7c5838 42%, #caa075 100%);
+  box-shadow:
+    0 18px 38px rgba(105, 85, 69, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.review-board__square {
+  cursor: default;
+}
+
+.review-board__square--legal::after {
+  display: none;
+}
+
+.review-board__legal-dot {
+  position: absolute;
+  z-index: 1;
+  inset: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 248, 222, 0.9);
+  box-shadow: 0 0 10px rgba(255, 210, 122, 0.58);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.review-board__square--played {
+  box-shadow: inset 0 0 0 3px rgba(239, 126, 113, 0.78);
+}
+
+.review-board__square--best {
+  box-shadow: inset 0 0 0 3px rgba(117, 190, 169, 0.92);
+}
+
+.review-board__square--played.review-board__square--best {
+  box-shadow:
+    inset 0 0 0 3px rgba(117, 190, 169, 0.92),
+    inset 0 0 0 6px rgba(239, 126, 113, 0.72);
+}
+
+.review-board__marker {
+  position: absolute;
+  z-index: 2;
+  top: 4px;
+  left: 4px;
+  border-radius: 999px;
+  min-width: 22px;
+  padding: 3px 5px;
+  color: #34323e;
+  background: #fff8de;
+  font-size: clamp(0.52rem, 1.5vw, 0.64rem);
+  font-weight: 950;
+  line-height: 1;
+}
+
+.review-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  color: #5c5866;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.review-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.review-legend__marker {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.review-legend__marker--played {
+  border: 2px solid rgba(239, 126, 113, 0.9);
+}
+
+.review-legend__marker--best {
+  border: 2px solid rgba(117, 190, 169, 0.95);
+}
+
+.review-legend__marker--legal {
+  border-radius: 50%;
+  background: rgba(255, 210, 122, 0.5);
+}

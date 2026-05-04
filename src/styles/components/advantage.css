@@ -1,0 +1,81 @@
+.advantage-panel {
+  display: grid;
+  gap: 9px;
+  border: 1px solid rgba(184, 176, 225, 0.28);
+  border-radius: 18px;
+  padding: 10px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.82),
+      rgba(255, 250, 243, 0.72)
+    ),
+    #ffffff;
+}
+
+.advantage-panel__header,
+.advantage-panel__scores {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.advantage-panel__header {
+  color: #7770b8;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.advantage-panel__header strong {
+  color: #347967;
+  font-size: 0.82rem;
+  text-transform: none;
+}
+
+.advantage-bar {
+  display: flex;
+  overflow: hidden;
+  height: 18px;
+  border: 1px solid rgba(184, 176, 225, 0.34);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 10px 16px rgba(118, 100, 88, 0.12);
+}
+
+.advantage-bar__segment {
+  min-width: 0;
+  transition: flex-basis 280ms ease;
+}
+
+.advantage-bar__segment--black {
+  flex-basis: var(--black-advantage);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14), transparent 32%),
+    linear-gradient(180deg, #343831, #080908);
+}
+
+.advantage-bar__segment--white {
+  flex: 1;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.22), transparent 42%),
+    linear-gradient(180deg, #fffdf4, #c8baa1);
+}
+
+.advantage-panel__scores {
+  color: #5c5866;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.advantage-panel__score {
+  min-width: 0;
+}
+
+.advantage-panel__score--white {
+  color: #5c5866;
+  text-align: right;
+}

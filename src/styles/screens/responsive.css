@@ -1,0 +1,120 @@
+@media (max-width: 520px) {
+  .app {
+    align-items: start;
+    padding: 18px 12px;
+  }
+
+  .game-shell {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "sidebar"
+      "board"
+      "history";
+    gap: 14px;
+  }
+
+  .game-sidebar {
+    padding: 14px;
+  }
+
+  .game-table {
+    padding: 10px;
+  }
+
+  .game-heading {
+    text-align: center;
+  }
+
+  .game-status-row,
+  .game-actions {
+    justify-content: center;
+  }
+
+  .game-action {
+    flex: 1 1 128px;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  .start-screen {
+    width: 100%;
+    max-width: calc(100vw - 24px);
+    gap: 10px;
+  }
+
+  .start-screen__board-preview {
+    width: min(38vw, 140px);
+    border-width: 10px;
+    gap: 7px;
+    padding: 14px;
+  }
+
+  .start-panel {
+    width: 100%;
+    max-width: 100%;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .start-panel__section {
+    padding: 12px;
+  }
+
+  .mode-selector,
+  .disc-selector {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cpu-star-selector {
+    gap: 6px;
+  }
+
+  .cpu-star-selector__button {
+    min-height: 38px;
+  }
+
+  .board-frame {
+    width: min(100%, 560px);
+  }
+
+  .review-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .review-panel {
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .review-board {
+    width: min(100%, 560px);
+  }
+
+  .review-playback {
+    grid-template-columns: 1fr;
+  }
+
+  .review-detail div {
+    grid-template-columns: 70px minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 521px) and (max-width: 900px) {
+  .game-shell {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "sidebar"
+      "board"
+      "history";
+  }
+
+  .game-sidebar {
+    align-items: start;
+  }
+
+  .review-layout {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,122 @@
+.move-history {
+  display: grid;
+  gap: 10px;
+  min-height: 0;
+  border: 1px solid rgba(184, 176, 225, 0.3);
+  border-radius: 18px;
+  padding: 10px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.86),
+      rgba(255, 250, 243, 0.76)
+    ),
+    #ffffff;
+}
+
+.move-history__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.move-history__title {
+  margin: 0;
+  color: #7770b8;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.move-history__count {
+  display: inline-grid;
+  min-width: 28px;
+  min-height: 24px;
+  place-items: center;
+  border: 1px solid rgba(255, 204, 112, 0.44);
+  border-radius: 999px;
+  color: #7d5d19;
+  background: rgba(255, 248, 222, 0.9);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.move-history__empty {
+  margin: 0;
+  color: #777384;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.move-history__list {
+  display: grid;
+  overflow: auto;
+  max-height: 180px;
+  margin: 0;
+  padding: 0;
+  gap: 6px;
+  list-style: none;
+}
+
+.move-history__item {
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 36px;
+  border: 1px solid rgba(184, 176, 225, 0.24);
+  border-radius: 14px;
+  padding: 7px 9px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.move-history__disc {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: 0 5px 9px rgba(0, 0, 0, 0.24);
+}
+
+.move-history__disc--black {
+  background: radial-gradient(
+    circle at 35% 28%,
+    #60645e 0%,
+    #20231f 36%,
+    #090a09 100%
+  );
+}
+
+.move-history__disc--white {
+  background: radial-gradient(
+    circle at 35% 28%,
+    #ffffff 0%,
+    #eee6d6 48%,
+    #c8baa1 100%
+  );
+}
+
+.move-history__main {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.move-history__move-number,
+.move-history__flips {
+  color: #777384;
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.move-history__square {
+  color: #34323e;
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.move-history__flips {
+  color: #7d5d19;
+}
