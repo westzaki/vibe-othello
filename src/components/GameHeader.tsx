@@ -72,10 +72,19 @@ export function GameHeader({
                 className={`turn-disc turn-disc--${currentDisc}`}
                 aria-hidden="true"
               />
-              <span>
-                {isCpuThinking
-                  ? "ビビーが考え中"
-                  : `${formatDisc(currentDisc)}の番`}
+              <span className="turn-status__copy">
+                <span className="turn-status__label">
+                  {isCpuThinking
+                    ? "ビビーが考え中"
+                    : `${formatDisc(currentDisc)}の番`}
+                </span>
+                {gameStatus === "playing" && (
+                  <span className="turn-status__hint">
+                    {isCpuThinking
+                      ? "ちょっとまってね"
+                      : "置ける場所が光っています"}
+                  </span>
+                )}
               </span>
             </p>
           )}
