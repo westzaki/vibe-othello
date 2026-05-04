@@ -1,5 +1,5 @@
 import { useReducer } from "react";
-import type { CpuLevel } from "../cpu";
+import type { PlayableCpuLevel } from "../cpu";
 import type { DiscColor } from "../game/othello";
 import { createMatchPlayerSettings, type GameMode } from "../game/matchSetup";
 import type { PlayerSettings } from "../game/players";
@@ -108,7 +108,7 @@ export function useAppFlow({
 
   function startMatch(
     mode: GameMode,
-    cpuLevel: CpuLevel,
+    cpuLevel: PlayableCpuLevel,
     humanDisc: DiscColor,
   ) {
     game.setPlayers(createMatchPlayerSettings(mode, cpuLevel, humanDisc));

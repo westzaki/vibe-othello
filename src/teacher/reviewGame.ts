@@ -1,6 +1,7 @@
 import {
   getMinimaxMoveScores,
   getMobilityDifference,
+  getTeacherMoveScores,
   strategicEvaluateBoard,
 } from "../cpu";
 import {
@@ -27,7 +28,6 @@ import {
 } from "./evaluationTimeline";
 import { compareLearningIssueMoves } from "./reviewLessonSelection";
 
-const defaultSearchDepth = 3;
 const defaultMaxHighlights = 2;
 const goodMoveScoreGap = 8;
 const badMoveScoreGap = 28;
@@ -43,7 +43,7 @@ export function reviewGame(
   moveHistory: MoveRecord[],
   options: ReviewGameOptions,
 ): GameReview {
-  const searchDepth = options.searchDepth ?? defaultSearchDepth;
+  const searchDepth = options.searchDepth;
   const maxHighlights = options.maxHighlights ?? defaultMaxHighlights;
   const evaluationTimeline = createEvaluationTimeline(
     moveHistory,
@@ -78,12 +78,13 @@ export function reviewGame(
 
 function reviewMove(
   move: MoveRecord,
-  searchDepth: number,
+  searchDepth: number | undefined,
   isTurningPoint: boolean,
 ): ReviewedMove {
-  const moveScores = getMinimaxMoveScores(move.boardBefore, move.disc, {
-    searchDepth,
-  });
+  const moveScores =
+    searchDepth === undefined
+      ? getTeacherMoveScores(move.boardBefore, move.disc)
+      : getMinimaxMoveScores(move.boardBefore, move.disc, { searchDepth });
   const candidateMoves = moveScores.map<CandidateMoveReview>(
     ({ move: square, score }, index) => ({
       square,

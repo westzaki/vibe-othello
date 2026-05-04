@@ -4,6 +4,7 @@ import { createBoardFixture } from "../../test/boardFixtures";
 import {
   chooseGrandmasterMove,
   chooseIterativeDeepeningMove,
+  getPerfectEndgameMoveScores,
   choosePerfectEndgameMove,
 } from "./grandmasterStrategy";
 
@@ -34,5 +35,13 @@ describe("grandmaster CPU", () => {
     const board = createBoardFixture({ 0: null, 7: "white" }, "black");
 
     expect(choosePerfectEndgameMove(board, "white")).toBe(0);
+  });
+
+  it("returns exact endgame scores for legal moves", () => {
+    const board = createBoardFixture({ 0: null, 7: "white" }, "black");
+
+    expect(getPerfectEndgameMoveScores(board, "white")).toEqual([
+      { move: 0, score: -48 },
+    ]);
   });
 });

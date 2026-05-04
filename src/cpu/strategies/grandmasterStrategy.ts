@@ -46,10 +46,20 @@ export function chooseIterativeDeepeningMove(
   disc: DiscColor,
   timeLimitMs = grandmasterTimeLimitMs,
 ): SquareIndex | null {
+  return (
+    getIterativeDeepeningMoveScores(board, disc, timeLimitMs)[0]?.move ?? null
+  );
+}
+
+export function getIterativeDeepeningMoveScores(
+  board: Board,
+  disc: DiscColor,
+  timeLimitMs = grandmasterTimeLimitMs,
+): RootMoveScore[] {
   const legalMoves = getLegalMoves(board, disc);
 
   if (legalMoves.length === 0) {
-    return null;
+    return [];
   }
 
   const deadline = Date.now() + timeLimitMs;
@@ -59,7 +69,6 @@ export function chooseIterativeDeepeningMove(
     (nextBoard) => strategicEvaluateBoard(nextBoard, disc),
     legalMoves,
   );
-  let bestMove = orderMovesByScore(initialScores, "descending")[0];
   let previousScores = initialScores;
   const maxDepth = countEmptySquares(board);
 
@@ -81,10 +90,9 @@ export function chooseIterativeDeepeningMove(
     }
 
     previousScores = searchResult.scores;
-    bestMove = orderMovesByScore(searchResult.scores, "descending")[0];
   }
 
-  return bestMove;
+  return sortRootMoveScores(previousScores);
 }
 
 function searchRootMoves(
@@ -329,17 +337,23 @@ export function choosePerfectEndgameMove(
   board: Board,
   disc: DiscColor,
 ): SquareIndex | null {
+  return getPerfectEndgameMoveScores(board, disc)[0]?.move ?? null;
+}
+
+export function getPerfectEndgameMoveScores(
+  board: Board,
+  disc: DiscColor,
+): RootMoveScore[] {
   const legalMoves = getLegalMoves(board, disc);
 
   if (legalMoves.length === 0) {
-    return null;
+    return [];
   }
 
   const orderedMoves = getOrderedMoves(board, disc, disc, legalMoves, true);
   const cache: ExactScoreCache = new Map();
-  let bestMove = orderedMoves[0];
-  let bestScore = Number.NEGATIVE_INFINITY;
   let alpha = Number.NEGATIVE_INFINITY;
+  const scores: RootMoveScore[] = [];
 
   for (const move of orderedMoves) {
     const score = solveEndgame(
@@ -351,15 +365,12 @@ export function choosePerfectEndgameMove(
       cache,
     );
 
-    if (score > bestScore) {
-      bestMove = move;
-      bestScore = score;
-    }
+    scores.push({ move, score });
 
-    alpha = Math.max(alpha, bestScore);
+    alpha = Math.max(alpha, score);
   }
 
-  return bestMove;
+  return sortRootMoveScores(scores);
 }
 
 function solveEndgame(
@@ -538,6 +549,12 @@ function getFinalDiscDifference(board: Board, disc: DiscColor): number {
   const counts = countDiscs(board);
 
   return counts[disc] - counts[opponentDisc];
+}
+
+function sortRootMoveScores(scores: RootMoveScore[]): RootMoveScore[] {
+  return [...scores].sort(
+    (firstMove, secondMove) => secondMove.score - firstMove.score,
+  );
 }
 
 function getExactScoreCacheKey(

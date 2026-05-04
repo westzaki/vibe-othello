@@ -1,4 +1,4 @@
-import { getMinimaxMoveScores } from "../cpu";
+import { getTeacherMoveScores } from "../cpu";
 import {
   getLegalMoves,
   getNextDisc,
@@ -7,7 +7,6 @@ import {
   type DiscColor,
   type SquareIndex,
 } from "../game/othello";
-import { defaultTeacherReviewConfig } from "./reviewConfig";
 
 export type PositionReview = {
   bestSquare: SquareIndex | null;
@@ -34,9 +33,7 @@ export function createPositionReview(
       ? nextDiscLegalMoves
       : getLegalMoves(board, disc);
   const bestSquare =
-    getMinimaxMoveScores(board, disc, {
-      searchDepth: defaultTeacherReviewConfig.searchDepth,
-    })[0]?.move ?? null;
+    getTeacherMoveScores(board, disc)[0]?.move ?? null;
 
   return {
     bestSquare,

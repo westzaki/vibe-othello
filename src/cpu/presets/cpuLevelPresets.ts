@@ -5,6 +5,7 @@ import { chooseFixedDepthMinimaxMove } from "../strategies/minimaxStrategy";
 import { chooseOnePlyMove } from "../strategies/onePlyStrategy";
 import { chooseRandomMove } from "../strategies/randomStrategy";
 import { chooseStrategicMove } from "../strategies/strategicStrategy";
+import { chooseTeacherMove } from "../strategies/teacherStrategy";
 import type { CpuMoveStrategy } from "../strategies/types";
 
 export type CpuLevelPreset = {
@@ -36,6 +37,10 @@ export const cpuLevelPresets: Record<CpuLevel, CpuLevelPreset> = {
   level6: {
     level: "level6",
     chooseMove: chooseGrandmasterMove,
+  },
+  level7: {
+    level: "level7",
+    chooseMove: chooseTeacherMove,
   },
 };
 

@@ -4,7 +4,10 @@ export type CpuLevel =
   | "level3"
   | "level4"
   | "level5"
-  | "level6";
+  | "level6"
+  | "level7";
+
+export type PlayableCpuLevel = Exclude<CpuLevel, "level7">;
 
 export const cpuLevels = [
   "level1",
@@ -13,7 +16,7 @@ export const cpuLevels = [
   "level4",
   "level5",
   "level6",
-] as const satisfies CpuLevel[];
+] as const satisfies PlayableCpuLevel[];
 
 export const cpuLevelLabels: Record<CpuLevel, string> = {
   level1: "Beginner",
@@ -22,4 +25,5 @@ export const cpuLevelLabels: Record<CpuLevel, string> = {
   level4: "Expert",
   level5: "Master",
   level6: "Grandmaster",
+  level7: "Teacher",
 };

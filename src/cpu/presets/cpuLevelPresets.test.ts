@@ -8,7 +8,15 @@ import {
 
 describe("CPU level presets", () => {
   it("defines one preset for every user-facing CPU level", () => {
-    expect(Object.keys(cpuLevelPresets)).toEqual([...cpuLevels]);
+    expect(cpuLevels).not.toContain("level7");
+
+    for (const level of cpuLevels) {
+      expect(cpuLevelPresets[level].level).toBe(level);
+    }
+  });
+
+  it("defines the teacher-only level outside the user-facing levels", () => {
+    expect(cpuLevelPresets.level7.level).toBe("level7");
   });
 
   it("returns the preset for a CPU level", () => {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { cpuLevels, type CpuLevel } from "../cpu";
+import { cpuLevels, type CpuLevel, type PlayableCpuLevel } from "../cpu";
 import type { GameMode, HumanDisc } from "../game/matchSetup";
 
 type StartScreenProps = {
@@ -7,7 +7,11 @@ type StartScreenProps = {
   initialHumanDisc: HumanDisc;
   initialMode: GameMode;
   onOpenSettings: () => void;
-  onStart: (mode: GameMode, cpuLevel: CpuLevel, humanDisc: HumanDisc) => void;
+  onStart: (
+    mode: GameMode,
+    cpuLevel: PlayableCpuLevel,
+    humanDisc: HumanDisc,
+  ) => void;
 };
 
 export function StartScreen({
@@ -18,7 +22,9 @@ export function StartScreen({
   onStart,
 }: StartScreenProps) {
   const [mode, setMode] = useState<GameMode>(initialMode);
-  const [cpuLevel, setCpuLevel] = useState<CpuLevel>(initialCpuLevel);
+  const [cpuLevel, setCpuLevel] = useState<PlayableCpuLevel>(
+    getPlayableCpuLevel(initialCpuLevel),
+  );
   const [humanDisc, setHumanDisc] = useState<HumanDisc>(initialHumanDisc);
   const cpuLevelIndex = Math.max(0, cpuLevels.indexOf(cpuLevel));
   const isOnePlayer = mode === "onePlayer";
@@ -187,4 +193,8 @@ function getModeButtonClass(isSelected: boolean): string {
     "mode-selector__button",
     isSelected ? "mode-selector__button--selected" : "",
   ].join(" ");
+}
+
+function getPlayableCpuLevel(level: CpuLevel): PlayableCpuLevel {
+  return level === "level7" ? "level6" : level;
 }

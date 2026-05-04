@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createEmptyBoard, type Board } from "../game/othello";
+import { createEmptyBoard, type Board, type DiscColor } from "../game/othello";
 import type { MoveRecord } from "../game/session";
 import { placeCurrentDisc, startNewGame } from "../game/session";
+import { createBoardFixture } from "../test/boardFixtures";
 import { reviewGame } from "./reviewGame";
 
 describe("teacher review", () => {
@@ -38,6 +39,33 @@ describe("teacher review", () => {
     );
     expect(reviewedMove.review.reasons.length).toBeGreaterThan(0);
     expect(review).not.toHaveProperty("advice");
+  });
+
+  it("uses the teacher-level review search by default", () => {
+    const boardBefore = createBoardFixture({ 0: null, 7: "white" }, "black");
+    const boardAfter = createBoardFixture({}, "black");
+    for (let index = 0; index <= 7; index += 1) {
+      boardAfter[index] = "white";
+    }
+
+    const review = reviewGame(
+      [
+        createMoveRecord({
+          boardAfter,
+          boardBefore,
+          square: 0,
+          disc: "white",
+        }),
+      ],
+      {
+        reviewedDisc: "white",
+      },
+    );
+
+    expect(review.reviewedMoves[0].candidateMoves).toEqual([
+      expect.objectContaining({ rank: 1, score: -48, square: 0 }),
+    ]);
+    expect(review.reviewedMoves[0].review.bestSquare).toBe(0);
   });
 
   it("does not blame a move for a corner the opponent already had", () => {
@@ -157,18 +185,20 @@ function createCornerThreatBoard(): Board {
 function createMoveRecord({
   boardAfter,
   boardBefore,
+  disc = "black",
   moveNumber = 1,
   square,
 }: {
   boardAfter: Board;
   boardBefore: Board;
+  disc?: DiscColor;
   moveNumber?: number;
   square: number;
 }): MoveRecord {
   return {
     boardAfter,
     boardBefore,
-    disc: "black",
+    disc,
     flippedSquares: [],
     legalMovesBefore: [square],
     moveNumber,
