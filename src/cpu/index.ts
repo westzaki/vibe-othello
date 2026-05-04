@@ -12,7 +12,16 @@ export {
   countEmptySquares,
   getMobilityDifference,
 } from "./evaluation/evaluationFeatures";
-export { solveExactEndgameDiscDifference } from "./search/exactEndgame";
+export {
+  chooseExactEndgameMove,
+  getExactEndgameMoveScores,
+  solveExactEndgameDiscDifference,
+} from "./search/exactEndgame";
+export type {
+  ExactEndgameMoveOptions,
+  ExactEndgameMoveOrderer,
+  ExactEndgameMoveScore,
+} from "./search/exactEndgame";
 export { getMinimaxMoveScores } from "./search/minimaxSearch";
 export type {
   MinimaxMoveScore,

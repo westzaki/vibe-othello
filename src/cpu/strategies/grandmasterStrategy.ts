@@ -11,6 +11,7 @@ import {
 import { countEmptySquares } from "../evaluation/evaluationFeatures";
 import { strategicEvaluateBoard } from "../evaluation/strategicEvaluateBoard";
 import { getScoredMoves, orderMovesByScore } from "../moveSelection";
+import { chooseExactEndgameMove } from "../search/exactEndgame";
 
 const grandmasterTimeLimitMs = 300;
 const iterativeDeepeningMinDepth = 1;
@@ -20,13 +21,8 @@ const candidatePruneScoreMargin = 45;
 const fullWidthSearchDepth = 4;
 const finalScoreWeight = 1000;
 
-type ExactScoreCache = Map<string, number>;
 type RootMoveScore = {
   move: SquareIndex;
-  score: number;
-};
-type EndgameScore = {
-  isExact: boolean;
   score: number;
 };
 type TimedSearchResult = {
@@ -329,190 +325,29 @@ export function choosePerfectEndgameMove(
   board: Board,
   disc: DiscColor,
 ): SquareIndex | null {
-  const legalMoves = getLegalMoves(board, disc);
-
-  if (legalMoves.length === 0) {
-    return null;
-  }
-
-  const orderedMoves = getOrderedMoves(board, disc, disc, legalMoves, true);
-  const cache: ExactScoreCache = new Map();
-  let bestMove = orderedMoves[0];
-  let bestScore = Number.NEGATIVE_INFINITY;
-  let alpha = Number.NEGATIVE_INFINITY;
-
-  for (const move of orderedMoves) {
-    const score = solveEndgame(
-      placeDisc(board, move, disc),
-      getNextDisc(disc),
+  return chooseExactEndgameMove(board, disc, {
+    orderedMoves: getOrderedMoves(
+      board,
       disc,
-      alpha,
-      Number.POSITIVE_INFINITY,
-      cache,
-    );
-
-    if (score > bestScore) {
-      bestMove = move;
-      bestScore = score;
-    }
-
-    alpha = Math.max(alpha, bestScore);
-  }
-
-  return bestMove;
-}
-
-function solveEndgame(
-  board: Board,
-  currentDisc: DiscColor,
-  maximizingDisc: DiscColor,
-  alpha: number,
-  beta: number,
-  cache: ExactScoreCache,
-): number {
-  const cacheKey = getExactScoreCacheKey(board, currentDisc, maximizingDisc);
-  const cachedScore = cache.get(cacheKey);
-
-  if (cachedScore !== undefined) {
-    return cachedScore;
-  }
-
-  if (isGameOver(board)) {
-    const score = getFinalDiscDifference(board, maximizingDisc);
-
-    cache.set(cacheKey, score);
-
-    return score;
-  }
-
-  const legalMoves = getLegalMoves(board, currentDisc);
-  const nextDisc = getNextDisc(currentDisc);
-
-  if (legalMoves.length === 0) {
-    return solveEndgame(board, nextDisc, maximizingDisc, alpha, beta, cache);
-  }
-
-  if (currentDisc === maximizingDisc) {
-    const result = getMaxScore(
+      disc,
+      getLegalMoves(board, disc),
+      true,
+    ),
+    orderMoves: ({
       board,
       currentDisc,
-      maximizingDisc,
+      scoringDisc,
       legalMoves,
-      alpha,
-      beta,
-      cache,
-    );
-
-    if (result.isExact) {
-      cache.set(cacheKey, result.score);
-    }
-
-    return result.score;
-  }
-
-  const result = getMinScore(
-    board,
-    currentDisc,
-    maximizingDisc,
-    legalMoves,
-    alpha,
-    beta,
-    cache,
-  );
-
-  if (result.isExact) {
-    cache.set(cacheKey, result.score);
-  }
-
-  return result.score;
-}
-
-function getMaxScore(
-  board: Board,
-  currentDisc: DiscColor,
-  maximizingDisc: DiscColor,
-  legalMoves: SquareIndex[],
-  alpha: number,
-  beta: number,
-  cache: ExactScoreCache,
-): EndgameScore {
-  let bestScore = Number.NEGATIVE_INFINITY;
-  let isExact = true;
-  const orderedMoves = getOrderedMoves(
-    board,
-    currentDisc,
-    maximizingDisc,
-    legalMoves,
-    true,
-  );
-
-  for (const move of orderedMoves) {
-    const score = solveEndgame(
-      placeDisc(board, move, currentDisc),
-      getNextDisc(currentDisc),
-      maximizingDisc,
-      alpha,
-      beta,
-      cache,
-    );
-
-    bestScore = Math.max(bestScore, score);
-    alpha = Math.max(alpha, bestScore);
-
-    if (beta <= alpha) {
-      isExact = false;
-      break;
-    }
-  }
-
-  return {
-    isExact,
-    score: bestScore,
-  };
-}
-
-function getMinScore(
-  board: Board,
-  currentDisc: DiscColor,
-  maximizingDisc: DiscColor,
-  legalMoves: SquareIndex[],
-  alpha: number,
-  beta: number,
-  cache: ExactScoreCache,
-): EndgameScore {
-  let bestScore = Number.POSITIVE_INFINITY;
-  let isExact = true;
-  const orderedMoves = getOrderedMoves(
-    board,
-    currentDisc,
-    maximizingDisc,
-    legalMoves,
-    false,
-  );
-
-  for (const move of orderedMoves) {
-    const score = solveEndgame(
-      placeDisc(board, move, currentDisc),
-      getNextDisc(currentDisc),
-      maximizingDisc,
-      alpha,
-      beta,
-      cache,
-    );
-
-    bestScore = Math.min(bestScore, score);
-    beta = Math.min(beta, bestScore);
-
-    if (beta <= alpha) {
-      isExact = false;
-      break;
-    }
-  }
-
-  return {
-    isExact,
-    score: bestScore,
-  };
+      isMaximizing,
+    }) =>
+      getOrderedMoves(
+        board,
+        currentDisc,
+        scoringDisc,
+        legalMoves,
+        isMaximizing,
+      ),
+  });
 }
 
 function getOrderedMoves(
@@ -538,14 +373,4 @@ function getFinalDiscDifference(board: Board, disc: DiscColor): number {
   const counts = countDiscs(board);
 
   return counts[disc] - counts[opponentDisc];
-}
-
-function getExactScoreCacheKey(
-  board: Board,
-  currentDisc: DiscColor,
-  maximizingDisc: DiscColor,
-): string {
-  return `${currentDisc}:${maximizingDisc}:${board
-    .map((cell) => cell?.[0] ?? "-")
-    .join("")}`;
 }

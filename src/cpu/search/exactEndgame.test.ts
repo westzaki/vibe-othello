@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { getLegalMoves, placeDisc } from "../../game/othello";
 import { createBoardFixture } from "../../test/boardFixtures";
-import { solveExactEndgameDiscDifference } from "./exactEndgame";
+import {
+  chooseExactEndgameMove,
+  getExactEndgameMoveScores,
+  solveExactEndgameDiscDifference,
+} from "./exactEndgame";
 
 describe("exact endgame search", () => {
   it("solves a one-move endgame from the current turn", () => {
@@ -31,5 +35,26 @@ describe("exact endgame search", () => {
     expect(getLegalMoves(board, "white")).toEqual([2]);
     expect(getLegalMoves(afterWhiteMove, "black")).toEqual([1]);
     expect(solveExactEndgameDiscDifference(board, "white", "black")).toBe(63);
+  });
+
+  it("chooses the highest scoring exact endgame move", () => {
+    const board = createBoardFixture({ 0: null, 7: "white" }, "black");
+
+    expect(chooseExactEndgameMove(board, "white")).toBe(0);
+  });
+
+  it("returns exact endgame move scores in descending order", () => {
+    const board = createBoardFixture(
+      {
+        0: null,
+        1: null,
+        2: null,
+        4: "white",
+      },
+      "black",
+    );
+
+    expect(getExactEndgameMoveScores(board, "white").map(({ move }) => move))
+      .toEqual([2]);
   });
 });
