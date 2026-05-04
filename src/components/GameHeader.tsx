@@ -93,16 +93,14 @@ export function GameHeader({
       <div className="game-actions" aria-label="Game controls">
         {isPlaying ? (
           <>
-            {showUndo && (
-              <button
-                className="game-action"
-                disabled={isUndoDisabled}
-                onClick={onUndo}
-                type="button"
-              >
-                まった
-              </button>
-            )}
+            <button
+              className="game-action"
+              disabled={!showUndo || isUndoDisabled}
+              onClick={onUndo}
+              type="button"
+            >
+              まった
+            </button>
             <button className="game-action" onClick={requestEndGame} type="button">
               対局をやめる
             </button>
