@@ -3,9 +3,12 @@ import type { PracticeSessionOptions } from "../game/session";
 import type { OthelloGameController } from "../hooks/useOthelloGame";
 import {
   createGameReviewMessages,
+  createPracticeFeedbackContext,
   createReviewLesson,
   defaultTeacherReviewConfig,
   reviewGame,
+  type PracticeFeedbackContext,
+  type ReviewedMove,
 } from "../teacher";
 import { ReviewMoveSection } from "./review/ReviewMoveSection";
 import {
@@ -27,7 +30,10 @@ type ReviewScreenProps = {
   onBackToResult: () => void;
   onBackToStart: () => void;
   onMoveNumberChange: (moveNumber: number) => void;
-  onStartPractice: (options: PracticeSessionOptions) => void;
+  onStartPractice: (
+    options: PracticeSessionOptions,
+    feedbackContext?: PracticeFeedbackContext | null,
+  ) => void;
 };
 
 export function ReviewScreen({
@@ -96,20 +102,26 @@ export function ReviewScreen({
         displayedMoveNumber,
         displayedReviewedMove,
       ),
-    [displayedMoveNumber, displayedReviewedMove, game.moveHistory, playbackBoards],
+    [
+      displayedMoveNumber,
+      displayedReviewedMove,
+      game.moveHistory,
+      playbackBoards,
+    ],
   );
 
   function goToMove(moveNumber: number) {
     onMoveNumberChange(clampMoveNumber(moveNumber, maxMoveNumber));
   }
 
-  function startPracticeFromMove(moveNumber: number) {
+  function startPracticeFromMove(move: ReviewedMove) {
     onStartPractice(
       createPracticeOptionsFromMoveNumber(
         game.moveHistory,
         playbackBoards,
-        moveNumber,
+        move.moveNumber,
       ),
+      createPracticeFeedbackContext(move),
     );
   }
 
@@ -147,13 +159,15 @@ export function ReviewScreen({
                     messages={messages}
                     moves={getReviewCardMoves(card)}
                     onAction={
-                      practiceActionMove === null || card.actionLabel === undefined
+                      practiceActionMove === null ||
+                      card.actionLabel === undefined
                         ? undefined
-                        : () =>
-                            startPracticeFromMove(practiceActionMove.moveNumber)
+                        : () => startPracticeFromMove(practiceActionMove)
                     }
                     onSelectMove={goToMove}
-                    selectedMoveNumber={displayedReviewedMove?.moveNumber ?? null}
+                    selectedMoveNumber={
+                      displayedReviewedMove?.moveNumber ?? null
+                    }
                     showComparison={card.kind === "turningPoint"}
                     title={card.title}
                   />

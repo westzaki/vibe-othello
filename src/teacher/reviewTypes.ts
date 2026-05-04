@@ -36,6 +36,15 @@ export type MoveReview = {
   playedScore: number;
 };
 
+export type PracticeFeedbackContext = Pick<
+  MoveReview,
+  "bestSquare" | "disc" | "reasons" | "scoreAfter" | "square"
+>;
+
+export type PracticeFeedback = {
+  text: string;
+};
+
 export type ReviewMoveComparison = {
   nextFocus: string;
   playedMove: {

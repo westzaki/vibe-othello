@@ -2,7 +2,13 @@ import { useReducer } from "react";
 import type { CpuLevel } from "../cpu";
 import type { DiscColor } from "../game/othello";
 import { createMatchPlayerSettings, type GameMode } from "../game/matchSetup";
-import type { PracticeSessionOptions } from "../game/session";
+import type { PlayerSettings } from "../game/players";
+import type { MoveRecord, PracticeSessionOptions } from "../game/session";
+import {
+  createPracticeFeedback,
+  type PracticeFeedback,
+  type PracticeFeedbackContext,
+} from "../teacher";
 import { useOthelloGame, type OthelloGameController } from "./useOthelloGame";
 
 export type AppFlowState =
@@ -12,6 +18,7 @@ export type AppFlowState =
   | { screen: "review"; moveNumber: number }
   | {
       screen: "practice";
+      feedbackContext: PracticeFeedbackContext | null;
       returnMoveNumber: number;
       start: PracticeSessionOptions;
     };
@@ -28,6 +35,7 @@ export type AppFlowAction =
   | { type: "SELECT_REVIEW_MOVE"; moveNumber: number }
   | {
       type: "START_PRACTICE";
+      feedbackContext?: PracticeFeedbackContext | null;
       returnMoveNumber: number;
       start: PracticeSessionOptions;
     }
@@ -55,6 +63,7 @@ export function appFlowReducer(
     case "START_PRACTICE":
       return {
         screen: "practice",
+        feedbackContext: action.feedbackContext ?? null,
         returnMoveNumber: action.returnMoveNumber,
         start: action.start,
       };
@@ -95,6 +104,7 @@ export function useAppFlow({
     undoEnabled,
   });
   const reviewMoveNumber = getCurrentReviewMoveNumber(state);
+  const practiceFeedback = getPracticeFeedback(state, practiceGame);
 
   function startMatch(
     mode: GameMode,
@@ -134,11 +144,15 @@ export function useAppFlow({
     dispatch({ type: "BACK_TO_RESULT" });
   }
 
-  function startPractice(options: PracticeSessionOptions) {
+  function startPractice(
+    options: PracticeSessionOptions,
+    feedbackContext: PracticeFeedbackContext | null = null,
+  ) {
     copyPlayers(game, practiceGame);
     practiceGame.startPracticeSession(options);
     dispatch({
       type: "START_PRACTICE",
+      feedbackContext,
       returnMoveNumber: getReviewMoveNumber(state, game.moveHistory.length),
       start: options,
     });
@@ -165,6 +179,7 @@ export function useAppFlow({
   return {
     game,
     practiceGame,
+    practiceFeedback,
     reviewMoveNumber,
     screen,
     backToResult,
@@ -179,6 +194,29 @@ export function useAppFlow({
     startMatch,
     startPractice,
   };
+}
+
+function getPracticeFeedback(
+  state: AppFlowState,
+  practiceGame: OthelloGameController,
+): PracticeFeedback | null {
+  if (state.screen !== "practice") {
+    return null;
+  }
+
+  return createPracticeFeedback(
+    state.feedbackContext,
+    getFirstHumanPracticeMove(practiceGame.moveHistory, practiceGame.players),
+  );
+}
+
+export function getFirstHumanPracticeMove(
+  moveHistory: MoveRecord[],
+  players: PlayerSettings,
+): MoveRecord | null {
+  return (
+    moveHistory.find((move) => players[move.disc].type === "human") ?? null
+  );
 }
 
 function copyPlayers(

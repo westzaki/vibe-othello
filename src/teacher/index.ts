@@ -8,6 +8,10 @@ export {
   defaultTurningPointAnalysisConfig,
   findTurningPointMoveNumbers,
 } from "./evaluationTimeline";
+export {
+  createPracticeFeedback,
+  createPracticeFeedbackContext,
+} from "./practiceFeedback";
 export { createReviewLesson } from "./createReviewLesson";
 export { defaultTeacherReviewConfig } from "./reviewConfig";
 export type { TeacherReviewConfig } from "./reviewConfig";
@@ -33,6 +37,8 @@ export type {
   MoveReviewKind,
   MoveReviewMessage,
   MoveReviewReason,
+  PracticeFeedback,
+  PracticeFeedbackContext,
   ReviewCard,
   ReviewCardKind,
   ReviewMoveComparison,

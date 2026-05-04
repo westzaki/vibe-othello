@@ -12,7 +12,8 @@ export default function App() {
     soundEnabled: settings.soundEnabled,
     undoEnabled: settings.undoEnabled,
   });
-  const { game, practiceGame, reviewMoveNumber, screen } = appFlow;
+  const { game, practiceFeedback, practiceGame, reviewMoveNumber, screen } =
+    appFlow;
 
   return (
     <main className="app">
@@ -49,6 +50,7 @@ export default function App() {
           onEndGame={practiceGame.endGame}
           onOpenReview={appFlow.backToReview}
           onPlayAgain={appFlow.practicePlayAgain}
+          practiceFeedbackText={practiceFeedback?.text ?? null}
         />
       ) : (
         <GameScreen
