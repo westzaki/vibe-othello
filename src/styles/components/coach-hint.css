@@ -13,7 +13,7 @@
     0 10px 20px rgba(101, 158, 143, 0.1);
 }
 
-.coach-hint--active {
+.coach-hint--active.coach-hint--helpful {
   border-color: color-mix(
     in srgb,
     var(--color-accent-soft) 46%,
@@ -22,6 +22,20 @@
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(250, 246, 255, 0.62)),
     rgba(255, 255, 255, 0.54);
+}
+
+.coach-hint--risk {
+  border-color: color-mix(
+    in srgb,
+    var(--color-border-peach) 76%,
+    var(--color-border)
+  );
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 244, 238, 0.66)),
+    rgba(255, 255, 255, 0.54);
+  box-shadow:
+    var(--shadow-hairline),
+    0 10px 20px rgba(216, 126, 112, 0.1);
 }
 
 .coach-hint__label {
@@ -35,9 +49,14 @@
   letter-spacing: 0;
 }
 
-.coach-hint--active .coach-hint__label {
+.coach-hint--active.coach-hint--helpful .coach-hint__label {
   color: var(--color-accent-strong);
   background: var(--color-accent-wash);
+}
+
+.coach-hint--risk .coach-hint__label {
+  color: var(--color-peach-strong);
+  background: rgba(255, 222, 210, 0.72);
 }
 
 .coach-hint p {

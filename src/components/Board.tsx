@@ -10,6 +10,8 @@ const rowLabels = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
 type BoardProps = {
   board: OthelloBoard;
+  coachHintSquare?: SquareIndex | null;
+  coachHintTone?: BoardHintTone | null;
   currentDisc: DiscColor;
   flipAnimationId: number;
   flippedSquares: SquareIndex[];
@@ -19,8 +21,12 @@ type BoardProps = {
   placedSquare: SquareIndex | null;
 };
 
+export type BoardHintTone = "helpful" | "risk";
+
 export function Board({
   board,
+  coachHintSquare = null,
+  coachHintTone = null,
   currentDisc,
   flipAnimationId,
   flippedSquares,
@@ -51,6 +57,7 @@ export function Board({
           {board.map((cell, square: SquareIndex) => {
             const isLegal = legalMoves.includes(square);
             const isLastMove = square === lastMove && cell !== null;
+            const isCoachHintSquare = square === coachHintSquare;
             const flipIndex = flippedSquares.indexOf(square);
             const flipMotion =
               flipIndex >= 0 && placedSquare !== null
@@ -70,6 +77,10 @@ export function Board({
                   "board-square",
                   isLegal ? "board-square--legal" : "",
                   isLastMove ? "board-square--last-move" : "",
+                  isCoachHintSquare ? "board-square--coach-hint" : "",
+                  isCoachHintSquare && coachHintTone !== null
+                    ? `board-square--coach-hint-${coachHintTone}`
+                    : "",
                 ].join(" ")}
                 disabled={!isLegal}
                 key={square}

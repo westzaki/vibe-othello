@@ -67,10 +67,10 @@ export function createCoachHint(
       kind: "cornerRisk",
       message:
         messageStyle === "vague"
-          ? "角の近くは少し注意。置いた後に相手が角へ行けないか見てみよう。"
+          ? "角の近くは少し注意。ここに置く前に、相手が角へ行けないか見てみよう。"
           : `角の近くは少し注意。${formatSquare(
               cornerRiskCandidate.square,
-            )} の後に相手が角へ行けないか見てみよう。`,
+            )} は、置いた後に相手が角へ行けないか見てみよう。`,
     });
   }
 

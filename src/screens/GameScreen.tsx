@@ -1,7 +1,7 @@
 import { lazy, Suspense, useMemo } from "react";
 import { calculateAdvantage } from "../cpu";
 import { AdvantageBar } from "../components/AdvantageBar";
-import { Board } from "../components/Board";
+import { Board, type BoardHintTone } from "../components/Board";
 import { GameHeader } from "../components/GameHeader";
 import { GameResultOverlay } from "../components/GameResultOverlay";
 import { MoveHistory } from "../components/MoveHistory";
@@ -64,6 +64,8 @@ export function GameScreen({
     session: game.session,
     settings: coachHintSettings,
   });
+  const coachHintTone =
+    coachHintModel === null ? null : getCoachHintTone(coachHintModel);
   const resultWinner =
     game.gameStatus === "ended" &&
     game.endReason === "completed" &&
@@ -76,6 +78,8 @@ export function GameScreen({
       <div className="game-table">
         <Board
           board={game.board}
+          coachHintSquare={coachHintModel?.hint.square ?? null}
+          coachHintTone={coachHintTone}
           currentDisc={game.currentDisc}
           flipAnimationId={game.flipAnimationId}
           flippedSquares={game.flippedSquares}
@@ -168,16 +172,28 @@ export function GameScreen({
 }
 
 function CoachHintPanel({ model }: { model: CoachHintModel }) {
+  const isRiskHint = model.hint.kind === "cornerRisk";
+
   return (
     <div
-      className={`coach-hint coach-hint--${model.mode}`}
+      className={[
+        "coach-hint",
+        `coach-hint--${model.mode}`,
+        isRiskHint ? "coach-hint--risk" : "coach-hint--helpful",
+      ].join(" ")}
       role="status"
       aria-live="polite"
     >
-      <span className="coach-hint__label">ヒント</span>
+      <span className="coach-hint__label">
+        {isRiskHint ? "気をつけて" : "見てみよう"}
+      </span>
       <p>{model.hint.message}</p>
     </div>
   );
+}
+
+function getCoachHintTone(model: CoachHintModel): BoardHintTone {
+  return model.hint.kind === "cornerRisk" ? "risk" : "helpful";
 }
 
 function PassNoticeOverlay({ notice }: { notice: GameSessionNotice }) {
