@@ -1,10 +1,13 @@
 import type { DiscCounts, Winner } from "../game/othello";
+import type { PlayerSettings } from "../game/players";
+import { getResultTitle, getResultTone } from "./resultLabels";
 
 type GameResultOverlayProps = {
   discCounts: DiscCounts;
   onBackToStart: () => void;
   onOpenReview?: () => void;
   onPlayAgain: () => void;
+  players: PlayerSettings;
   winner: Winner;
 };
 
@@ -13,20 +16,26 @@ export function GameResultOverlay({
   onBackToStart,
   onOpenReview,
   onPlayAgain,
+  players,
   winner,
 }: GameResultOverlayProps) {
   const score = `${discCounts.black} - ${discCounts.white}`;
+  const resultTone = getResultTone(winner, players);
 
   return (
     <div
-      className={["result-overlay", `result-overlay--${winner}`].join(" ")}
+      className={[
+        "result-overlay",
+        `result-overlay--${winner}`,
+        `result-overlay--${resultTone}`,
+      ].join(" ")}
       aria-labelledby="result-title"
     >
       <div className="result-overlay__burst" aria-hidden="true" />
       <div className="result-overlay__content">
         <p className="result-overlay__eyebrow">対局終了</p>
         <h2 id="result-title" className="result-overlay__title">
-          {getResultTitle(winner)}
+          {getResultTitle(winner, players)}
         </h2>
         <p className="result-overlay__score">{score}</p>
         <div className="result-overlay__discs" aria-hidden="true">
@@ -60,12 +69,4 @@ export function GameResultOverlay({
       </div>
     </div>
   );
-}
-
-function getResultTitle(winner: Winner): string {
-  if (winner === "draw") {
-    return "ひきわけ";
-  }
-
-  return `${winner === "black" ? "黒" : "白"}の勝ち`;
 }
