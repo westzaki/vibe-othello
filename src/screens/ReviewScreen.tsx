@@ -128,8 +128,11 @@ export function ReviewScreen({
   return (
     <section className="review-screen" aria-labelledby="review-title">
       <div className="review-panel">
-        <p className="eyebrow">Teacher Review</p>
-        <h1 id="review-title">ふりかえり</h1>
+        <div className="review-panel__header">
+          <p className="eyebrow">Teacher Review</p>
+          <h1 id="review-title">ふりかえり</h1>
+          <p>先生が選んだ局面だけを見て、次の一手を試してみよう。</p>
+        </div>
 
         {review === null || messages === null || lesson === null ? (
           <p className="review-panel__status">
@@ -170,6 +173,7 @@ export function ReviewScreen({
                     }
                     showComparison={card.kind === "turningPoint"}
                     title={card.title}
+                    tone={card.kind}
                   />
                 );
               })}
@@ -179,7 +183,7 @@ export function ReviewScreen({
 
         <div className="game-actions review-panel__actions">
           <button
-            className="game-action game-action--primary"
+            className="game-action review-panel__nav-action"
             onClick={onBackToResult}
             type="button"
           >

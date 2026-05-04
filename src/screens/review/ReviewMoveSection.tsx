@@ -2,6 +2,7 @@ import type {
   GameReview,
   GameReviewMessages,
   MoveReviewMessage,
+  ReviewCardKind,
   ReviewedMove,
 } from "../../teacher";
 import { formatSquare } from "./reviewFormat";
@@ -18,6 +19,7 @@ type ReviewMoveSectionProps = {
   selectedMoveNumber: number | null;
   showComparison?: boolean;
   title: string;
+  tone: ReviewCardKind;
 };
 
 export function ReviewMoveSection({
@@ -32,9 +34,12 @@ export function ReviewMoveSection({
   selectedMoveNumber,
   showComparison = false,
   title,
+  tone,
 }: ReviewMoveSectionProps) {
   return (
-    <section className="review-summary__section">
+    <section
+      className={`review-summary__section review-summary__section--${tone}`}
+    >
       <h2 className="review-summary__title">{title}</h2>
       {bodyText !== undefined && (
         <p className="review-summary__caption">{bodyText}</p>
@@ -107,7 +112,9 @@ function ReviewMoveItem({
       >
         <div className="review-summary__move-line">
           <span>{move.moveNumber}手目</span>
-          <strong>{showComparison ? comparisonLabel : formatSquare(move.square)}</strong>
+          <strong>
+            {showComparison ? comparisonLabel : formatSquare(move.square)}
+          </strong>
         </div>
         {message !== undefined && (
           <>
