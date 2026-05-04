@@ -90,6 +90,7 @@ describe("game session", () => {
       type: "pass",
     });
     expect(practiceSession.moveHistory).toEqual([]);
+    expect(getSessionLegalMoves(practiceSession).length).toBeGreaterThan(0);
     expect(getSessionLegalMoves(practiceSession)).toEqual([5]);
   });
 
@@ -184,6 +185,7 @@ describe("game session", () => {
     });
     expect(result.session.moveHistory).toHaveLength(1);
     expect(result.session.moveHistory[0].legalMovesBefore).toEqual([2, 5]);
+    expect(getSessionLegalMoves(result.session).length).toBeGreaterThan(0);
     expect(getSessionLegalMoves(result.session)).toEqual([5]);
   });
 

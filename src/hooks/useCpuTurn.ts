@@ -34,9 +34,21 @@ export function useCpuTurn({
         currentPlayer.cpuLevel,
       );
 
-      if (move !== null) {
-        onPlaceDisc(move);
+      if (move === null) {
+        if (import.meta.env.DEV) {
+          console.warn(
+            "CPU turn could not choose a legal move.",
+            {
+              cpuLevel: currentPlayer.cpuLevel,
+              currentDisc: session.currentDisc,
+            },
+          );
+        }
+
+        return;
       }
+
+      onPlaceDisc(move);
     }, cpuMoveDelayMs);
 
     return () => window.clearTimeout(timeoutId);
