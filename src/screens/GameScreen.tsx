@@ -99,6 +99,7 @@ export function GameScreen({
                   : undefined
               }
               onPlayAgain={onPlayAgain}
+              players={game.players}
               winner={resultWinner}
             />
           ) : (
