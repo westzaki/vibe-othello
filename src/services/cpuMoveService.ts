@@ -1,6 +1,9 @@
 import { chooseCpuMove, type CpuLevel } from "../cpu";
 import type { Board, DiscColor, SquareIndex } from "../game/othello";
-import { chooseCpuMoveInWorker } from "../workers/cpuMove/cpuMoveWorkerClient";
+import {
+  cancelCpuMoveWorkerRequest,
+  chooseCpuMoveInWorker,
+} from "../workers/cpuMove/cpuMoveWorkerClient";
 
 export type CpuMoveRequest = {
   board: Board;
@@ -14,6 +17,8 @@ export type CpuMoveResponse = {
   requestId: string;
 };
 
+const cpuWorkerTimeoutMs = 1000;
+
 let nextWorkerRequestId = 0;
 
 export async function chooseCpuMoveAsync(
@@ -24,13 +29,17 @@ export async function chooseCpuMoveAsync(
     nextWorkerRequestId += 1;
 
     try {
-      const response = await chooseCpuMoveInWorker({
-        board: request.board,
-        disc: request.disc,
-        level: request.level,
-        requestId: workerRequestId,
-        type: "chooseCpuMove",
-      });
+      const response = await withTimeout(
+        chooseCpuMoveInWorker({
+          board: request.board,
+          disc: request.disc,
+          level: request.level,
+          requestId: workerRequestId,
+          type: "chooseCpuMove",
+        }),
+        cpuWorkerTimeoutMs,
+        () => cancelCpuMoveWorkerRequest(workerRequestId),
+      );
 
       if (response.type === "cpuMoveChosen") {
         return {
@@ -56,4 +65,28 @@ function chooseCpuMoveSync({
     move: chooseCpuMove(board, disc, level),
     requestId,
   };
+}
+
+function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  onTimeout: () => void,
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      onTimeout();
+      reject(new Error("CPU worker timed out"));
+    }, timeoutMs);
+
+    promise.then(
+      (value) => {
+        clearTimeout(timeoutId);
+        resolve(value);
+      },
+      (error: unknown) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      },
+    );
+  });
 }

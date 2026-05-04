@@ -58,3 +58,7 @@ export function chooseCpuMoveInWorker(
     getWorker().postMessage(request);
   });
 }
+
+export function cancelCpuMoveWorkerRequest(requestId: number): void {
+  pendingRequests.delete(requestId);
+}
