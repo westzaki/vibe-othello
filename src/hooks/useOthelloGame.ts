@@ -70,6 +70,7 @@ export type OthelloGameController = {
   resetGame: () => void;
   startNewGame: () => void;
   startPracticeSession: (options: PracticeSessionOptions) => void;
+  undoEnabled: boolean;
 };
 
 export function useOthelloGame({
@@ -216,5 +217,6 @@ export function useOthelloGame({
     resetGame: handleResetGame,
     startNewGame: handleStartNewGame,
     startPracticeSession: handleStartPracticeSession,
+    undoEnabled,
   };
 }
