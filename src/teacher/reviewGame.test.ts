@@ -77,6 +77,35 @@ describe("teacher review", () => {
     expect(review.reviewedMoves[0].review.reasons).toContain("cornerGiven");
   });
 
+  it("penalizes candidate moves that newly give the opponent a corner", () => {
+    const boardBefore = createBoardFixture({
+      10: "white",
+      11: "black",
+      18: "white",
+      27: "white",
+      28: "black",
+    });
+    const boardAfter = placeDisc(boardBefore, 9, "black");
+    const review = reviewGame(
+      [createMoveRecord({ boardAfter, boardBefore, square: 9 })],
+      {
+        reviewedDisc: "black",
+        searchDepth: 1,
+      },
+    );
+    const reviewedMove = review.reviewedMoves[0];
+    const cornerGivingCandidate = reviewedMove.candidateMoves.find(
+      (candidate) => candidate.square === 9,
+    );
+
+    expect(cornerGivingCandidate?.reasons).toContain("cornerGiven");
+    expect(reviewedMove.review.bestSquare).not.toBe(9);
+    expect(reviewedMove.review.reasons).toEqual(
+      expect.arrayContaining(["cornerGiven", "missedBestMove", "scoreDrop"]),
+    );
+    expect(reviewedMove.review.kind).toBe("bad");
+  });
+
   it("adds turningPoint when the reviewed move drops and does not recover soon", () => {
     const boardBefore = createEmptyBoard();
     boardBefore[0] = "black";
