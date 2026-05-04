@@ -1,7 +1,13 @@
 import { useCallback, useMemo, useState } from "react";
 import { unlockGameAudio } from "../audio/gameSounds";
 import type { CpuLevel } from "../cpu";
-import type { DiscColor, SquareIndex } from "../game/othello";
+import type {
+  Board,
+  DiscColor,
+  DiscCounts,
+  SquareIndex,
+  Winner,
+} from "../game/othello";
 import {
   createDefaultPlayerSettings,
   type PlayerSettings,
@@ -16,7 +22,11 @@ import {
   startNewGame,
   startPracticeSession,
   undoSessionMove,
+  type GameEndReason,
   type GameSession,
+  type GameSessionNotice,
+  type GameStatus,
+  type MoveRecord,
   type PracticeSessionOptions,
 } from "../game/session";
 import { formatGameSessionNotice } from "./formatGameSessionNotice";
@@ -27,7 +37,41 @@ type UseOthelloGameOptions = {
   enabled?: boolean;
 };
 
-export function useOthelloGame({ enabled = true }: UseOthelloGameOptions = {}) {
+export type OthelloGameController = {
+  board: Board;
+  canHumanPlay: boolean;
+  canUndo: boolean;
+  currentDisc: DiscColor;
+  currentPlayerType: PlayerType;
+  discCounts: DiscCounts;
+  endReason: GameEndReason | null;
+  flipAnimationId: number;
+  flippedSquares: SquareIndex[];
+  gameStatus: GameStatus;
+  isCpuThinking: boolean;
+  isPlaying: boolean;
+  lastMove: SquareIndex | null;
+  legalMoves: SquareIndex[];
+  message: string | null;
+  moveHistory: MoveRecord[];
+  notice: GameSessionNotice | null;
+  players: PlayerSettings;
+  winner: Winner | null;
+  endGame: () => void;
+  placeCurrentDisc: (square: SquareIndex) => void;
+  undoMove: () => void;
+  setCpuLevel: (disc: DiscColor, cpuLevel: CpuLevel) => void;
+  setPlayers: (nextPlayers: PlayerSettings) => void;
+  setPlayerType: (disc: DiscColor, playerType: PlayerType) => void;
+  replaceSession: (nextSession: GameSession) => void;
+  resetGame: () => void;
+  startNewGame: () => void;
+  startPracticeSession: (options: PracticeSessionOptions) => void;
+};
+
+export function useOthelloGame({
+  enabled = true,
+}: UseOthelloGameOptions = {}): OthelloGameController {
   const [session, setSession] = useState(createGameSession);
   const [players, setPlayers] = useState(createDefaultPlayerSettings);
   const [lastFlippedSquares, setLastFlippedSquares] = useState<SquareIndex[]>(
