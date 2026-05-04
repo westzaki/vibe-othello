@@ -212,6 +212,52 @@
   color: #347967;
 }
 
+.review-summary__action {
+  width: 100%;
+}
+
+.review-comparison {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(240, 200, 107, 0.4);
+  border-radius: 14px;
+  padding: 9px;
+  background: rgba(255, 248, 222, 0.72);
+}
+
+.review-comparison__moves {
+  display: grid;
+  gap: 7px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.review-comparison__moves div {
+  display: grid;
+  gap: 4px;
+  border-radius: 12px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.review-comparison__moves span {
+  color: #777384;
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.review-comparison__moves strong {
+  color: #34323e;
+  font-size: 0.94rem;
+}
+
+.review-comparison__focus {
+  color: #7d5d19;
+}
+
+.review-comparison__focus strong {
+  color: #7d5d19;
+}
+
 .review-panel__actions {
   justify-content: center;
 }

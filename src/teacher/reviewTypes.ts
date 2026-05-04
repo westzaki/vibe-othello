@@ -35,6 +35,22 @@ export type MoveReview = {
   playedScore: number;
 };
 
+export type ReviewMoveComparison = {
+  nextFocus: string;
+  playedMove: {
+    explanation: string;
+    playedScore: number;
+    reasons: MoveReviewReason[];
+    square: SquareIndex;
+  };
+  trialMove: {
+    bestScore: number;
+    explanation: string;
+    reasons: MoveReviewReason[];
+    square: SquareIndex;
+  } | null;
+};
+
 export type ReviewedMove = MoveRecord & {
   candidateMoves: CandidateMoveReview[];
   review: MoveReview;
@@ -67,6 +83,7 @@ export type ReviewLesson = {
 };
 
 export type MoveReviewMessage = {
+  comparison?: ReviewMoveComparison;
   explanation: string;
   suggestion?: string;
 };

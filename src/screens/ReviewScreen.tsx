@@ -9,6 +9,10 @@ import {
   reviewGame,
 } from "../teacher";
 import { ReviewMoveSection } from "./review/ReviewMoveSection";
+import {
+  getPracticeActionMove,
+  getReviewCardMoves,
+} from "./review/reviewLessonDisplay";
 import { ReviewPlaybackPanel } from "./review/ReviewPlaybackPanel";
 import {
   clampMoveNumber,
@@ -98,11 +102,15 @@ export function ReviewScreen({
   }
 
   function startPractice() {
+    startPracticeFromMove(safeMoveNumber);
+  }
+
+  function startPracticeFromMove(moveNumber: number) {
     onStartPractice(
       createPracticeOptionsFromMoveNumber(
         game.moveHistory,
         playbackBoards,
-        safeMoveNumber,
+        moveNumber,
       ),
     );
   }
@@ -130,21 +138,37 @@ export function ReviewScreen({
             />
 
             <div className="review-summary">
-              {lesson.cards.map((card) => (
-                <ReviewMoveSection
-                  key={card.kind}
-                  bodyText={card.bodyText}
-                  emptyText={card.emptyText}
-                  footerText={
-                    card.kind === "practiceTarget" ? messages.advice : undefined
-                  }
-                  messages={messages}
-                  moves={card.move === null ? [] : [card.move]}
-                  onSelectMove={goToMove}
-                  selectedMoveNumber={activeReviewedMove?.moveNumber ?? null}
-                  title={card.title}
-                />
-              ))}
+              {lesson.cards.map((card) => {
+                const practiceActionMove = getPracticeActionMove(card);
+
+                return (
+                  <ReviewMoveSection
+                    key={card.kind}
+                    actionLabel={
+                      practiceActionMove === null
+                        ? undefined
+                        : "この局面から練習する"
+                    }
+                    bodyText={card.bodyText}
+                    emptyText={card.emptyText}
+                    footerText={
+                      card.kind === "practiceTarget" ? messages.advice : undefined
+                    }
+                    messages={messages}
+                    moves={getReviewCardMoves(card)}
+                    onAction={
+                      practiceActionMove === null
+                        ? undefined
+                        : () =>
+                            startPracticeFromMove(practiceActionMove.moveNumber)
+                    }
+                    onSelectMove={goToMove}
+                    selectedMoveNumber={activeReviewedMove?.moveNumber ?? null}
+                    showComparison={card.kind === "turningPoint"}
+                    title={card.title}
+                  />
+                );
+              })}
             </div>
           </div>
         )}

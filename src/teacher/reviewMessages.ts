@@ -4,6 +4,7 @@ import type {
   GameReviewMessages,
   MoveReview,
   MoveReviewMessage,
+  ReviewMoveComparison,
   ReviewedMove,
 } from "./reviewTypes";
 
@@ -15,17 +16,117 @@ export function createGameReviewMessages(
     moveMessages: new Map(
       review.reviewedMoves.map((move) => [
         move.moveNumber,
-        createMoveReviewMessage(move.review),
+        createMoveReviewMessage(move),
       ]),
     ),
   };
 }
 
-export function createMoveReviewMessage(review: MoveReview): MoveReviewMessage {
+export function createMoveReviewMessage(
+  reviewedMove: MoveReview | ReviewedMove,
+): MoveReviewMessage {
+  const review = getMoveReview(reviewedMove);
+
   return {
+    comparison: createMoveComparison(reviewedMove),
     explanation: createExplanation(review),
     suggestion: createSuggestion(review),
   };
+}
+
+function getMoveReview(reviewedMove: MoveReview | ReviewedMove): MoveReview {
+  return "review" in reviewedMove ? reviewedMove.review : reviewedMove;
+}
+
+function createMoveComparison(
+  reviewedMove: MoveReview | ReviewedMove,
+): ReviewMoveComparison | undefined {
+  if (!("review" in reviewedMove) || reviewedMove.review.kind !== "bad") {
+    return undefined;
+  }
+
+  const review = reviewedMove.review;
+  const trialCandidate =
+    review.bestSquare === null
+      ? null
+      : (reviewedMove.candidateMoves.find(
+          (candidate) => candidate.square === review.bestSquare,
+        ) ?? null);
+  const trialMove =
+    review.bestSquare === null || review.bestScore === null
+      ? null
+      : {
+          bestScore: review.bestScore,
+          explanation: createTrialMoveExplanation(review, trialCandidate),
+          reasons: trialCandidate?.reasons ?? [],
+          square: review.bestSquare,
+        };
+
+  return {
+    nextFocus: createComparisonFocus(review),
+    playedMove: {
+      explanation: createPlayedMoveExplanation(review),
+      playedScore: review.playedScore,
+      reasons: review.reasons,
+      square: review.square,
+    },
+    trialMove,
+  };
+}
+
+function createPlayedMoveExplanation(review: MoveReview): string {
+  if (review.reasons.includes("cornerGiven")) {
+    return "置いた後に、相手が角へ近づける形になりやすかったかも。";
+  }
+
+  if (review.reasons.includes("dangerSquare")) {
+    return "角の近くに置く手だったね。急ぐ前に、角まわりの形をもう一回見てもよさそう。";
+  }
+
+  if (review.reasons.includes("mobilityLoss")) {
+    return "たくさん返せても、次の自分の置ける場所が少し減ったかも。";
+  }
+
+  return "自然な一手だったね。次は、置いた後の相手の置ける場所も一緒に見てみよう。";
+}
+
+function createTrialMoveExplanation(
+  review: MoveReview,
+  trialCandidate: ReviewedMove["candidateMoves"][number] | null,
+): string {
+  if (trialCandidate?.reasons.includes("corner")) {
+    return "角を大事にしながら、流れを作りやすい手かも。";
+  }
+
+  if (trialCandidate?.reasons.includes("dangerSquare")) {
+    return "角の近くだから、ここも形を比べながら試してみたい手だね。";
+  }
+
+  if (review.reasons.includes("cornerGiven")) {
+    return "角まわりのリスクを少し避けながら、相手の置ける場所を比べやすい手かも。";
+  }
+
+  if (review.reasons.includes("mobilityLoss")) {
+    return "返す数は少なくても、次の置き場所を残しやすいか比べてみたい手かも。";
+  }
+
+  return "返す数だけでなく、相手にいい手をあげにくいか比べてみたい手かも。";
+}
+
+function createComparisonFocus(review: MoveReview): string {
+  if (review.reasons.includes("cornerGiven")) {
+    return "置いた後に、相手が角へ行けるかを見てみよう。";
+  }
+
+  if (review.reasons.includes("dangerSquare")) {
+    return "角の近くに置く前に、空いている角を一回だけ確認してみよう。";
+  }
+
+  if (review.reasons.includes("mobilityLoss")) {
+    return "置いた後に、自分と相手がどこへ置けるか見てみよう。";
+  }
+
+  return "置いた後に、相手がどこへ置けるか見てみよう。";
 }
 
 function createExplanation(review: MoveReview): string {
@@ -77,7 +178,7 @@ function createSuggestion(review: MoveReview): string | undefined {
 
   return `この局面では ${formatSquare(
     review.bestSquare,
-  )} も候補に入れてみる？角まわりと、相手の置ける場所を少し比べると見えやすいかも。`;
+  )} も試してみる？角まわりと、相手の置ける場所を少し比べると見えやすいかも。`;
 }
 
 function createAdvice(reviewedMoves: ReviewedMove[]): string {
