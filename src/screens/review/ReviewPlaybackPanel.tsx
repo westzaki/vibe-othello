@@ -13,7 +13,6 @@ type ReviewPlaybackPanelProps = {
   maxMoveNumber: number;
   mode: ReviewPlaybackMode;
   onGoToMove: (moveNumber: number) => void;
-  onStartPractice?: () => void;
   positionReview: PositionReview;
 };
 
@@ -24,17 +23,10 @@ export function ReviewPlaybackPanel({
   maxMoveNumber,
   mode,
   onGoToMove,
-  onStartPractice,
   positionReview,
 }: ReviewPlaybackPanelProps) {
   return (
     <section className="review-board-panel">
-      <h2 className="review-summary__title">棋譜再生</h2>
-      <p className="review-board-panel__status">
-        {mode === "reviewTarget"
-          ? `${currentMoveNumber}手目を打つ前`
-          : `${currentMoveNumber} / ${maxMoveNumber}`}
-      </p>
       <ReviewBoard
         bestSquare={positionReview.bestSquare}
         board={currentBoard}
@@ -45,7 +37,6 @@ export function ReviewPlaybackPanel({
         currentMoveNumber={currentMoveNumber}
         maxMoveNumber={maxMoveNumber}
         onGoToMove={onGoToMove}
-        onStartPractice={onStartPractice}
       />
       <ReviewLegend
         bestLabel={mode === "reviewTarget" ? "試してみたい手" : "次に見たい手"}

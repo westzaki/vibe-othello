@@ -89,12 +89,12 @@ function createPracticeBodyText(move: ReviewedMove | null): string {
   }
 
   if (move.review.bestSquare !== null) {
-    return `#${move.moveNumber} の局面から、${formatSquare(
+    return `${move.moveNumber}手目の局面から、${formatSquare(
       move.review.bestSquare,
     )} を試してみよう。`;
   }
 
-  return `#${move.moveNumber} の局面から、もう一回別の形を試してみよう。`;
+  return `${move.moveNumber}手目の局面から、もう一回別の形を試してみよう。`;
 }
 
 function createPracticeEmptyText(move: ReviewedMove | null): string {

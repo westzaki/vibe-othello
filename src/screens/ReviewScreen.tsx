@@ -81,23 +81,26 @@ export function ReviewScreen({
   }, [lesson]);
   const activeReviewedMove =
     selectableMoves.find((move) => move.moveNumber === safeMoveNumber) ?? null;
+  const displayedReviewedMove =
+    activeReviewedMove ??
+    lesson?.turningPointCandidate ??
+    lesson?.niceMove ??
+    null;
+  const displayedMoveNumber =
+    displayedReviewedMove?.moveNumber ?? safeMoveNumber;
   const playbackDisplay = useMemo(
     () =>
       createReviewPlaybackDisplay(
         game.moveHistory,
         playbackBoards,
-        safeMoveNumber,
-        activeReviewedMove,
+        displayedMoveNumber,
+        displayedReviewedMove,
       ),
-    [activeReviewedMove, game.moveHistory, playbackBoards, safeMoveNumber],
+    [displayedMoveNumber, displayedReviewedMove, game.moveHistory, playbackBoards],
   );
 
   function goToMove(moveNumber: number) {
     onMoveNumberChange(clampMoveNumber(moveNumber, maxMoveNumber));
-  }
-
-  function startPractice() {
-    startPracticeFromMove(safeMoveNumber);
   }
 
   function startPracticeFromMove(moveNumber: number) {
@@ -129,11 +132,6 @@ export function ReviewScreen({
               maxMoveNumber={maxMoveNumber}
               mode={playbackDisplay.mode}
               onGoToMove={goToMove}
-              onStartPractice={
-                playbackDisplay.mode === "reviewTarget"
-                  ? undefined
-                  : startPractice
-              }
               positionReview={playbackDisplay.positionReview}
             />
 
@@ -157,7 +155,7 @@ export function ReviewScreen({
                             startPracticeFromMove(practiceActionMove.moveNumber)
                     }
                     onSelectMove={goToMove}
-                    selectedMoveNumber={activeReviewedMove?.moveNumber ?? null}
+                    selectedMoveNumber={displayedReviewedMove?.moveNumber ?? null}
                     showComparison={card.kind === "turningPoint"}
                     title={card.title}
                   />
