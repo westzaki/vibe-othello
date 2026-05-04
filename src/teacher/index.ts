@@ -20,6 +20,12 @@ export {
   createPracticeFeedback,
   createPracticeFeedbackContext,
 } from "./practiceFeedback";
+export { createCoachHint } from "./createCoachHint";
+export type {
+  CoachHint,
+  CoachHintKind,
+  CreateCoachHintOptions,
+} from "./createCoachHint";
 export { createReviewLesson } from "./createReviewLesson";
 export { defaultTeacherReviewConfig } from "./reviewConfig";
 export type { TeacherReviewConfig } from "./reviewConfig";

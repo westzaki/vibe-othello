@@ -1,0 +1,110 @@
+import type { Board, DiscColor, SquareIndex } from "../game/othello";
+import {
+  analyzeMoveCandidates,
+  type AnalyzeMoveCandidatesOptions,
+} from "./analyzeMoveCandidates";
+import type { CandidateMoveReview, MoveReviewReason } from "./reviewTypes";
+
+export type CoachHintKind =
+  | "cornerOpportunity"
+  | "cornerRisk"
+  | "mobility"
+  | "endgame";
+
+export type CoachHint = {
+  candidate: CandidateMoveReview | null;
+  kind: CoachHintKind;
+  message: string;
+  reasons: MoveReviewReason[];
+  square: SquareIndex | null;
+};
+
+export type CreateCoachHintOptions = Partial<AnalyzeMoveCandidatesOptions>;
+
+const defaultCoachHintSearchDepth = 3;
+
+export function createCoachHint(
+  board: Board,
+  disc: DiscColor,
+  { searchDepth = defaultCoachHintSearchDepth }: CreateCoachHintOptions = {},
+): CoachHint | null {
+  const analysis = analyzeMoveCandidates(board, disc, { searchDepth });
+  const bestCandidate = analysis.candidateMoves[0] ?? null;
+
+  if (bestCandidate === null) {
+    return null;
+  }
+
+  if (bestCandidate.reasons.includes("corner")) {
+    return createHint({
+      candidate: bestCandidate,
+      kind: "cornerOpportunity",
+      message: `角を取れる場所がありそう。${formatSquare(
+        bestCandidate.square,
+      )} を見てみよう。`,
+    });
+  }
+
+  const cornerRiskCandidate = analysis.candidateMoves.find((candidate) =>
+    candidate.reasons.some((reason) =>
+      ["cornerGiven", "dangerSquare"].includes(reason),
+    ),
+  );
+
+  if (cornerRiskCandidate !== undefined) {
+    return createHint({
+      candidate: cornerRiskCandidate,
+      kind: "cornerRisk",
+      message: `角の近くは少し注意。${formatSquare(
+        cornerRiskCandidate.square,
+      )} の後に相手が角へ行けないか見てみよう。`,
+    });
+  }
+
+  if (bestCandidate.reasons.includes("mobilityGain")) {
+    return createHint({
+      candidate: bestCandidate,
+      kind: "mobility",
+      message: `相手が少し動きづらくなる手がありそう。${formatSquare(
+        bestCandidate.square,
+      )} の後の形を見てみよう。`,
+    });
+  }
+
+  if (analysis.evaluationSource === "exactEndgame") {
+    return createHint({
+      candidate: bestCandidate,
+      kind: "endgame",
+      message: `終盤は最後に残る石数を見たいところ。${formatSquare(
+        bestCandidate.square,
+      )} から試してみよう。`,
+    });
+  }
+
+  return null;
+}
+
+function createHint({
+  candidate,
+  kind,
+  message,
+}: {
+  candidate: CandidateMoveReview;
+  kind: CoachHintKind;
+  message: string;
+}): CoachHint {
+  return {
+    candidate,
+    kind,
+    message,
+    reasons: candidate.reasons,
+    square: candidate.square,
+  };
+}
+
+function formatSquare(square: SquareIndex): string {
+  const column = String.fromCharCode("A".charCodeAt(0) + (square % 8));
+  const row = Math.floor(square / 8) + 1;
+
+  return `${column}${row}`;
+}
