@@ -77,7 +77,9 @@ describe("CPU move service", () => {
 
     expect(response.requestId).toBe("fallback-move");
     expect(getLegalMoves(board, "black")).toContain(response.move);
-    expect(cancelCpuMoveWorkerRequestMock).not.toHaveBeenCalled();
+    expect(cancelCpuMoveWorkerRequestMock).toHaveBeenCalledWith(
+      expect.any(Number),
+    );
   });
 
   it("falls back to sync CPU when the level 6 worker returns an error response", async () => {
