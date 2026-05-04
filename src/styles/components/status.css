@@ -18,18 +18,18 @@
   gap: 8px;
   min-width: 0;
   justify-content: center;
-  border: 1px solid rgba(184, 176, 225, 0.36);
-  border-radius: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   min-height: 48px;
   padding: 8px 10px;
-  color: #5c5866;
+  color: var(--color-text-soft);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 251, 244, 0.72)),
     rgba(255, 255, 255, 0.76);
   font-size: 0.88rem;
   font-weight: 850;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    var(--shadow-hairline),
     0 8px 16px rgba(118, 100, 88, 0.06);
 }
 
@@ -41,7 +41,7 @@
 }
 
 .score-chip strong {
-  color: #34323e;
+  color: var(--color-text-strong);
   font-size: 1.2rem;
   font-weight: 950;
 }
@@ -49,18 +49,18 @@
 .score-chip--black::before {
   background: radial-gradient(
     circle at 35% 28%,
-    #60645e 0%,
-    #20231f 36%,
-    #090a09 100%
+    var(--color-disc-black-a) 0%,
+    var(--color-disc-black-b) 36%,
+    var(--color-disc-black-c) 100%
   );
 }
 
 .score-chip--white::before {
   background: radial-gradient(
     circle at 35% 28%,
-    #ffffff 0%,
-    #eee6d6 48%,
-    #c8baa1 100%
+    var(--color-disc-white-a) 0%,
+    var(--color-disc-white-b) 48%,
+    var(--color-disc-white-c) 100%
   );
 }
 
@@ -70,7 +70,7 @@
   display: flex;
   align-items: center;
   margin: 0;
-  color: #5c5866;
+  color: var(--color-text-soft);
   font-size: 0.92rem;
   font-weight: 800;
 }
@@ -78,37 +78,37 @@
 .turn-status {
   gap: 10px;
   min-height: 38px;
-  border: 1px solid rgba(184, 176, 225, 0.22);
-  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-round);
   padding: 5px 12px 5px 6px;
   background: rgba(255, 255, 255, 0.52);
 }
 
 .session-status {
-  border: 1px solid rgba(117, 190, 169, 0.46);
-  border-radius: 999px;
+  border: 1px solid var(--color-border-mint);
+  border-radius: var(--radius-round);
   min-height: 34px;
   padding: 5px 12px;
-  color: #347967;
-  background: rgba(219, 246, 236, 0.8);
+  color: var(--color-mint-strong);
+  background: var(--color-mint-wash);
 }
 
 .result-status {
-  border: 1px solid rgba(255, 173, 153, 0.46);
-  border-radius: 999px;
+  border: 1px solid var(--color-border-peach);
+  border-radius: var(--radius-round);
   min-height: 34px;
   padding: 5px 12px;
-  color: #b85c52;
-  background: rgba(255, 231, 225, 0.78);
+  color: var(--color-peach-strong);
+  background: var(--color-peach-wash);
   text-transform: capitalize;
 }
 
 .game-message {
   margin: 0;
-  border: 1px solid rgba(255, 204, 112, 0.42);
-  border-radius: 18px;
+  border: 1px solid var(--color-border-honey);
+  border-radius: var(--radius-md);
   padding: 9px 12px;
-  color: #7d5d19;
+  color: var(--color-honey-strong);
   background:
     linear-gradient(180deg, rgba(255, 251, 235, 0.98), rgba(255, 248, 222, 0.86)),
     rgba(255, 248, 222, 0.9);
@@ -122,7 +122,7 @@
   min-width: 54px;
   justify-content: center;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 999px;
+  border-radius: var(--radius-round);
   padding: 5px 10px;
   font-size: 0.78rem;
   font-weight: 950;
@@ -155,10 +155,10 @@
   align-items: center;
   gap: 15px;
   max-width: min(92vw, 420px);
-  border: 1px solid rgba(255, 204, 112, 0.62);
-  border-radius: 26px;
+  border: 1px solid var(--color-border-honey);
+  border-radius: var(--radius-xl);
   padding: 17px 19px;
-  color: #4e4a5b;
+  color: var(--color-text);
   background:
     radial-gradient(
       circle at 18% 18%,
@@ -171,8 +171,8 @@
       rgba(255, 251, 244, 0.97)
     );
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.92),
-    0 28px 60px rgba(118, 100, 88, 0.22),
+    var(--shadow-hairline),
+    0 28px 60px rgba(118, 100, 88, 0.2),
     0 12px 26px rgba(143, 135, 216, 0.16),
     0 0 0 8px rgba(255, 255, 255, 0.54);
   animation: pass-notice-enter 240ms ease both;
@@ -183,7 +183,7 @@
   flex: 0 0 auto;
   width: 38px;
   height: 38px;
-  border-radius: 999px;
+  border-radius: var(--radius-round);
   box-shadow:
     inset -7px -8px 12px rgba(0, 0, 0, 0.26),
     inset 4px 5px 8px rgba(255, 255, 255, 0.22),
@@ -193,24 +193,24 @@
 .pass-notice-overlay__disc--black {
   background: radial-gradient(
     circle at 35% 28%,
-    #60645e 0%,
-    #20231f 36%,
-    #090a09 100%
+    var(--color-disc-black-a) 0%,
+    var(--color-disc-black-b) 36%,
+    var(--color-disc-black-c) 100%
   );
 }
 
 .pass-notice-overlay__disc--white {
   background: radial-gradient(
     circle at 35% 28%,
-    #ffffff 0%,
-    #eee6d6 48%,
-    #c8baa1 100%
+    var(--color-disc-white-a) 0%,
+    var(--color-disc-white-b) 48%,
+    var(--color-disc-white-c) 100%
   );
 }
 
 .pass-notice-overlay__title {
   margin: 0;
-  color: #5c568f;
+  color: var(--color-accent-strong);
   font-size: clamp(1rem, 2.5vw, 1.18rem);
   font-weight: 950;
   line-height: 1.35;
@@ -218,7 +218,7 @@
 
 .pass-notice-overlay__text {
   margin: 4px 0 0;
-  color: #5c5866;
+  color: var(--color-text-soft);
   font-size: clamp(0.9rem, 2.2vw, 1rem);
   font-weight: 800;
   line-height: 1.45;
