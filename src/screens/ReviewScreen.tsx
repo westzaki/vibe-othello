@@ -129,9 +129,7 @@ export function ReviewScreen({
               currentBoard={playbackDisplay.board}
               currentMove={playbackDisplay.currentMove}
               currentMoveNumber={playbackDisplay.currentMoveNumber}
-              maxMoveNumber={maxMoveNumber}
               mode={playbackDisplay.mode}
-              onGoToMove={goToMove}
               positionReview={playbackDisplay.positionReview}
             />
 

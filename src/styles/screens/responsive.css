@@ -175,10 +175,6 @@
     width: min(100%, 560px);
   }
 
-  .review-playback {
-    grid-template-columns: 1fr;
-  }
-
 }
 
 @media (min-width: 521px) and (max-width: 900px) {

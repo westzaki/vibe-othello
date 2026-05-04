@@ -67,6 +67,13 @@
   gap: 12px;
 }
 
+.review-board-panel__status {
+  margin: 0;
+  color: #777384;
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
 .review-summary__section {
   display: grid;
   gap: 9px;
@@ -229,28 +236,6 @@
 
 .review-panel__actions {
   justify-content: center;
-}
-
-.review-playback-group {
-  display: grid;
-  gap: 8px;
-}
-
-.review-playback {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(96px, 1fr));
-  align-items: center;
-  gap: 8px;
-}
-
-.review-playback .game-action {
-  width: 100%;
-  min-height: 44px;
-}
-
-.review-playback .game-action:disabled {
-  opacity: 0.42;
-  cursor: not-allowed;
 }
 
 .review-board {
