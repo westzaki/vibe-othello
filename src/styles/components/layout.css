@@ -190,15 +190,15 @@
 
 .game-heading {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   justify-items: stretch;
   text-align: left;
 }
 
 .game-heading h1 {
   margin: 0;
-  color: var(--color-text-muted);
-  font-size: 0.95rem;
+  color: color-mix(in srgb, var(--color-text-muted) 72%, transparent);
+  font-size: 0.78rem;
   font-weight: 950;
   line-height: 1.05;
 }

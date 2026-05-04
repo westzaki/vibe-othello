@@ -76,16 +76,18 @@
 }
 
 .game-action--danger {
-  color: var(--color-peach-strong);
-  border-color: var(--color-border-peach);
+  color: var(--color-text-soft);
+  border-color: color-mix(in srgb, var(--color-border-peach) 58%, var(--color-border));
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 246, 241, 0.86)),
-    #ffffff;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 250, 242, 0.76)),
+    rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-hairline);
 }
 
 .game-action--danger:hover:not(:disabled) {
-  border-color: rgba(216, 126, 112, 0.62);
-  background: linear-gradient(180deg, #ffffff, #fff1ed);
+  color: var(--color-peach-strong);
+  border-color: rgba(216, 126, 112, 0.5);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 244, 238, 0.84));
 }
 
 .game-end-confirm {
