@@ -4,6 +4,8 @@ import {
   type Board,
   type DiscColor,
 } from "../../game/othello";
+import { solveExactEndgameDiscDifference } from "../search/exactEndgame";
+import { countEmptySquares } from "./evaluationFeatures";
 import { strategicEvaluateBoard } from "./strategicEvaluateBoard";
 
 export type Advantage = {
@@ -13,10 +15,21 @@ export type Advantage = {
 };
 
 const evaluationScale = 220;
+const exactEndgameAdvantageEmptyThreshold = 10;
 
-export function calculateAdvantage(board: Board): Advantage {
+export function calculateAdvantage(
+  board: Board,
+  currentDisc?: DiscColor,
+): Advantage {
   if (isGameOver(board)) {
     return getFinalAdvantage(board);
+  }
+
+  if (
+    currentDisc !== undefined &&
+    countEmptySquares(board) <= exactEndgameAdvantageEmptyThreshold
+  ) {
+    return getExactEndgameAdvantage(board, currentDisc);
   }
 
   const blackScore = strategicEvaluateBoard(board, "black");
@@ -27,6 +40,31 @@ export function calculateAdvantage(board: Board): Advantage {
     blackPercent,
     leadingDisc: getLeadingDisc(blackPercent, whitePercent),
     whitePercent,
+  };
+}
+
+function getExactEndgameAdvantage(
+  board: Board,
+  currentDisc: DiscColor,
+): Advantage {
+  const blackFinalDifference = solveExactEndgameDiscDifference(
+    board,
+    currentDisc,
+    "black",
+  );
+
+  if (blackFinalDifference === 0) {
+    return {
+      blackPercent: 50,
+      leadingDisc: null,
+      whitePercent: 50,
+    };
+  }
+
+  return {
+    blackPercent: blackFinalDifference > 0 ? 100 : 0,
+    leadingDisc: blackFinalDifference > 0 ? "black" : "white",
+    whitePercent: blackFinalDifference < 0 ? 100 : 0,
   };
 }
 
