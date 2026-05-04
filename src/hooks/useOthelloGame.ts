@@ -37,6 +37,7 @@ import { useMoveSounds } from "./useMoveSounds";
 type UseOthelloGameOptions = {
   enabled?: boolean;
   soundEnabled?: boolean;
+  undoEnabled?: boolean;
 };
 
 export type OthelloGameController = {
@@ -74,6 +75,7 @@ export type OthelloGameController = {
 export function useOthelloGame({
   enabled = true,
   soundEnabled = true,
+  undoEnabled = true,
 }: UseOthelloGameOptions = {}): OthelloGameController {
   const [session, setSession] = useState(createGameSession);
   const [players, setPlayers] = useState(createDefaultPlayerSettings);
@@ -88,7 +90,7 @@ export function useOthelloGame({
   const currentPlayer = players[session.currentDisc];
   const currentPlayerType = currentPlayer.type;
   const canHumanPlay = isPlaying && currentPlayerType === "human";
-  const canUndo = canUndoSessionMove(session, players);
+  const canUndo = undoEnabled && canUndoSessionMove(session, players);
 
   function handleEndGame() {
     setSession((currentSession) => endGame(currentSession));
@@ -148,7 +150,7 @@ export function useOthelloGame({
   }
 
   function handleUndoMove() {
-    if (isCpuThinking) {
+    if (!undoEnabled || isCpuThinking) {
       return;
     }
 

@@ -4,12 +4,14 @@ type SettingsScreenProps = {
   settings: AppSettings;
   onBackToStart: () => void;
   onSoundEnabledChange: (soundEnabled: boolean) => void;
+  onUndoEnabledChange: (undoEnabled: boolean) => void;
 };
 
 export function SettingsScreen({
   settings,
   onBackToStart,
   onSoundEnabledChange,
+  onUndoEnabledChange,
 }: SettingsScreenProps) {
   return (
     <section className="settings-screen" aria-labelledby="settings-title">
@@ -23,9 +25,17 @@ export function SettingsScreen({
         </header>
 
         <div className="settings-list" aria-label="設定項目">
-          <SoundSettingItem
+          <SettingsToggleItem
+            description="石を置いたときなどに音が出ます"
             enabled={settings.soundEnabled}
+            label="音をならす"
             onChange={onSoundEnabledChange}
+          />
+          <SettingsToggleItem
+            description="対局中に「まった」を使えるようにします"
+            enabled={settings.undoEnabled}
+            label="まったを使う"
+            onChange={onUndoEnabledChange}
           />
         </div>
 
@@ -39,17 +49,24 @@ export function SettingsScreen({
   );
 }
 
-type SoundSettingItemProps = {
+type SettingsToggleItemProps = {
+  description: string;
   enabled: boolean;
+  label: string;
   onChange: (enabled: boolean) => void;
 };
 
-function SoundSettingItem({ enabled, onChange }: SoundSettingItemProps) {
+function SettingsToggleItem({
+  description,
+  enabled,
+  label,
+  onChange,
+}: SettingsToggleItemProps) {
   return (
     <div className="settings-item">
       <div className="settings-item__text">
-        <h2>音をならす</h2>
-        <p>石を置いたときなどに音が出ます</p>
+        <h2>{label}</h2>
+        <p>{description}</p>
       </div>
       <button
         aria-checked={enabled}
