@@ -1,6 +1,6 @@
 import { useState } from "react";
+import type { CpuLevel } from "../cpu";
 import type { DiscColor } from "../game/othello";
-import type { CpuLevel } from "../game/players";
 import { createMatchPlayerSettings, type GameMode } from "../game/matchSetup";
 import type { PracticeSessionOptions } from "../game/session";
 import { useOthelloGame } from "./useOthelloGame";

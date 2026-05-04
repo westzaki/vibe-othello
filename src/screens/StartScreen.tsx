@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { cpuLevels, type CpuLevel } from "../cpu";
 import type { GameMode, HumanDisc } from "../game/matchSetup";
-import { cpuLevels, type CpuLevel } from "../game/players";
 
 type StartScreenProps = {
   initialCpuLevel: CpuLevel;

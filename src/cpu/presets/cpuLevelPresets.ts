@@ -1,4 +1,4 @@
-import type { CpuLevel } from "../../game/players";
+import type { CpuLevel } from "../cpuLevels";
 import { chooseCornerMove } from "../strategies/cornerStrategy";
 import { chooseGrandmasterMove } from "../strategies/grandmasterStrategy";
 import { chooseFixedDepthMinimaxMove } from "../strategies/minimaxStrategy";

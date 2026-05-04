@@ -1,11 +1,9 @@
 import type { DiscColor } from "../game/othello";
+import { cpuLevelLabels, cpuLevels, type CpuLevel } from "../cpu";
 import {
-  cpuLevelLabels,
-  cpuLevels,
   discColors,
   playerTypeLabels,
   playerTypes,
-  type CpuLevel,
   type PlayerSettings,
   type PlayerType,
 } from "../game/players";

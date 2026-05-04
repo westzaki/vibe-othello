@@ -1,5 +1,5 @@
-import type { CpuLevel } from "../game/players";
 import type { Board, DiscColor } from "../game/othello";
+import type { CpuLevel } from "./cpuLevels";
 import { getCpuLevelPreset } from "./presets/cpuLevelPresets";
 
 export function chooseCpuMove(

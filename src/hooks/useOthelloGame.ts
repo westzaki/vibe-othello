@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useState } from "react";
 import { unlockGameAudio } from "../audio/gameSounds";
+import type { CpuLevel } from "../cpu";
 import type { DiscColor, SquareIndex } from "../game/othello";
 import {
   createDefaultPlayerSettings,
-  type CpuLevel,
   type PlayerSettings,
   type PlayerType,
 } from "../game/players";
