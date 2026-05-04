@@ -1,6 +1,6 @@
 import type { DiscCounts, Winner } from "../game/othello";
 import type { PlayerSettings } from "../game/players";
-import { getResultTitle } from "./resultLabels";
+import { getResultTitle, getResultTone } from "./resultLabels";
 
 type GameResultOverlayProps = {
   discCounts: DiscCounts;
@@ -20,10 +20,15 @@ export function GameResultOverlay({
   winner,
 }: GameResultOverlayProps) {
   const score = `${discCounts.black} - ${discCounts.white}`;
+  const resultTone = getResultTone(winner, players);
 
   return (
     <div
-      className={["result-overlay", `result-overlay--${winner}`].join(" ")}
+      className={[
+        "result-overlay",
+        `result-overlay--${winner}`,
+        `result-overlay--${resultTone}`,
+      ].join(" ")}
       aria-labelledby="result-title"
     >
       <div className="result-overlay__burst" aria-hidden="true" />
