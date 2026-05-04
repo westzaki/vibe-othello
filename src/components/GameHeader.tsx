@@ -32,7 +32,7 @@ export function GameHeader({
 }: GameHeaderProps) {
   return (
     <div className="game-heading">
-      <h1 id="game-title">Vibe Othello</h1>
+      <h1 id="game-title">Vibe オセロ</h1>
       <div className="game-heading__status">
         <div className="score-row" aria-label="Current score">
           <span className="score-chip score-chip--black">
