@@ -109,12 +109,12 @@ export function GameScreen({
                 endReason={game.endReason}
                 gameStatus={game.gameStatus}
                 isPlaying={game.isPlaying}
-                isUndoDisabled={game.isCpuThinking}
+                isUndoDisabled={!game.canUndo || game.isCpuThinking}
                 message={game.message}
                 onEndGame={onEndGame}
                 onNewGame={onBackToStart}
                 onUndo={game.undoMove}
-                showUndo={game.canUndo}
+                showUndo={game.undoEnabled}
                 winner={game.winner}
               />
 
