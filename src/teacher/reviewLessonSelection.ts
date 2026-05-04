@@ -45,7 +45,12 @@ export function selectTurningPointCandidate(
 export function selectPracticeTarget(
   turningPointCandidate: ReviewedMove | null,
 ): ReviewedMove | null {
-  if (turningPointCandidate?.review.bestSquare === null) {
+  if (
+    turningPointCandidate === null ||
+    turningPointCandidate.review.bestSquare === null ||
+    turningPointCandidate.review.bestSquare ===
+      turningPointCandidate.review.square
+  ) {
     return null;
   }
 

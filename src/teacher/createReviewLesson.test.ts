@@ -12,6 +12,7 @@ describe("createReviewLesson", () => {
       square: 20,
     });
     const turningPoint = createReviewedMove({
+      bestSquare: 45,
       kind: "bad",
       moveNumber: 8,
       square: 44,
@@ -89,6 +90,7 @@ describe("createReviewLesson", () => {
 
   it("uses practice copy only when there is a practice target", () => {
     const turningPoint = createReviewedMove({
+      bestSquare: 49,
       kind: "bad",
       moveNumber: 53,
       square: 48,
@@ -128,6 +130,7 @@ describe("createReviewLesson", () => {
       square: 20,
     });
     const turningPoint = createReviewedMove({
+      bestSquare: 22,
       kind: "bad",
       moveNumber: 30,
       playedScore: -20,

@@ -135,7 +135,7 @@ describe("review lesson selection", () => {
     expect(selectNiceMove([plainBestMove, mobilityGain])).toBe(mobilityGain);
   });
 
-  it("uses the turning point as practice target only when a trial move exists", () => {
+  it("uses the turning point as practice target when the trial move is different", () => {
     const turningPoint = createReviewedMove({
       bestSquare: 26,
       kind: "bad",
@@ -153,6 +153,18 @@ describe("review lesson selection", () => {
 
     expect(selectPracticeTarget(turningPoint)).toBe(turningPoint);
     expect(selectPracticeTarget(noTrialMove)).toBeNull();
+  });
+
+  it("does not use the turning point as practice target when trial move matches the played move", () => {
+    const sameTrialMove = createReviewedMove({
+      bestSquare: 20,
+      kind: "bad",
+      moveNumber: 40,
+      reasons: ["turningPoint"],
+      square: 20,
+    });
+
+    expect(selectPracticeTarget(sameTrialMove)).toBeNull();
     expect(selectPracticeTarget(null)).toBeNull();
   });
 });
