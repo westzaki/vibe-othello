@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import { calculateAdvantage } from "../cpu";
 import { AdvantageBar } from "../components/AdvantageBar";
 import { Board } from "../components/Board";
@@ -8,6 +8,7 @@ import { MoveHistory } from "../components/MoveHistory";
 import type { DiscColor } from "../game/othello";
 import type { GameSessionNotice } from "../game/session";
 import type { OthelloGameController } from "../hooks/useOthelloGame";
+import { usePassNoticeVisibility } from "../hooks/usePassNoticeVisibility";
 
 const DevDebugPanel = import.meta.env.DEV
   ? lazy(() =>
@@ -37,41 +38,17 @@ export function GameScreen({
   onPlayAgain,
 }: GameScreenProps) {
   const advantage = useMemo(() => calculateAdvantage(game.board), [game.board]);
-  const passNotice = game.notice?.type === "pass" ? game.notice : null;
-  const passNoticeKey =
-    passNotice === null
-      ? null
-      : [
-          game.moveHistory.length,
-          game.lastMove ?? "none",
-          passNotice.skippedDisc,
-          passNotice.nextDisc,
-        ].join(":");
-  const [hiddenPassNoticeKey, setHiddenPassNoticeKey] = useState<string | null>(
-    null,
-  );
+  const { isPassNoticeVisible, passNotice } = usePassNoticeVisibility({
+    lastMove: game.lastMove,
+    moveCount: game.moveHistory.length,
+    notice: game.notice,
+  });
   const resultWinner =
     game.gameStatus === "ended" &&
     game.endReason === "completed" &&
     game.winner !== null
       ? game.winner
       : null;
-
-  useEffect(() => {
-    if (passNoticeKey === null) {
-      const resetTimeoutId = window.setTimeout(() => {
-        setHiddenPassNoticeKey(null);
-      }, 0);
-
-      return () => window.clearTimeout(resetTimeoutId);
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setHiddenPassNoticeKey(passNoticeKey);
-    }, 2400);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [passNoticeKey]);
 
   return (
     <section className="game-shell" aria-label="Othello game">
@@ -144,11 +121,9 @@ export function GameScreen({
         </div>
       </div>
 
-      {passNotice !== null &&
-        passNoticeKey !== null &&
-        hiddenPassNoticeKey !== passNoticeKey && (
-          <PassNoticeOverlay notice={passNotice} />
-        )}
+      {isPassNoticeVisible && passNotice !== null && (
+        <PassNoticeOverlay notice={passNotice} />
+      )}
 
       {DevDebugPanel !== null && (
         <Suspense fallback={null}>
