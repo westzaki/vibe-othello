@@ -102,7 +102,9 @@ export function ReviewScreen({
         <h1 id="review-title">ふりかえり</h1>
 
         {review === null || messages === null ? (
-          <p className="review-panel__status">2Pではふりかえりはありません</p>
+          <p className="review-panel__status">
+            ふたり対戦のふりかえりは、今はお休み中です
+          </p>
         ) : (
           <div className="review-layout">
             <ReviewPlaybackPanel
@@ -117,23 +119,25 @@ export function ReviewScreen({
 
             <div className="review-summary">
               <ReviewMoveSection
-                emptyText="今回は大きく流れを良くした手は少なめでした。"
+                emptyText="今回は小さな良い判断が積み重なっていました。次はナイスな場面を一緒に見つけよう。"
                 messages={messages}
                 moves={review.highlights.goodMoves}
                 onSelectMove={goToMove}
                 selectedMoveNumber={activeReviewedMove?.moveNumber ?? null}
-                title="良かった手"
+                title="今日のナイス"
               />
               <ReviewMoveSection
-                emptyText="今回は目立った失着はありませんでした。"
+                emptyText="大きな分かれ道は少なめでした。今の調子で、角の近くを少しだけ意識してみよう。"
                 messages={messages}
                 moves={review.highlights.badMoves}
                 onSelectMove={goToMove}
                 selectedMoveNumber={activeReviewedMove?.moveNumber ?? null}
-                title="もったいなかった手"
+                title="勝負どころ"
               />
               <section className="review-summary__section">
-                <h2 className="review-summary__title">次のポイント</h2>
+                <h2 className="review-summary__title">
+                  次に意識したいポイント
+                </h2>
                 <p className="review-summary__advice">{messages.advice}</p>
               </section>
             </div>
