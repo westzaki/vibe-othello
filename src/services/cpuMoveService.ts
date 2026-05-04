@@ -4,6 +4,7 @@ import {
   cancelCpuMoveWorkerRequest,
   chooseCpuMoveInWorker,
 } from "../workers/cpuMove/cpuMoveWorkerClient";
+import { withTimeout } from "./withTimeout";
 
 export type CpuMoveRequest = {
   board: Board;
@@ -37,8 +38,11 @@ export async function chooseCpuMoveAsync(
           requestId: workerRequestId,
           type: "chooseCpuMove",
         }),
-        cpuWorkerTimeoutMs,
-        () => cancelCpuMoveWorkerRequest(workerRequestId),
+        {
+          onTimeout: () => cancelCpuMoveWorkerRequest(workerRequestId),
+          timeoutMessage: "CPU worker timed out",
+          timeoutMs: cpuWorkerTimeoutMs,
+        },
       );
 
       if (response.type === "cpuMoveChosen") {
@@ -66,28 +70,4 @@ function chooseCpuMoveSync({
     move: chooseCpuMove(board, disc, level),
     requestId,
   };
-}
-
-function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-  onTimeout: () => void,
-): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      onTimeout();
-      reject(new Error("CPU worker timed out"));
-    }, timeoutMs);
-
-    promise.then(
-      (value) => {
-        clearTimeout(timeoutId);
-        resolve(value);
-      },
-      (error: unknown) => {
-        clearTimeout(timeoutId);
-        reject(error);
-      },
-    );
-  });
 }

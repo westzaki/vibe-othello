@@ -5,6 +5,7 @@ import {
   cancelReviewWorkerRequest,
   reviewGameInWorker,
 } from "../workers/review/reviewWorkerClient";
+import { withTimeout } from "./withTimeout";
 
 export type ReviewGameRequest = {
   moveHistory: MoveRecord[];
@@ -35,8 +36,11 @@ export async function reviewGameAsync(
         requestId: workerRequestId,
         type: "reviewGame",
       }),
-      reviewWorkerTimeoutMs,
-      () => cancelReviewWorkerRequest(workerRequestId),
+      {
+        onTimeout: () => cancelReviewWorkerRequest(workerRequestId),
+        timeoutMessage: "Review worker timed out",
+        timeoutMs: reviewWorkerTimeoutMs,
+      },
     );
 
     if (response.type === "gameReviewed") {
@@ -58,28 +62,4 @@ function reviewGameSync(request: ReviewGameRequest): ReviewGameResponse {
     requestId: request.requestId,
     review: reviewGame(request.moveHistory, request.options),
   };
-}
-
-function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-  onTimeout: () => void,
-): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      onTimeout();
-      reject(new Error("Review worker timed out"));
-    }, timeoutMs);
-
-    promise.then(
-      (value) => {
-        clearTimeout(timeoutId);
-        resolve(value);
-      },
-      (error: unknown) => {
-        clearTimeout(timeoutId);
-        reject(error);
-      },
-    );
-  });
 }
