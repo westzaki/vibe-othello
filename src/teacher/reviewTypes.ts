@@ -67,6 +67,7 @@ export type ReviewedMove = MoveRecord & {
 };
 
 export type GameReview = {
+  moveCount: number;
   reviewedDisc: DiscColor;
   reviewedMoves: ReviewedMove[];
   highlights: {

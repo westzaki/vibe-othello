@@ -67,6 +67,7 @@ export function reviewGame(
     );
 
   return {
+    moveCount: moveHistory.length,
     reviewedDisc: options.reviewedDisc,
     reviewedMoves,
     highlights: {
