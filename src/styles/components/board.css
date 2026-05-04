@@ -156,11 +156,26 @@
 }
 
 .board-square--coach-hint-risk::before {
-  border-color: rgba(244, 147, 131, 0.96);
-  background: rgba(244, 147, 131, 0.18);
-  box-shadow:
-    0 0 0 4px rgba(255, 234, 226, 0.38),
-    0 0 18px rgba(244, 147, 131, 0.62);
+  inset: 20%;
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(
+      45deg,
+      transparent calc(50% - 4px),
+      rgba(244, 147, 131, 0.96) calc(50% - 4px),
+      rgba(244, 147, 131, 0.96) calc(50% + 4px),
+      transparent calc(50% + 4px)
+    ),
+    linear-gradient(
+      -45deg,
+      transparent calc(50% - 4px),
+      rgba(244, 147, 131, 0.96) calc(50% - 4px),
+      rgba(244, 147, 131, 0.96) calc(50% + 4px),
+      transparent calc(50% + 4px)
+    );
+  box-shadow: none;
+  filter: drop-shadow(0 0 8px rgba(244, 147, 131, 0.62));
 }
 
 .board-square--coach-hint .disc {
