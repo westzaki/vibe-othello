@@ -3,7 +3,7 @@ import type { Board } from "../../game/othello";
 import type { MoveRecord } from "../../game/session";
 import type { PositionReview } from "../../teacher";
 import { ReviewLegend } from "./ReviewLegend";
-import type { ReviewPlaybackMode } from "./reviewPlayback";
+import type { ReviewPlaybackMode } from "../../services/reviewPlaybackModel";
 
 type ReviewPlaybackPanelProps = {
   currentBoard: Board;
