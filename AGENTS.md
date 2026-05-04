@@ -4,31 +4,41 @@
 
 This project is for learning vibe-coding and modern React / TypeScript architecture by building a browser-based Othello/Reversi game.
 
-The final goal is to build a polished, family-friendly browser Othello game with:
+The product goal is to create a polished, family-friendly browser Othello game where elementary upper-grade to junior high school beginners can enjoy playing while getting better at actually winning.
+
+The game should help players improve through:
 
 - 1P and 2P modes
 - CPU opponents with multiple difficulty levels
+- In-game coaching hints
 - Teacher / coach review mode
+- Practice from reviewed positions
 - Useful learning feedback
-- Cute, playful UI polish after the core features are stable
+- Soft, playful UI polish after the core features are stable
 
-This is a learning project. The code should be easy to read, easy to modify, and useful for understanding good frontend architecture.
+This is both a learning project and a product design project. The code should be easy to read, easy to modify, and useful for understanding good frontend architecture, while feature decisions should support the product vision.
 
-## Product Vision
+## Product Design References
 
-The product vision is defined in:
+The product vision and coach persona are defined in:
 
 - docs/product-vision.md
+- docs/coach-persona.md
 
-All feature decisions must align with this vision.
+All product, UI, coaching, review, and practice-related changes must align with these documents.
 
 If a proposed change does not clearly support:
 
 - helping the player win
 - improving understanding
 - maintaining a fun and light experience
+- making the player feel "I can win next time"
 
 then it should be reconsidered or split into a smaller step.
+
+Do not duplicate the full contents of these documents in AGENTS.md.
+
+Use AGENTS.md for durable development rules and use the docs files for product-specific design details.
 
 ## Product Goal
 
