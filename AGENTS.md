@@ -14,6 +14,22 @@ The final goal is to build a polished, family-friendly browser Othello game with
 
 This is a learning project. The code should be easy to read, easy to modify, and useful for understanding good frontend architecture.
 
+## Product Vision
+
+The product vision is defined in:
+
+- docs/product-vision.md
+
+All feature decisions must align with this vision.
+
+If a proposed change does not clearly support:
+
+- helping the player win
+- improving understanding
+- maintaining a fun and light experience
+
+then it should be reconsidered or split into a smaller step.
+
 ## Product Goal
 
 Build a browser-based Othello/Reversi game.
