@@ -1,6 +1,14 @@
 // Public API for the teacher package.
 // UI and future analysis screens should depend on these exports instead of
 // reaching into the engine/message modules directly.
+export {
+  analyzeMoveCandidates,
+  getMoveCandidateReasons,
+} from "./analyzeMoveCandidates";
+export type {
+  AnalyzeMoveCandidatesOptions,
+  MoveCandidateAnalysis,
+} from "./analyzeMoveCandidates";
 export { createPositionReview } from "./createPositionReview";
 export type { PositionReview } from "./createPositionReview";
 export {

@@ -1,32 +1,20 @@
 import {
-  countEmptySquares,
-  getMinimaxMoveScores,
   getMobilityDifference,
-  solveExactEndgameDiscDifference,
   strategicEvaluateBoard,
-  type MinimaxMoveScore,
 } from "../cpu";
-import {
-  CORNER_SQUARES,
-  getLegalMoves,
-  getNextDisc,
-  placeDisc,
-  type Board,
-  type DiscColor,
-  type SquareIndex,
-} from "../game/othello";
 import type { MoveRecord } from "../game/session";
 import type {
-  CandidateMoveReview,
   GameReview,
   MoveReview,
   MoveReviewKind,
   MoveReviewReason,
-  ReviewEvaluationSource,
-  ReviewContext,
   ReviewGameOptions,
   ReviewedMove,
 } from "./reviewTypes";
+import {
+  analyzeMoveCandidates,
+  getMoveCandidateReasons,
+} from "./analyzeMoveCandidates";
 import {
   createEvaluationTimeline,
   findTurningPointMoveNumbers,
@@ -37,21 +25,7 @@ const defaultSearchDepth = 3;
 const defaultMaxHighlights = 2;
 const goodMoveScoreGap = 8;
 const badMoveScoreGap = 28;
-const exactEndgameReviewEmptyThreshold = 10;
-const exactEndgameReviewScoreWeight = 10;
-const cornerGivenScorePenalty = 90;
 const mobilitySwingThreshold = 3;
-const dangerSquaresByCorner = new Map<SquareIndex, SquareIndex[]>([
-  [0, [1, 8, 9]],
-  [7, [6, 14, 15]],
-  [56, [48, 49, 57]],
-  [63, [54, 55, 62]],
-]);
-
-type ReviewMoveScores = {
-  evaluationSource: ReviewEvaluationSource;
-  scores: MinimaxMoveScore[];
-};
 
 export function reviewGame(
   moveHistory: MoveRecord[],
@@ -96,28 +70,10 @@ function reviewMove(
   searchDepth: number,
   isTurningPoint: boolean,
 ): ReviewedMove {
-  const moveScores = getReviewMoveScores(
-    move.boardBefore,
-    move.disc,
+  const candidateAnalysis = analyzeMoveCandidates(move.boardBefore, move.disc, {
     searchDepth,
-  );
-  const candidateMoves = moveScores.scores.map<CandidateMoveReview>(
-    ({ move: square, score }, index) => {
-      const boardAfter = placeDisc(move.boardBefore, square, move.disc);
-
-      return {
-        square,
-        score,
-        rank: index + 1,
-        reasons: getCandidateReasons({
-          boardAfter,
-          boardBefore: move.boardBefore,
-          disc: move.disc,
-          square,
-        }),
-      };
-    },
-  );
+  });
+  const candidateMoves = candidateAnalysis.candidateMoves;
   const bestCandidate = candidateMoves[0] ?? null;
   const playedCandidate =
     candidateMoves.find((candidate) => candidate.square === move.square) ??
@@ -127,7 +83,18 @@ function reviewMove(
     strategicEvaluateBoard(move.boardAfter, move.disc);
   const bestScore = bestCandidate?.score ?? null;
   const scoreGap = bestScore === null ? 0 : bestScore - playedScore;
-  const reasons = getMoveReasons(move, scoreGap, isTurningPoint);
+  const reasons = getMoveReasons(
+    move,
+    scoreGap,
+    isTurningPoint,
+    playedCandidate?.reasons ??
+      getMoveCandidateReasons({
+        boardAfter: move.boardAfter,
+        boardBefore: move.boardBefore,
+        disc: move.disc,
+        square: move.square,
+      }),
+  );
   const kind = getMoveReviewKind(scoreGap, reasons);
 
   return {
@@ -137,7 +104,7 @@ function reviewMove(
       moveNumber: move.moveNumber,
       disc: move.disc,
       square: move.square,
-      evaluationSource: moveScores.evaluationSource,
+      evaluationSource: candidateAnalysis.evaluationSource,
       kind,
       reasons,
       scoreBefore: strategicEvaluateBoard(move.boardBefore, move.disc),
@@ -149,90 +116,11 @@ function reviewMove(
   };
 }
 
-function getReviewMoveScores(
-  board: Board,
-  disc: DiscColor,
-  searchDepth: number,
-): ReviewMoveScores {
-  if (countEmptySquares(board) <= exactEndgameReviewEmptyThreshold) {
-    return {
-      evaluationSource: "exactEndgame",
-      scores: getExactEndgameMoveScores(board, disc),
-    };
-  }
-
-  return {
-    evaluationSource: "minimax",
-    scores: getTeacherAdjustedMoveScores(
-      board,
-      disc,
-      getMinimaxMoveScores(board, disc, {
-        searchDepth,
-      }),
-    ),
-  };
-}
-
-function getTeacherAdjustedMoveScores(
-  board: Board,
-  disc: DiscColor,
-  moveScores: MinimaxMoveScore[],
-): MinimaxMoveScore[] {
-  return moveScores
-    .map(({ move, score }) => {
-      const boardAfter = placeDisc(board, move, disc);
-
-      return {
-        move,
-        score:
-          score -
-          (newlyGivesCorner(board, boardAfter, disc)
-            ? cornerGivenScorePenalty
-            : 0),
-      };
-    })
-    .sort((firstMove, secondMove) => secondMove.score - firstMove.score);
-}
-
-function getExactEndgameMoveScores(
-  board: Board,
-  disc: DiscColor,
-): MinimaxMoveScore[] {
-  return getLegalMoves(board, disc)
-    .map((move) => ({
-      move,
-      score:
-        solveExactEndgameDiscDifference(
-          placeDisc(board, move, disc),
-          getNextDisc(disc),
-          disc,
-        ) * exactEndgameReviewScoreWeight,
-    }))
-    .sort((firstMove, secondMove) => secondMove.score - firstMove.score);
-}
-
-function getCandidateReasons(context: ReviewContext): MoveReviewReason[] {
-  const reasons: MoveReviewReason[] = [];
-
-  if (isCorner(context.square)) {
-    reasons.push("corner");
-  }
-
-  if (isDangerSquare(context.boardBefore, context.square)) {
-    reasons.push("dangerSquare");
-  }
-
-  if (newlyGivesCorner(context.boardBefore, context.boardAfter, context.disc)) {
-    reasons.push("cornerGiven");
-  }
-
-  return reasons;
-}
-
 function getMoveReasons(
   move: MoveRecord,
   scoreGap: number,
   isTurningPoint: boolean,
+  candidateReasons: MoveReviewReason[],
 ): MoveReviewReason[] {
   const reasons: MoveReviewReason[] = [];
   const mobilityBefore = getMobilityDifference(move.boardBefore, move.disc);
@@ -253,17 +141,7 @@ function getMoveReasons(
     reasons.push("turningPoint");
   }
 
-  if (isCorner(move.square)) {
-    reasons.push("corner");
-  }
-
-  if (isDangerSquare(move.boardBefore, move.square)) {
-    reasons.push("dangerSquare");
-  }
-
-  if (newlyGivesCorner(move.boardBefore, move.boardAfter, move.disc)) {
-    reasons.push("cornerGiven");
-  }
+  pushUniqueReasons(reasons, candidateReasons);
 
   if (mobilitySwing >= mobilitySwingThreshold) {
     reasons.push("mobilityGain");
@@ -278,6 +156,17 @@ function getMoveReasons(
   }
 
   return reasons;
+}
+
+function pushUniqueReasons(
+  reasons: MoveReviewReason[],
+  nextReasons: MoveReviewReason[],
+): void {
+  for (const reason of nextReasons) {
+    if (!reasons.includes(reason)) {
+      reasons.push(reason);
+    }
+  }
 }
 
 function getMoveReviewKind(
@@ -323,39 +212,4 @@ function getHighlightedMoves(
 
 function getScoreGap(review: MoveReview): number {
   return review.bestScore === null ? 0 : review.bestScore - review.playedScore;
-}
-
-function newlyGivesCorner(
-  boardBefore: ReviewContext["boardBefore"],
-  boardAfter: ReviewContext["boardAfter"],
-  disc: DiscColor,
-) {
-  const opponentDisc = getNextDisc(disc);
-  const cornerMovesBefore = getLegalMoves(boardBefore, opponentDisc).filter(
-    isCorner,
-  );
-  const cornerMovesAfter = getLegalMoves(boardAfter, opponentDisc).filter(
-    isCorner,
-  );
-
-  return cornerMovesAfter.some(
-    (cornerMove) => !cornerMovesBefore.includes(cornerMove),
-  );
-}
-
-function isCorner(square: SquareIndex): boolean {
-  return CORNER_SQUARES.some((corner) => corner === square);
-}
-
-function isDangerSquare(
-  board: ReviewContext["boardBefore"],
-  square: SquareIndex,
-) {
-  for (const [corner, dangerSquares] of dangerSquaresByCorner) {
-    if (board[corner] === null && dangerSquares.includes(square)) {
-      return true;
-    }
-  }
-
-  return false;
 }
