@@ -358,6 +358,7 @@ function createReviewedMove({
       bestScore: reviewedBestSquare === null ? null : 0,
       bestSquare: reviewedBestSquare,
       disc: "black",
+      evaluationSource: "minimax",
       kind,
       moveNumber,
       playedScore,

@@ -1,4 +1,3 @@
-import { countEmptySquares } from "../cpu";
 import type { SquareIndex } from "../game/othello";
 import type {
   GameReview,
@@ -8,8 +7,6 @@ import type {
   ReviewMoveComparison,
   ReviewedMove,
 } from "./reviewTypes";
-
-const exactEndgameMessageEmptyThreshold = 10;
 
 export function createGameReviewMessages(
   review: GameReview,
@@ -273,12 +270,8 @@ function createAdvice(reviewedMoves: ReviewedMove[]): string {
 
 function usesExactEndgameEvaluation(
   reviewedMove: MoveReview | ReviewedMove,
-): reviewedMove is ReviewedMove {
-  return (
-    "review" in reviewedMove &&
-    countEmptySquares(reviewedMove.boardBefore) <=
-      exactEndgameMessageEmptyThreshold
-  );
+): boolean {
+  return getMoveReview(reviewedMove).evaluationSource === "exactEndgame";
 }
 
 function formatSquare(square: SquareIndex): string {

@@ -42,6 +42,7 @@ describe("teacher review", () => {
         square: expect.any(Number),
       }),
     );
+    expect(reviewedMove.review.evaluationSource).toBe("minimax");
     expect(reviewedMove.review.reasons.length).toBeGreaterThan(0);
     expect(review).not.toHaveProperty("advice");
   });
@@ -178,6 +179,7 @@ describe("teacher review", () => {
     );
     const reviewedMove = review.reviewedMoves[0];
 
+    expect(reviewedMove.review.evaluationSource).toBe("exactEndgame");
     expect(reviewedMove.candidateMoves).toEqual([
       expect.objectContaining({
         rank: 1,

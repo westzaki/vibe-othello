@@ -39,6 +39,7 @@ export type {
   MoveReviewReason,
   PracticeFeedback,
   PracticeFeedbackContext,
+  ReviewEvaluationSource,
   ReviewCard,
   ReviewCardKind,
   ReviewMoveComparison,

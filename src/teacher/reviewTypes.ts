@@ -3,6 +3,8 @@ import type { MoveRecord } from "../game/session";
 
 export type MoveReviewKind = "good" | "bad" | "neutral";
 
+export type ReviewEvaluationSource = "minimax" | "exactEndgame";
+
 export type MoveReviewReason =
   | "bestMove"
   | "nearBestMove"
@@ -27,6 +29,7 @@ export type MoveReview = {
   moveNumber: number;
   disc: DiscColor;
   square: SquareIndex;
+  evaluationSource: ReviewEvaluationSource;
   kind: MoveReviewKind;
   reasons: MoveReviewReason[];
   scoreBefore: number;

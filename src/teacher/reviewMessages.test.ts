@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { createEmptyBoard, type Board, type SquareIndex } from "../game/othello";
 import { placeCurrentDisc, startNewGame } from "../game/session";
-import { createBoardFixture } from "../test/boardFixtures";
 import { reviewGame } from "./reviewGame";
 import {
   createGameReviewMessages,
   createMoveReviewMessage,
 } from "./reviewMessages";
-import type { MoveReviewReason, ReviewedMove } from "./reviewTypes";
+import type {
+  MoveReviewReason,
+  ReviewEvaluationSource,
+  ReviewedMove,
+} from "./reviewTypes";
 
 describe("teacher review messages", () => {
   it("creates Japanese display text from structured review data", () => {
@@ -28,6 +31,7 @@ describe("teacher review messages", () => {
       bestScore: 18,
       bestSquare: 0,
       disc: "black",
+      evaluationSource: "minimax",
       kind: "bad",
       playedScore: -12,
       moveNumber: 12,
@@ -111,6 +115,7 @@ describe("teacher review messages", () => {
       bestScore: 18,
       bestSquare: 26,
       disc: "black",
+      evaluationSource: "minimax",
       kind: "bad",
       playedScore: -12,
       moveNumber: 24,
@@ -130,8 +135,8 @@ describe("teacher review messages", () => {
     const message = createMoveReviewMessage(
       createReviewedMove({
         bestSquare: 0,
-        boardBefore: createEndgameBoard(),
         candidateReasons: [],
+        evaluationSource: "exactEndgame",
         reasons: ["missedBestMove", "scoreDrop"],
         square: 2,
       }),
@@ -150,8 +155,8 @@ describe("teacher review messages", () => {
   it("uses endgame advice when a highlighted bad move came from exact endgame evaluation", () => {
     const reviewedMove = createReviewedMove({
       bestSquare: 0,
-      boardBefore: createEndgameBoard(),
       candidateReasons: [],
+      evaluationSource: "exactEndgame",
       reasons: ["missedBestMove", "scoreDrop"],
       square: 2,
     });
@@ -174,12 +179,14 @@ function createReviewedMove({
   bestSquare,
   boardBefore = createEmptyBoard(),
   candidateReasons,
+  evaluationSource = "minimax",
   reasons,
   square,
 }: {
   bestSquare: SquareIndex | null;
   boardBefore?: Board;
   candidateReasons: MoveReviewReason[];
+  evaluationSource?: ReviewEvaluationSource;
   reasons: MoveReviewReason[];
   square: SquareIndex;
 }): ReviewedMove {
@@ -207,6 +214,7 @@ function createReviewedMove({
       bestScore: bestSquare === null ? null : 18,
       bestSquare,
       disc: "black",
+      evaluationSource,
       kind: "bad",
       moveNumber: 53,
       playedScore: -12,
@@ -217,15 +225,4 @@ function createReviewedMove({
     },
     square,
   };
-}
-
-function createEndgameBoard(): Board {
-  return createBoardFixture(
-    {
-      0: null,
-      1: null,
-      2: null,
-    },
-    "black",
-  );
 }

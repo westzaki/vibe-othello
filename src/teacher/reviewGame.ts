@@ -22,6 +22,7 @@ import type {
   MoveReview,
   MoveReviewKind,
   MoveReviewReason,
+  ReviewEvaluationSource,
   ReviewContext,
   ReviewGameOptions,
   ReviewedMove,
@@ -45,6 +46,11 @@ const dangerSquaresByCorner = new Map<SquareIndex, SquareIndex[]>([
   [56, [48, 49, 57]],
   [63, [54, 55, 62]],
 ]);
+
+type ReviewMoveScores = {
+  evaluationSource: ReviewEvaluationSource;
+  scores: MinimaxMoveScore[];
+};
 
 export function reviewGame(
   moveHistory: MoveRecord[],
@@ -94,7 +100,7 @@ function reviewMove(
     move.disc,
     searchDepth,
   );
-  const candidateMoves = moveScores.map<CandidateMoveReview>(
+  const candidateMoves = moveScores.scores.map<CandidateMoveReview>(
     ({ move: square, score }, index) => ({
       square,
       score,
@@ -126,6 +132,7 @@ function reviewMove(
       moveNumber: move.moveNumber,
       disc: move.disc,
       square: move.square,
+      evaluationSource: moveScores.evaluationSource,
       kind,
       reasons,
       scoreBefore: strategicEvaluateBoard(move.boardBefore, move.disc),
@@ -141,14 +148,20 @@ function getReviewMoveScores(
   board: Board,
   disc: DiscColor,
   searchDepth: number,
-): MinimaxMoveScore[] {
+): ReviewMoveScores {
   if (countEmptySquares(board) <= exactEndgameReviewEmptyThreshold) {
-    return getExactEndgameMoveScores(board, disc);
+    return {
+      evaluationSource: "exactEndgame",
+      scores: getExactEndgameMoveScores(board, disc),
+    };
   }
 
-  return getMinimaxMoveScores(board, disc, {
-    searchDepth,
-  });
+  return {
+    evaluationSource: "minimax",
+    scores: getMinimaxMoveScores(board, disc, {
+      searchDepth,
+    }),
+  };
 }
 
 function getExactEndgameMoveScores(
