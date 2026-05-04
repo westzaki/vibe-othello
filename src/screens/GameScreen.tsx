@@ -1,10 +1,12 @@
-import { lazy, Suspense, useMemo } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { calculateAdvantage } from "../cpu";
 import { AdvantageBar } from "../components/AdvantageBar";
 import { Board } from "../components/Board";
 import { GameHeader } from "../components/GameHeader";
 import { GameResultOverlay } from "../components/GameResultOverlay";
 import { MoveHistory } from "../components/MoveHistory";
+import type { DiscColor } from "../game/othello";
+import type { GameSessionNotice } from "../game/session";
 import type { useOthelloGame } from "../hooks/useOthelloGame";
 
 const DevDebugPanel = import.meta.env.DEV
@@ -35,12 +37,41 @@ export function GameScreen({
   onPlayAgain,
 }: GameScreenProps) {
   const advantage = useMemo(() => calculateAdvantage(game.board), [game.board]);
+  const passNotice = game.notice?.type === "pass" ? game.notice : null;
+  const passNoticeKey =
+    passNotice === null
+      ? null
+      : [
+          game.moveHistory.length,
+          game.lastMove ?? "none",
+          passNotice.skippedDisc,
+          passNotice.nextDisc,
+        ].join(":");
+  const [hiddenPassNoticeKey, setHiddenPassNoticeKey] = useState<string | null>(
+    null,
+  );
   const resultWinner =
     game.gameStatus === "ended" &&
     game.endReason === "completed" &&
     game.winner !== null
       ? game.winner
       : null;
+
+  useEffect(() => {
+    if (passNoticeKey === null) {
+      const resetTimeoutId = window.setTimeout(() => {
+        setHiddenPassNoticeKey(null);
+      }, 0);
+
+      return () => window.clearTimeout(resetTimeoutId);
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setHiddenPassNoticeKey(passNoticeKey);
+    }, 2400);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [passNoticeKey]);
 
   return (
     <section className="game-shell" aria-label="Othello game">
@@ -110,12 +141,39 @@ export function GameScreen({
         <MoveHistory moves={game.moveHistory} />
       </div>
 
+      {passNotice !== null &&
+        passNoticeKey !== null &&
+        hiddenPassNoticeKey !== passNoticeKey && (
+          <PassNoticeOverlay notice={passNotice} />
+        )}
+
       {DevDebugPanel !== null && (
         <Suspense fallback={null}>
           <DevDebugPanel onReplaceSession={game.replaceSession} />
         </Suspense>
       )}
     </section>
+  );
+}
+
+function PassNoticeOverlay({ notice }: { notice: GameSessionNotice }) {
+  return (
+    <div className="pass-notice-overlay" role="status" aria-live="polite">
+      <div className="pass-notice-overlay__card">
+        <span
+          className={`pass-notice-overlay__disc pass-notice-overlay__disc--${notice.skippedDisc}`}
+          aria-hidden="true"
+        />
+        <div>
+          <p className="pass-notice-overlay__title">
+            {formatDisc(notice.skippedDisc)}は置ける場所がないみたい
+          </p>
+          <p className="pass-notice-overlay__text">
+            {formatDisc(notice.nextDisc)}がもう一度打つよ
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -128,4 +186,8 @@ function canOpenReview(game: ReturnType<typeof useOthelloGame>): boolean {
       (game.players.white.type === "human" &&
         game.players.black.type === "cpu"))
   );
+}
+
+function formatDisc(disc: DiscColor): string {
+  return disc === "black" ? "黒" : "白";
 }
