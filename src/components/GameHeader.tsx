@@ -8,6 +8,7 @@ type GameHeaderProps = {
   discCounts: DiscCounts;
   endReason: GameEndReason | null;
   gameStatus: GameStatus;
+  isCpuThinking: boolean;
   isPlaying: boolean;
   isUndoDisabled: boolean;
   message: string | null;
@@ -23,6 +24,7 @@ export function GameHeader({
   discCounts,
   endReason,
   gameStatus,
+  isCpuThinking,
   isPlaying,
   isUndoDisabled,
   message,
@@ -49,18 +51,7 @@ export function GameHeader({
 
   return (
     <div className="game-heading">
-      <h1 id="game-title">Vibe オセロ</h1>
       <div className="game-heading__status">
-        <div className="score-row" aria-label="Current score">
-          <span className="score-chip score-chip--black">
-            黒
-            <strong>{discCounts.black}</strong>
-          </span>
-          <span className="score-chip score-chip--white">
-            白
-            <strong>{discCounts.white}</strong>
-          </span>
-        </div>
         <div className="game-status-row">
           {gameStatus !== "playing" && (
             <p className="session-status">
@@ -77,12 +68,36 @@ export function GameHeader({
             <p className="result-status">Match stopped</p>
           ) : (
             <p className="turn-status">
-              <span className={`turn-disc turn-disc--${currentDisc}`}>
-                {formatDisc(currentDisc)}
+              <span
+                className={`turn-disc turn-disc--${currentDisc}`}
+                aria-hidden="true"
+              />
+              <span className="turn-status__copy">
+                <span className="turn-status__label">
+                  {isCpuThinking
+                    ? "ビビーが考え中"
+                    : `${formatDisc(currentDisc)}の番`}
+                </span>
+                {gameStatus === "playing" && (
+                  <span className="turn-status__hint">
+                    {isCpuThinking
+                      ? "ちょっとまってね"
+                      : "置ける場所が光っています"}
+                  </span>
+                )}
               </span>
-              の番
             </p>
           )}
+        </div>
+        <div className="score-row" aria-label="Current score">
+          <span className="score-chip score-chip--black">
+            黒
+            <strong>{discCounts.black}</strong>
+          </span>
+          <span className="score-chip score-chip--white">
+            白
+            <strong>{discCounts.white}</strong>
+          </span>
         </div>
         {message !== null && (
           <p className="game-message" role="status">
@@ -104,7 +119,11 @@ export function GameHeader({
                 まった
               </button>
             )}
-            <button className="game-action" onClick={requestEndGame} type="button">
+            <button
+              className="game-action game-action--danger"
+              onClick={requestEndGame}
+              type="button"
+            >
               対局をやめる
             </button>
           </>

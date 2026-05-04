@@ -1,21 +1,21 @@
 .board-frame {
   width: min(100%, 680px);
   padding: clamp(12px, 2.8vw, 22px);
-  border: 1px solid rgba(138, 104, 71, 0.34);
+  border: 1px solid rgba(112, 68, 34, 0.34);
   border-radius: var(--radius-xl);
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.18), transparent 34%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.2), transparent 34%),
     linear-gradient(
       135deg,
-      var(--color-board-frame-light),
-      var(--color-board-frame-dark) 43%,
-      #d1ac82 100%
+      color-mix(in srgb, var(--color-wood-soft) 74%, white),
+      color-mix(in srgb, var(--color-wood) 78%, var(--color-bibi-cocoa)) 45%,
+      color-mix(in srgb, var(--color-wood-dark) 72%, var(--color-wood)) 100%
     );
   box-shadow:
     var(--shadow-board),
-    0 0 0 8px rgba(255, 255, 255, 0.64),
+    0 0 0 8px rgba(255, 248, 232, 0.68),
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    inset 0 -18px 26px rgba(91, 58, 34, 0.2);
+    inset 0 -18px 26px rgba(70, 44, 22, 0.22);
 }
 
 .board-coordinate-shell {
@@ -70,9 +70,9 @@
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
   overflow: hidden;
-  border: 2px solid var(--color-board-edge);
+  border: 2px solid color-mix(in srgb, var(--color-board-green-dark) 82%, var(--color-wood));
   border-radius: var(--radius-sm);
-  background: var(--color-board-edge);
+  background: color-mix(in srgb, var(--color-board-green-dark) 82%, var(--color-wood));
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 18px 36px rgba(255, 255, 255, 0.08),
@@ -83,14 +83,14 @@
   position: relative;
   aspect-ratio: 1;
   padding: 0;
-  border-right: 1px solid var(--color-board-line);
+  border-right: 1px solid color-mix(in srgb, var(--color-board-line) 78%, var(--color-board-green-dark));
   border-top: 0;
   border-left: 0;
-  border-bottom: 1px solid var(--color-board-line);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-board-line) 78%, var(--color-board-green-dark));
   border-radius: 0;
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.14), transparent 44%),
-    var(--color-board-green);
+    linear-gradient(145deg, rgba(255, 255, 255, 0.1), transparent 44%),
+    color-mix(in srgb, var(--color-board-green) 78%, var(--color-board-green-dark));
   cursor: default;
   perspective: 520px;
   appearance: none;
@@ -109,8 +109,8 @@
 
 .board-square--legal:hover {
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.24), transparent 44%),
-    var(--color-board-green-hover);
+    linear-gradient(145deg, rgba(255, 255, 255, 0.18), transparent 44%),
+    color-mix(in srgb, var(--color-board-green-hover) 74%, var(--color-board-green-dark));
 }
 
 .board-square:nth-child(8n) {
@@ -125,13 +125,13 @@
   position: absolute;
   inset: 50%;
   display: none;
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: var(--color-honey-wash);
+  background: var(--color-bibi-honey);
   box-shadow:
-    0 0 0 4px rgba(255, 210, 122, 0.24),
-    0 0 14px rgba(255, 210, 122, 0.38);
+    0 0 0 3px rgba(255, 240, 194, 0.48),
+    0 0 13px rgba(243, 185, 79, 0.42);
   content: "";
   transform: translate(-50%, -50%);
 }
@@ -141,11 +141,12 @@
 }
 
 .board-square--last-move .disc {
-  outline: 3px solid var(--focus-ring);
+  outline: 3px solid #f5a6a6;
   outline-offset: 3px;
   box-shadow:
     0 0 0 1px rgba(32, 23, 12, 0.8),
-    0 0 22px rgba(240, 200, 107, 0.66),
+    0 0 0 7px rgba(245, 166, 166, 0.22),
+    0 0 22px rgba(245, 166, 166, 0.5),
     inset -8px -10px 14px rgba(0, 0, 0, 0.28),
     inset 5px 6px 10px rgba(255, 255, 255, 0.2),
     0 8px 14px rgba(0, 0, 0, 0.28);

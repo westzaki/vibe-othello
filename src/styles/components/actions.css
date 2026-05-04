@@ -3,8 +3,8 @@
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 8px;
-  border-block-start: 1px solid var(--color-border);
-  padding-block: 16px;
+  border-block-start: 1px solid color-mix(in srgb, var(--color-border) 48%, transparent);
+  padding-block-start: 12px;
 }
 
 .game-action {
@@ -23,7 +23,7 @@
     var(--shadow-soft);
   cursor: pointer;
   font: inherit;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 850;
   overflow-wrap: anywhere;
   white-space: normal;
@@ -76,16 +76,18 @@
 }
 
 .game-action--danger {
-  color: var(--color-peach-strong);
-  border-color: var(--color-border-peach);
+  color: var(--color-text-soft);
+  border-color: color-mix(in srgb, var(--color-border-peach) 58%, var(--color-border));
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 238, 232, 0.9)),
-    #ffffff;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 250, 242, 0.76)),
+    rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-hairline);
 }
 
 .game-action--danger:hover:not(:disabled) {
-  border-color: rgba(216, 126, 112, 0.62);
-  background: linear-gradient(180deg, #ffffff, #fff1ed);
+  color: var(--color-peach-strong);
+  border-color: rgba(216, 126, 112, 0.5);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 244, 238, 0.84));
 }
 
 .game-end-confirm {
