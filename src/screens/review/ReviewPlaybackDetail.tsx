@@ -1,12 +1,12 @@
+import type { PositionReview } from "../../teacher";
 import type { MoveRecord } from "../../game/session";
-import type { PlaybackPositionReview } from "./reviewPlayback";
 import { formatDisc, formatSquare } from "./reviewFormat";
 
 type ReviewPlaybackDetailProps = {
   currentMove: MoveRecord | null;
   currentMoveNumber: number;
   maxMoveNumber: number;
-  positionReview: PlaybackPositionReview;
+  positionReview: PositionReview;
 };
 
 export function ReviewPlaybackDetail({
