@@ -1,11 +1,14 @@
 import { getInitialGameMode, getInitialHumanDisc } from "./game/matchSetup";
+import { useAppSettings } from "./hooks/useAppSettings";
 import { useAppFlow } from "./hooks/useAppFlow";
 import { GameScreen } from "./screens/GameScreen";
 import { ReviewScreen } from "./screens/ReviewScreen";
+import { SettingsScreen } from "./screens/SettingsScreen";
 import { StartScreen } from "./screens/StartScreen";
 
 export default function App() {
-  const appFlow = useAppFlow();
+  const { settings, updateSoundEnabled } = useAppSettings();
+  const appFlow = useAppFlow({ soundEnabled: settings.soundEnabled });
   const { game, practiceGame, reviewMoveNumber, screen } = appFlow;
 
   return (
@@ -15,7 +18,14 @@ export default function App() {
           initialCpuLevel={game.players.white.cpuLevel}
           initialHumanDisc={getInitialHumanDisc(game.players)}
           initialMode={getInitialGameMode(game.players)}
+          onOpenSettings={appFlow.openSettings}
           onStart={appFlow.startMatch}
+        />
+      ) : screen === "settings" ? (
+        <SettingsScreen
+          onBackToStart={appFlow.backToStart}
+          onSoundEnabledChange={updateSoundEnabled}
+          settings={settings}
         />
       ) : screen === "review" ? (
         <ReviewScreen
