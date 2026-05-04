@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { Advantage } from "../cpu";
 import { createMatchPlayerSettings } from "../game/matchSetup";
 import type { PlayerSettings } from "../game/players";
 import {
@@ -15,17 +16,79 @@ import {
 } from "./coachHintModel";
 
 describe("teacher coach hint model", () => {
-  it("allows hints for a one-player human turn", () => {
+  it("allows gentle hints after a long pause in a difficult position", () => {
     const session = startNewGame();
     const players = createOnePlayerSettings("black");
 
     expect(
       canShowCoachHint({
+        advantage: createAdvantage({ blackPercent: 40 }),
         players,
         session,
         settings: defaultCoachHintSettings,
+        thinkingTimeMs: 4500,
       }),
     ).toBe(true);
+  });
+
+  it("does not show gentle hints before the player has paused for a while", () => {
+    const session = startNewGame();
+    const players = createOnePlayerSettings("black");
+
+    expect(
+      canShowCoachHint({
+        advantage: createAdvantage({ blackPercent: 40 }),
+        players,
+        session,
+        settings: { mode: "gentle" },
+        thinkingTimeMs: 4400,
+      }),
+    ).toBe(false);
+  });
+
+  it("does not show gentle hints while the current player is ahead", () => {
+    const session = startNewGame();
+    const players = createOnePlayerSettings("black");
+
+    expect(
+      canShowCoachHint({
+        advantage: createAdvantage({ blackPercent: 55 }),
+        players,
+        session,
+        settings: { mode: "gentle" },
+        thinkingTimeMs: 4500,
+      }),
+    ).toBe(false);
+  });
+
+  it("allows active hints after a shorter pause regardless of advantage", () => {
+    const session = startNewGame();
+    const players = createOnePlayerSettings("black");
+
+    expect(
+      canShowCoachHint({
+        advantage: createAdvantage({ blackPercent: 70 }),
+        players,
+        session,
+        settings: { mode: "active" },
+        thinkingTimeMs: 1500,
+      }),
+    ).toBe(true);
+  });
+
+  it("does not show active hints before the shorter pause", () => {
+    const session = startNewGame();
+    const players = createOnePlayerSettings("black");
+
+    expect(
+      canShowCoachHint({
+        advantage: createAdvantage({ blackPercent: 40 }),
+        players,
+        session,
+        settings: { mode: "active" },
+        thinkingTimeMs: 1400,
+      }),
+    ).toBe(false);
   });
 
   it("does not show hints when the mode is off", () => {
@@ -34,9 +97,11 @@ describe("teacher coach hint model", () => {
 
     expect(
       canShowCoachHint({
+        advantage: createAdvantage({ blackPercent: 40 }),
         players,
         session,
         settings: { mode: "off" },
+        thinkingTimeMs: 4500,
       }),
     ).toBe(false);
   });
@@ -46,9 +111,11 @@ describe("teacher coach hint model", () => {
 
     expect(
       canShowCoachHint({
+        advantage: createAdvantage({ blackPercent: 40 }),
         players: createMatchPlayerSettings("twoPlayer", "level1", "black"),
         session,
         settings: defaultCoachHintSettings,
+        thinkingTimeMs: 4500,
       }),
     ).toBe(false);
   });
@@ -58,9 +125,11 @@ describe("teacher coach hint model", () => {
 
     expect(
       canShowCoachHint({
+        advantage: createAdvantage({ blackPercent: 60 }),
         players: createOnePlayerSettings("white"),
         session,
         settings: defaultCoachHintSettings,
+        thinkingTimeMs: 4500,
       }),
     ).toBe(false);
   });
@@ -71,10 +140,12 @@ describe("teacher coach hint model", () => {
 
     expect(
       canShowCoachHint({
+        advantage: createAdvantage({ blackPercent: 40 }),
         isCpuThinking: true,
         players,
         session,
         settings: defaultCoachHintSettings,
+        thinkingTimeMs: 4500,
       }),
     ).toBe(false);
   });
@@ -84,14 +155,16 @@ describe("teacher coach hint model", () => {
 
     expect(
       canShowCoachHint({
+        advantage: createAdvantage({ blackPercent: 40 }),
         players,
         session: endGame(startNewGame()),
         settings: defaultCoachHintSettings,
+        thinkingTimeMs: 4500,
       }),
     ).toBe(false);
   });
 
-  it("creates a gentle model for high-priority hints", () => {
+  it("creates a vague gentle model after a long pause in a difficult position", () => {
     const session = createPracticeSessionFromBoard(
       createBoardFixture({
         1: "white",
@@ -100,9 +173,11 @@ describe("teacher coach hint model", () => {
       "black",
     );
     const model = createCoachHintModel({
+      advantage: createAdvantage({ blackPercent: 40 }),
       players: createOnePlayerSettings("black"),
       session,
       settings: { mode: "gentle" },
+      thinkingTimeMs: 4500,
     });
 
     expect(model).toEqual(
@@ -114,26 +189,39 @@ describe("teacher coach hint model", () => {
         }),
       }),
     );
+    expect(model?.hint.message).not.toContain("A1");
   });
 
-  it("hides mobility-only hints in gentle mode", () => {
-    const session = createPracticeSessionFromBoard(createMobilityBoard(), "black");
-
-    expect(
-      createCoachHintModel({
-        players: createOnePlayerSettings("black"),
-        session,
-        settings: { mode: "gentle" },
-      }),
-    ).toBeNull();
-  });
-
-  it("includes mobility hints in active mode", () => {
+  it("includes mobility hints in gentle mode when timing and advantage allow it", () => {
     const session = createPracticeSessionFromBoard(createMobilityBoard(), "black");
     const model = createCoachHintModel({
+      advantage: createAdvantage({ blackPercent: 40 }),
+      players: createOnePlayerSettings("black"),
+      session,
+      settings: { mode: "gentle" },
+      thinkingTimeMs: 4500,
+    });
+
+    expect(model).toEqual(
+      expect.objectContaining({
+        mode: "gentle",
+        hint: expect.objectContaining({
+          kind: "mobility",
+          square: 26,
+        }),
+      }),
+    );
+    expect(model?.hint.message).not.toContain("C4");
+  });
+
+  it("creates a specific active model after a shorter pause", () => {
+    const session = createPracticeSessionFromBoard(createMobilityBoard(), "black");
+    const model = createCoachHintModel({
+      advantage: createAdvantage({ blackPercent: 70 }),
       players: createOnePlayerSettings("black"),
       session,
       settings: { mode: "active" },
+      thinkingTimeMs: 1500,
     });
 
     expect(model).toEqual(
@@ -145,8 +233,22 @@ describe("teacher coach hint model", () => {
         }),
       }),
     );
+    expect(model?.hint.message).toContain("C4");
   });
 });
+
+function createAdvantage({
+  blackPercent,
+}: {
+  blackPercent: number;
+}): Advantage {
+  return {
+    blackPercent,
+    leadingDisc:
+      blackPercent === 50 ? null : blackPercent > 50 ? "black" : "white",
+    whitePercent: 100 - blackPercent,
+  };
+}
 
 function createOnePlayerSettings(humanDisc: "black" | "white"): PlayerSettings {
   return createMatchPlayerSettings("onePlayer", "level1", humanDisc);

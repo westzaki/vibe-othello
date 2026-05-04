@@ -24,6 +24,7 @@ export { createCoachHint } from "./createCoachHint";
 export type {
   CoachHint,
   CoachHintKind,
+  CoachHintMessageStyle,
   CreateCoachHintOptions,
 } from "./createCoachHint";
 export {
