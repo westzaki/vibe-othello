@@ -3,7 +3,10 @@ import type { CpuLevel } from "../cpu";
 import type { DiscColor } from "../game/othello";
 import { createMatchPlayerSettings, type GameMode } from "../game/matchSetup";
 import type { PracticeSessionOptions } from "../game/session";
-import { useOthelloGame } from "./useOthelloGame";
+import {
+  useOthelloGame,
+  type OthelloGameController,
+} from "./useOthelloGame";
 
 export type AppFlowState =
   | { screen: "start" }
@@ -157,8 +160,8 @@ export function useAppFlow() {
 }
 
 function copyPlayers(
-  source: ReturnType<typeof useOthelloGame>,
-  target: ReturnType<typeof useOthelloGame>,
+  source: OthelloGameController,
+  target: OthelloGameController,
 ) {
   target.setPlayers(source.players);
 }

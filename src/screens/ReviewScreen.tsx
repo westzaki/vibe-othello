@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { createInitialBoard } from "../game/othello";
 import type { PracticeSessionOptions } from "../game/session";
-import type { useOthelloGame } from "../hooks/useOthelloGame";
+import type { OthelloGameController } from "../hooks/useOthelloGame";
 import {
   createGameReviewMessages,
   defaultTeacherReviewConfig,
@@ -20,7 +20,7 @@ import { getReviewedDisc } from "./review/reviewPlayers";
 
 type ReviewScreenProps = {
   currentMoveNumber: number;
-  game: ReturnType<typeof useOthelloGame>;
+  game: OthelloGameController;
   onBackToResult: () => void;
   onBackToStart: () => void;
   onMoveNumberChange: (moveNumber: number) => void;

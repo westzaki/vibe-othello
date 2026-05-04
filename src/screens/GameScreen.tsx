@@ -7,7 +7,7 @@ import { GameResultOverlay } from "../components/GameResultOverlay";
 import { MoveHistory } from "../components/MoveHistory";
 import type { DiscColor } from "../game/othello";
 import type { GameSessionNotice } from "../game/session";
-import type { useOthelloGame } from "../hooks/useOthelloGame";
+import type { OthelloGameController } from "../hooks/useOthelloGame";
 
 const DevDebugPanel = import.meta.env.DEV
   ? lazy(() =>
@@ -18,7 +18,7 @@ const DevDebugPanel = import.meta.env.DEV
   : null;
 
 type GameScreenProps = {
-  game: ReturnType<typeof useOthelloGame>;
+  game: OthelloGameController;
   mode?: "match" | "practice";
   onBackToReview?: () => void;
   onBackToStart: () => void;
@@ -180,7 +180,7 @@ function PassNoticeOverlay({ notice }: { notice: GameSessionNotice }) {
   );
 }
 
-function canOpenReview(game: ReturnType<typeof useOthelloGame>): boolean {
+function canOpenReview(game: OthelloGameController): boolean {
   return (
     game.gameStatus === "ended" &&
     game.endReason === "completed" &&
