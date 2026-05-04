@@ -1,5 +1,3 @@
-import { useCallback, useMemo, useState } from "react";
-import { unlockGameAudio } from "../audio/gameSounds";
 import type { CpuLevel } from "../cpu";
 import type {
   Board,
@@ -8,20 +6,9 @@ import type {
   SquareIndex,
   Winner,
 } from "../game/othello";
-import {
-  createDefaultPlayerSettings,
-  type PlayerSettings,
-  type PlayerType,
-} from "../game/players";
+import type { PlayerSettings, PlayerType } from "../game/players";
 import {
   canUndoSessionMove,
-  createGameSession,
-  endGame,
-  getSessionLegalMoves,
-  placeCurrentDisc,
-  startNewGame,
-  startPracticeSession,
-  undoSessionMove,
   type GameEndReason,
   type GameSession,
   type GameSessionNotice,
@@ -30,8 +17,9 @@ import {
   type PracticeSessionOptions,
 } from "../game/session";
 import { useCpuTurn } from "./useCpuTurn";
-import { useMoveAnimationState } from "./useMoveAnimationState";
+import { useGameSessionController } from "./useGameSessionController";
 import { useMoveSounds } from "./useMoveSounds";
+import { usePlayerSettingsController } from "./usePlayerSettingsController";
 
 type UseOthelloGameOptions = {
   enabled?: boolean;
@@ -77,43 +65,26 @@ export function useOthelloGame({
   soundEnabled = true,
   undoEnabled = true,
 }: UseOthelloGameOptions = {}): OthelloGameController {
-  const [session, setSession] = useState(createGameSession);
-  const [players, setPlayers] = useState(createDefaultPlayerSettings);
+  const playerSettings = usePlayerSettingsController();
+  const sessionController = useGameSessionController(soundEnabled);
+  const { players } = playerSettings;
   const {
-    clearAnimationState,
     flipAnimationId,
     flippedSquares,
+    legalMoves,
     placedSquare,
-    recordMoveAnimation,
-  } = useMoveAnimationState();
-  const legalMoves = useMemo(() => getSessionLegalMoves(session), [session]);
+    session,
+  } = sessionController;
   const isPlaying = session.status === "playing";
   const currentPlayer = players[session.currentDisc];
   const currentPlayerType = currentPlayer.type;
   const canHumanPlay = isPlaying && currentPlayerType === "human";
   const canUndo = undoEnabled && canUndoSessionMove(session, players);
 
-  function handleEndGame() {
-    setSession((currentSession) => endGame(currentSession));
-    clearAnimationState();
-  }
-
-  const handlePlaceCurrentDisc = useCallback((square: SquareIndex) => {
-    setSession((currentSession) => {
-      const result = placeCurrentDisc(currentSession, square);
-
-      if (result.move !== null) {
-        recordMoveAnimation(result.move);
-      }
-
-      return result.session;
-    });
-  }, [recordMoveAnimation]);
-
   const isCpuThinking = useCpuTurn({
     currentPlayer,
     enabled,
-    onPlaceDisc: handlePlaceCurrentDisc,
+    onPlaceDisc: sessionController.placeCurrentDisc,
     session,
   });
   useMoveSounds({
@@ -123,69 +94,12 @@ export function useOthelloGame({
     placedSquare,
   });
 
-  function handleReplaceSession(nextSession: GameSession) {
-    setSession(nextSession);
-    clearAnimationState();
-  }
-
-  function handleResetGame() {
-    setSession(createGameSession());
-    clearAnimationState();
-  }
-
-  function handleStartNewGame() {
-    if (soundEnabled) {
-      unlockGameAudio();
-    }
-
-    setSession(startNewGame());
-    clearAnimationState();
-  }
-
-  function handleStartPracticeSession(options: PracticeSessionOptions) {
-    if (soundEnabled) {
-      unlockGameAudio();
-    }
-
-    setSession(startPracticeSession(options));
-    clearAnimationState();
-  }
-
   function handleUndoMove() {
     if (!undoEnabled || isCpuThinking) {
       return;
     }
 
-    setSession((currentSession) => {
-      const undoneSession = undoSessionMove(currentSession, players);
-
-      return undoneSession ?? currentSession;
-    });
-    clearAnimationState();
-  }
-
-  function handlePlayerTypeChange(disc: DiscColor, playerType: PlayerType) {
-    setPlayers((currentPlayers) => ({
-      ...currentPlayers,
-      [disc]: {
-        ...currentPlayers[disc],
-        type: playerType,
-      },
-    }));
-  }
-
-  function handleCpuLevelChange(disc: DiscColor, cpuLevel: CpuLevel) {
-    setPlayers((currentPlayers) => ({
-      ...currentPlayers,
-      [disc]: {
-        ...currentPlayers[disc],
-        cpuLevel,
-      },
-    }));
-  }
-
-  function handlePlayerSettingsChange(nextPlayers: PlayerSettings) {
-    setPlayers(nextPlayers);
+    sessionController.undoMove(players);
   }
 
   return {
@@ -200,7 +114,7 @@ export function useOthelloGame({
     flippedSquares,
     gameStatus: session.status,
     isCpuThinking,
-    isPlaying: session.status === "playing",
+    isPlaying,
     lastMove: session.lastMove,
     legalMoves,
     moveHistory: session.moveHistory,
@@ -208,16 +122,16 @@ export function useOthelloGame({
     placedSquare,
     players,
     winner: session.winner,
-    endGame: handleEndGame,
-    placeCurrentDisc: handlePlaceCurrentDisc,
+    endGame: sessionController.endGame,
+    placeCurrentDisc: sessionController.placeCurrentDisc,
     undoMove: handleUndoMove,
-    setCpuLevel: handleCpuLevelChange,
-    setPlayers: handlePlayerSettingsChange,
-    setPlayerType: handlePlayerTypeChange,
-    replaceSession: handleReplaceSession,
-    resetGame: handleResetGame,
-    startNewGame: handleStartNewGame,
-    startPracticeSession: handleStartPracticeSession,
+    setCpuLevel: playerSettings.setCpuLevel,
+    setPlayers: playerSettings.setPlayers,
+    setPlayerType: playerSettings.setPlayerType,
+    replaceSession: sessionController.replaceSession,
+    resetGame: sessionController.resetGame,
+    startNewGame: sessionController.startNewGame,
+    startPracticeSession: sessionController.startPracticeSession,
     undoEnabled,
   };
 }
