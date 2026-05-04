@@ -112,7 +112,6 @@ export function GameScreen({
                 isCpuThinking={game.isCpuThinking}
                 isPlaying={game.isPlaying}
                 isUndoDisabled={!game.canUndo || game.isCpuThinking}
-                message={game.message}
                 onEndGame={onEndGame}
                 onNewGame={onBackToStart}
                 onUndo={game.undoMove}
