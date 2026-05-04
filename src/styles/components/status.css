@@ -9,7 +9,7 @@
 .score-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 9px;
 }
 
 .score-chip {
@@ -18,14 +18,19 @@
   gap: 8px;
   min-width: 0;
   justify-content: center;
-  border: 1px solid rgba(184, 176, 225, 0.32);
-  border-radius: 16px;
+  border: 1px solid rgba(184, 176, 225, 0.36);
+  border-radius: 18px;
   min-height: 48px;
   padding: 8px 10px;
   color: #5c5866;
-  background: rgba(255, 255, 255, 0.76);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 251, 244, 0.72)),
+    rgba(255, 255, 255, 0.76);
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 850;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 8px 16px rgba(118, 100, 88, 0.06);
 }
 
 .score-chip::before {
@@ -37,7 +42,8 @@
 
 .score-chip strong {
   color: #34323e;
-  font-size: 1.16rem;
+  font-size: 1.2rem;
+  font-weight: 950;
 }
 
 .score-chip--black::before {
@@ -66,11 +72,16 @@
   margin: 0;
   color: #5c5866;
   font-size: 0.92rem;
-  font-weight: 600;
+  font-weight: 800;
 }
 
 .turn-status {
   gap: 10px;
+  min-height: 38px;
+  border: 1px solid rgba(184, 176, 225, 0.22);
+  border-radius: 999px;
+  padding: 5px 12px 5px 6px;
+  background: rgba(255, 255, 255, 0.52);
 }
 
 .session-status {
@@ -95,10 +106,12 @@
 .game-message {
   margin: 0;
   border: 1px solid rgba(255, 204, 112, 0.42);
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 9px 12px;
   color: #7d5d19;
-  background: rgba(255, 248, 222, 0.9);
+  background:
+    linear-gradient(180deg, rgba(255, 251, 235, 0.98), rgba(255, 248, 222, 0.86)),
+    rgba(255, 248, 222, 0.9);
   font-size: 0.88rem;
   font-weight: 700;
   line-height: 1.5;
@@ -112,7 +125,9 @@
   border-radius: 999px;
   padding: 5px 10px;
   font-size: 0.78rem;
+  font-weight: 950;
   text-transform: capitalize;
+  box-shadow: 0 6px 12px rgba(118, 100, 88, 0.1);
 }
 
 .turn-disc--black {
@@ -138,11 +153,11 @@
 .pass-notice-overlay__card {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 15px;
   max-width: min(92vw, 420px);
-  border: 1px solid rgba(255, 204, 112, 0.56);
-  border-radius: 24px;
-  padding: 16px 18px;
+  border: 1px solid rgba(255, 204, 112, 0.62);
+  border-radius: 26px;
+  padding: 17px 19px;
   color: #4e4a5b;
   background:
     radial-gradient(
@@ -153,12 +168,13 @@
     linear-gradient(
       180deg,
       rgba(255, 255, 255, 0.98),
-      rgba(255, 251, 244, 0.96)
+      rgba(255, 251, 244, 0.97)
     );
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.92),
-    0 24px 54px rgba(118, 100, 88, 0.2),
-    0 10px 24px rgba(143, 135, 216, 0.14);
+    0 28px 60px rgba(118, 100, 88, 0.22),
+    0 12px 26px rgba(143, 135, 216, 0.16),
+    0 0 0 8px rgba(255, 255, 255, 0.54);
   animation: pass-notice-enter 240ms ease both;
 }
 
