@@ -13,10 +13,10 @@ export function AdvantageBar({ advantage }: AdvantageBarProps) {
   return (
     <section
       className="advantage-panel"
-      aria-label={`形勢: 黒 ${advantage.blackPercent} パーセント, 白 ${advantage.whitePercent} パーセント`}
+      aria-label={`今の流れ: 黒 ${advantage.blackPercent} パーセント, 白 ${advantage.whitePercent} パーセント`}
     >
       <div className="advantage-panel__header">
-        <span>形勢</span>
+        <span>今の流れ</span>
         <strong>{getAdvantageLabel(advantage)}</strong>
       </div>
       <div className="advantage-bar" style={barStyle} aria-hidden="true">
@@ -24,12 +24,8 @@ export function AdvantageBar({ advantage }: AdvantageBarProps) {
         <span className="advantage-bar__segment advantage-bar__segment--white" />
       </div>
       <div className="advantage-panel__scores">
-        <span className="advantage-panel__score advantage-panel__score--black">
-          黒 {advantage.blackPercent}%
-        </span>
-        <span className="advantage-panel__score advantage-panel__score--white">
-          白 {advantage.whitePercent}%
-        </span>
+        <span className="advantage-panel__score advantage-panel__score--black">黒</span>
+        <span className="advantage-panel__score advantage-panel__score--white">白</span>
       </div>
     </section>
   );
@@ -37,10 +33,10 @@ export function AdvantageBar({ advantage }: AdvantageBarProps) {
 
 function getAdvantageLabel(advantage: Advantage): string {
   if (advantage.leadingDisc === null) {
-    return "互角";
+    return "いい勝負";
   }
 
-  return `${formatDisc(advantage.leadingDisc)}が有利`;
+  return `${formatDisc(advantage.leadingDisc)}が少しリード`;
 }
 
 function formatDisc(disc: "black" | "white"): string {

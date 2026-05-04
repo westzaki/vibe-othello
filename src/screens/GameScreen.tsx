@@ -108,6 +108,7 @@ export function GameScreen({
                 discCounts={game.discCounts}
                 endReason={game.endReason}
                 gameStatus={game.gameStatus}
+                isCpuThinking={game.isCpuThinking}
                 isPlaying={game.isPlaying}
                 isUndoDisabled={!game.canUndo || game.isCpuThinking}
                 message={game.message}

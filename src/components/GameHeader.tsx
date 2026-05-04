@@ -8,6 +8,7 @@ type GameHeaderProps = {
   discCounts: DiscCounts;
   endReason: GameEndReason | null;
   gameStatus: GameStatus;
+  isCpuThinking: boolean;
   isPlaying: boolean;
   isUndoDisabled: boolean;
   message: string | null;
@@ -23,6 +24,7 @@ export function GameHeader({
   discCounts,
   endReason,
   gameStatus,
+  isCpuThinking,
   isPlaying,
   isUndoDisabled,
   message,
@@ -51,16 +53,6 @@ export function GameHeader({
     <div className="game-heading">
       <h1 id="game-title">Vibe オセロ</h1>
       <div className="game-heading__status">
-        <div className="score-row" aria-label="Current score">
-          <span className="score-chip score-chip--black">
-            黒
-            <strong>{discCounts.black}</strong>
-          </span>
-          <span className="score-chip score-chip--white">
-            白
-            <strong>{discCounts.white}</strong>
-          </span>
-        </div>
         <div className="game-status-row">
           {gameStatus !== "playing" && (
             <p className="session-status">
@@ -77,12 +69,32 @@ export function GameHeader({
             <p className="result-status">Match stopped</p>
           ) : (
             <p className="turn-status">
-              <span className={`turn-disc turn-disc--${currentDisc}`}>
-                {formatDisc(currentDisc)}
+              <span
+                className={`turn-disc turn-disc--${currentDisc}`}
+                aria-hidden="true"
+              />
+              <span>
+                {isCpuThinking
+                  ? "ビビーが考え中"
+                  : `${formatDisc(currentDisc)}の番`}
               </span>
-              の番
             </p>
           )}
+        </div>
+        {gameStatus === "playing" && (
+          <p className="game-focus-message">
+            {isCpuThinking ? "ちょっとまってね" : "置ける場所が光っています"}
+          </p>
+        )}
+        <div className="score-row" aria-label="Current score">
+          <span className="score-chip score-chip--black">
+            黒
+            <strong>{discCounts.black}</strong>
+          </span>
+          <span className="score-chip score-chip--white">
+            白
+            <strong>{discCounts.white}</strong>
+          </span>
         </div>
         {message !== null && (
           <p className="game-message" role="status">
@@ -104,7 +116,11 @@ export function GameHeader({
                 まった
               </button>
             )}
-            <button className="game-action" onClick={requestEndGame} type="button">
+            <button
+              className="game-action game-action--danger"
+              onClick={requestEndGame}
+              type="button"
+            >
               対局をやめる
             </button>
           </>
