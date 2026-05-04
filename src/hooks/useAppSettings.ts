@@ -52,13 +52,31 @@ function readStoredSettings(): AppSettings {
       return defaultAppSettings;
     }
 
-    return {
-      ...defaultAppSettings,
-      ...JSON.parse(storedSettings),
-    };
+    return normalizeAppSettings(JSON.parse(storedSettings));
   } catch {
     return defaultAppSettings;
   }
+}
+
+export function normalizeAppSettings(value: unknown): AppSettings {
+  if (!isRecord(value)) {
+    return defaultAppSettings;
+  }
+
+  return {
+    soundEnabled:
+      typeof value.soundEnabled === "boolean"
+        ? value.soundEnabled
+        : defaultAppSettings.soundEnabled,
+    undoEnabled:
+      typeof value.undoEnabled === "boolean"
+        ? value.undoEnabled
+        : defaultAppSettings.undoEnabled,
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function writeStoredSettings(settings: AppSettings) {
