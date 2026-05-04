@@ -1,21 +1,13 @@
-import { getMinimaxMoveScores } from "../../cpu";
 import {
   createInitialBoard,
-  getLegalMoves,
   getNextDisc,
-  isGameOver,
   type Board,
   type DiscColor,
-  type SquareIndex,
 } from "../../game/othello";
 import type { MoveRecord, PracticeSessionOptions } from "../../game/session";
-import { defaultTeacherReviewConfig } from "../../teacher";
+import { createPositionReview, type PositionReview } from "../../teacher";
 
-export type PlaybackPositionReview = {
-  bestSquare: SquareIndex | null;
-  disc: DiscColor;
-  legalMoves: SquareIndex[];
-};
+export type PlaybackPositionReview = PositionReview;
 
 export function createPlaybackBoards(moveHistory: MoveRecord[]): Board[] {
   return [
@@ -35,30 +27,7 @@ export function createPlaybackPositionReview(
   board: Board,
   nextDisc: DiscColor,
 ): PlaybackPositionReview {
-  if (isGameOver(board)) {
-    return {
-      bestSquare: null,
-      disc: nextDisc,
-      legalMoves: [],
-    };
-  }
-
-  const nextDiscLegalMoves = getLegalMoves(board, nextDisc);
-  const disc = nextDiscLegalMoves.length > 0 ? nextDisc : getNextDisc(nextDisc);
-  const legalMoves =
-    nextDiscLegalMoves.length > 0
-      ? nextDiscLegalMoves
-      : getLegalMoves(board, disc);
-  const bestSquare =
-    getMinimaxMoveScores(board, disc, {
-      searchDepth: defaultTeacherReviewConfig.searchDepth,
-    })[0]?.move ?? null;
-
-  return {
-    bestSquare,
-    disc,
-    legalMoves,
-  };
+  return createPositionReview(board, nextDisc);
 }
 
 export function createPracticeOptionsFromMoveNumber(

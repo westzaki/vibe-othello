@@ -1,10 +1,10 @@
 import { ReviewBoard } from "../../components/ReviewBoard";
 import type { Board } from "../../game/othello";
 import type { MoveRecord } from "../../game/session";
+import type { PositionReview } from "../../teacher";
 import { ReviewLegend } from "./ReviewLegend";
 import { ReviewPlaybackControls } from "./ReviewPlaybackControls";
 import { ReviewPlaybackDetail } from "./ReviewPlaybackDetail";
-import type { PlaybackPositionReview } from "./reviewPlayback";
 
 type ReviewPlaybackPanelProps = {
   currentBoard: Board;
@@ -13,7 +13,7 @@ type ReviewPlaybackPanelProps = {
   maxMoveNumber: number;
   onGoToMove: (moveNumber: number) => void;
   onStartPractice: () => void;
-  positionReview: PlaybackPositionReview;
+  positionReview: PositionReview;
 };
 
 export function ReviewPlaybackPanel({
