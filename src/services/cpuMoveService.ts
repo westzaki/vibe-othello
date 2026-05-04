@@ -48,6 +48,7 @@ export async function chooseCpuMoveAsync(
         };
       }
     } catch {
+      cancelCpuMoveWorkerRequest(workerRequestId);
       // Fall back to sync CPU below.
     }
   }
