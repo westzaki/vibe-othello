@@ -268,8 +268,8 @@ Do not add React Router unless explicitly approved.
 
 Architecture boundaries are defined in:
 
-- architecture.md
+- docs/architecture.md
 
-Before changing game/session, CPU, teacher/review, services, workers, or screen boundaries, read architecture.md and keep the dependency direction aligned with it.
+Before changing game/session, CPU, teacher/review, services, workers, or screen boundaries, read docs/architecture.md and keep the dependency direction aligned with it.
 
-Keep AGENTS.md focused on durable development rules. Put architecture-specific detail in architecture.md instead of duplicating it here.
+Keep AGENTS.md focused on durable development rules. Put architecture-specific detail in docs/architecture.md instead of duplicating it here.
