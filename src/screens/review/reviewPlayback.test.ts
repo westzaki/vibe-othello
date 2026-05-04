@@ -174,6 +174,7 @@ function createReviewedMove({
       bestScore: bestSquare === null ? null : 10,
       bestSquare,
       disc: "black",
+      evaluationSource: "minimax",
       kind: "bad",
       moveNumber: 1,
       playedScore: 0,

@@ -43,6 +43,7 @@ function createReviewedMove(square: SquareIndex): ReviewedMove {
       bestScore: null,
       bestSquare: null,
       disc: "black",
+      evaluationSource: "minimax",
       kind: "bad",
       moveNumber: 53,
       playedScore: 0,
