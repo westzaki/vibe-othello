@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
+import type { CoachHintMode } from "../teacher";
 
 const appSettingsStorageKey = "vibe-othello-settings";
 
 export type AppSettings = {
+  coachHintMode: CoachHintMode;
   soundEnabled: boolean;
   undoEnabled: boolean;
 };
 
 const defaultAppSettings: AppSettings = {
+  coachHintMode: "gentle",
   soundEnabled: true,
   undoEnabled: true,
 };
@@ -33,8 +36,16 @@ export function useAppSettings() {
     }));
   }
 
+  function updateCoachHintMode(coachHintMode: CoachHintMode) {
+    setSettings((currentSettings) => ({
+      ...currentSettings,
+      coachHintMode,
+    }));
+  }
+
   return {
     settings,
+    updateCoachHintMode,
     updateSoundEnabled,
     updateUndoEnabled,
   };
@@ -64,6 +75,9 @@ export function normalizeAppSettings(value: unknown): AppSettings {
   }
 
   return {
+    coachHintMode: isCoachHintMode(value.coachHintMode)
+      ? value.coachHintMode
+      : defaultAppSettings.coachHintMode,
     soundEnabled:
       typeof value.soundEnabled === "boolean"
         ? value.soundEnabled
@@ -77,6 +91,10 @@ export function normalizeAppSettings(value: unknown): AppSettings {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isCoachHintMode(value: unknown): value is CoachHintMode {
+  return value === "off" || value === "gentle" || value === "active";
 }
 
 function writeStoredSettings(settings: AppSettings) {

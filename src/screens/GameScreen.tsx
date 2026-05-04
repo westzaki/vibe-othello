@@ -9,6 +9,12 @@ import type { DiscColor } from "../game/othello";
 import type { GameSessionNotice } from "../game/session";
 import type { OthelloGameController } from "../hooks/useOthelloGame";
 import { usePassNoticeVisibility } from "../hooks/usePassNoticeVisibility";
+import { usePlayCoachHintModel } from "../hooks/usePlayCoachHintModel";
+import {
+  defaultCoachHintSettings,
+  type CoachHintModel,
+  type CoachHintSettings,
+} from "../teacher";
 
 const DevDebugPanel = import.meta.env.DEV
   ? lazy(() =>
@@ -19,6 +25,7 @@ const DevDebugPanel = import.meta.env.DEV
   : null;
 
 type GameScreenProps = {
+  coachHintSettings?: CoachHintSettings;
   game: OthelloGameController;
   mode?: "match" | "practice";
   onBackToReview?: () => void;
@@ -30,6 +37,7 @@ type GameScreenProps = {
 };
 
 export function GameScreen({
+  coachHintSettings = defaultCoachHintSettings,
   game,
   mode = "match",
   onBackToReview,
@@ -47,6 +55,14 @@ export function GameScreen({
     lastMove: game.lastMove,
     moveCount: game.moveHistory.length,
     notice: game.notice,
+  });
+  const coachHintModel = usePlayCoachHintModel({
+    advantage,
+    enabled: mode === "match",
+    isCpuThinking: game.isCpuThinking,
+    players: game.players,
+    session: game.session,
+    settings: coachHintSettings,
   });
   const resultWinner =
     game.gameStatus === "ended" &&
@@ -125,6 +141,10 @@ export function GameScreen({
               />
 
               <AdvantageBar advantage={advantage} players={game.players} />
+
+              {coachHintModel !== null && (
+                <CoachHintPanel model={coachHintModel} />
+              )}
             </>
           )}
         </aside>
@@ -144,6 +164,19 @@ export function GameScreen({
         </Suspense>
       )}
     </section>
+  );
+}
+
+function CoachHintPanel({ model }: { model: CoachHintModel }) {
+  return (
+    <div
+      className={`coach-hint coach-hint--${model.mode}`}
+      role="status"
+      aria-live="polite"
+    >
+      <span className="coach-hint__label">ヒント</span>
+      <p>{model.hint.message}</p>
+    </div>
   );
 }
 
