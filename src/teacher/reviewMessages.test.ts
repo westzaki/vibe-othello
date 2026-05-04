@@ -68,7 +68,7 @@ describe("teacher review messages", () => {
         square: 58,
       }),
     );
-    expect(message.comparison?.nextFocus).toContain("相手が角へ行けるか");
+    expect(message.comparison?.nextFocus).toContain("角チャンス");
   });
 
   it("keeps comparison display safe when there is no trial move", () => {
@@ -87,7 +87,7 @@ describe("teacher review messages", () => {
   });
 
   it.each([
-    ["cornerGiven" as const, "相手が角へ近づける", "相手が角へ行けるか"],
+    ["cornerGiven" as const, "相手が角へ近づける", "角チャンス"],
     ["dangerSquare" as const, "角の近く", "空いている角"],
     ["mobilityLoss" as const, "置ける場所", "自分と相手"],
   ])("uses a natural comparison for %s", (reason, playedText, focusText) => {

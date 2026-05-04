@@ -39,9 +39,9 @@ export function ReviewMoveSection({
       {bodyText !== undefined && (
         <p className="review-summary__caption">{bodyText}</p>
       )}
-      {moves.length === 0 ? (
+      {moves.length === 0 && emptyText !== "" ? (
         <p className="review-summary__empty">{emptyText}</p>
-      ) : (
+      ) : moves.length > 0 ? (
         <ul className="review-summary__list">
           {moves.map((move) => (
             <ReviewMoveItem
@@ -54,7 +54,7 @@ export function ReviewMoveSection({
             />
           ))}
         </ul>
-      )}
+      ) : null}
       {footerText !== undefined && (
         <p className="review-summary__advice">{footerText}</p>
       )}
@@ -111,11 +111,11 @@ function ReviewMoveItem({
         </div>
         {message !== undefined && (
           <>
-            <p>{message.explanation}</p>
+            {!showComparison && <p>{message.explanation}</p>}
             {showComparison && message.comparison !== undefined && (
               <ReviewMoveComparisonPanel message={message} />
             )}
-            {message.suggestion !== undefined && (
+            {!showComparison && message.suggestion !== undefined && (
               <p className="review-summary__suggestion">{message.suggestion}</p>
             )}
           </>

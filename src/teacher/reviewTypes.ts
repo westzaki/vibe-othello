@@ -68,8 +68,10 @@ export type GameReview = {
 export type ReviewCardKind = "niceMove" | "turningPoint" | "practiceTarget";
 
 export type ReviewCard = {
+  actionLabel?: string;
   bodyText: string;
   emptyText: string;
+  footerText?: string;
   kind: ReviewCardKind;
   move: ReviewedMove | null;
   title: string;

@@ -144,20 +144,14 @@ export function ReviewScreen({
                 return (
                   <ReviewMoveSection
                     key={card.kind}
-                    actionLabel={
-                      practiceActionMove === null
-                        ? undefined
-                        : "この局面から練習する"
-                    }
+                    actionLabel={card.actionLabel}
                     bodyText={card.bodyText}
                     emptyText={card.emptyText}
-                    footerText={
-                      card.kind === "practiceTarget" ? messages.advice : undefined
-                    }
+                    footerText={card.footerText}
                     messages={messages}
                     moves={getReviewCardMoves(card)}
                     onAction={
-                      practiceActionMove === null
+                      practiceActionMove === null || card.actionLabel === undefined
                         ? undefined
                         : () =>
                             startPracticeFromMove(practiceActionMove.moveNumber)

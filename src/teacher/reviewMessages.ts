@@ -115,7 +115,7 @@ function createTrialMoveExplanation(
 
 function createComparisonFocus(review: MoveReview): string {
   if (review.reasons.includes("cornerGiven")) {
-    return "置いた後に、相手が角へ行けるかを見てみよう。";
+    return "相手の角チャンスが増えていないか見てみよう。";
   }
 
   if (review.reasons.includes("dangerSquare")) {
