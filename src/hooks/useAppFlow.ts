@@ -2,14 +2,10 @@ import { useReducer } from "react";
 import type { CpuLevel } from "../cpu";
 import type { DiscColor } from "../game/othello";
 import { createMatchPlayerSettings, type GameMode } from "../game/matchSetup";
-import type { PlayerSettings } from "../game/players";
-import type { MoveRecord, PracticeSessionOptions } from "../game/session";
-import {
-  createPracticeFeedback,
-  type PracticeFeedback,
-  type PracticeFeedbackContext,
-} from "../teacher";
-import { useOthelloGame, type OthelloGameController } from "./useOthelloGame";
+import type { PracticeSessionOptions } from "../game/session";
+import type { PracticeFeedbackContext } from "../teacher";
+import { useOthelloGame } from "./useOthelloGame";
+import { usePracticeFlow } from "./usePracticeFlow";
 
 export type AppFlowState =
   | { screen: "start" }
@@ -104,7 +100,12 @@ export function useAppFlow({
     undoEnabled,
   });
   const reviewMoveNumber = getCurrentReviewMoveNumber(state);
-  const practiceFeedback = getPracticeFeedback(state, practiceGame);
+  const practiceFlow = usePracticeFlow({
+    dispatch,
+    game,
+    practiceGame,
+    state,
+  });
 
   function startMatch(
     mode: GameMode,
@@ -144,34 +145,6 @@ export function useAppFlow({
     dispatch({ type: "BACK_TO_RESULT" });
   }
 
-  function startPractice(
-    options: PracticeSessionOptions,
-    feedbackContext: PracticeFeedbackContext | null = null,
-  ) {
-    copyPlayers(game, practiceGame);
-    practiceGame.startPracticeSession(options);
-    dispatch({
-      type: "START_PRACTICE",
-      feedbackContext,
-      returnMoveNumber: getReviewMoveNumber(state, game.moveHistory.length),
-      start: options,
-    });
-  }
-
-  function practicePlayAgain() {
-    if (state.screen !== "practice") {
-      dispatch({ type: "BACK_TO_REVIEW" });
-      return;
-    }
-
-    practiceGame.startPracticeSession(state.start);
-    dispatch({ type: "PRACTICE_PLAY_AGAIN" });
-  }
-
-  function backToReview() {
-    dispatch({ type: "BACK_TO_REVIEW" });
-  }
-
   function selectReviewMove(moveNumber: number) {
     dispatch({ type: "SELECT_REVIEW_MOVE", moveNumber });
   }
@@ -179,66 +152,21 @@ export function useAppFlow({
   return {
     game,
     practiceGame,
-    practiceFeedback,
+    practiceFeedback: practiceFlow.practiceFeedback,
     reviewMoveNumber,
     screen,
     backToResult,
-    backToReview,
+    backToReview: practiceFlow.backToReview,
     backToStart,
     endGame,
     openReview,
     openSettings,
     playAgain,
-    practicePlayAgain,
+    practicePlayAgain: practiceFlow.practicePlayAgain,
     selectReviewMove,
     startMatch,
-    startPractice,
+    startPractice: practiceFlow.startPractice,
   };
-}
-
-function getPracticeFeedback(
-  state: AppFlowState,
-  practiceGame: OthelloGameController,
-): PracticeFeedback | null {
-  if (state.screen !== "practice") {
-    return null;
-  }
-
-  return createPracticeFeedback(
-    state.feedbackContext,
-    getFirstHumanPracticeMove(practiceGame.moveHistory, practiceGame.players),
-  );
-}
-
-export function getFirstHumanPracticeMove(
-  moveHistory: MoveRecord[],
-  players: PlayerSettings,
-): MoveRecord | null {
-  return (
-    moveHistory.find((move) => players[move.disc].type === "human") ?? null
-  );
-}
-
-function copyPlayers(
-  source: OthelloGameController,
-  target: OthelloGameController,
-) {
-  target.setPlayers(source.players);
-}
-
-function getReviewMoveNumber(
-  state: AppFlowState,
-  fallbackMoveNumber: number,
-): number {
-  if (state.screen === "review") {
-    return state.moveNumber;
-  }
-
-  if (state.screen === "practice") {
-    return state.returnMoveNumber;
-  }
-
-  return fallbackMoveNumber;
 }
 
 function getCurrentReviewMoveNumber(state: AppFlowState): number | null {

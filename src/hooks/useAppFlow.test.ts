@@ -1,13 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createInitialBoard } from "../game/othello";
-import { createDefaultPlayerSettings } from "../game/players";
-import type { MoveRecord, PracticeSessionOptions } from "../game/session";
+import type { PracticeSessionOptions } from "../game/session";
 import type { PracticeFeedbackContext } from "../teacher";
-import {
-  appFlowReducer,
-  getFirstHumanPracticeMove,
-  type AppFlowState,
-} from "./useAppFlow";
+import { appFlowReducer, type AppFlowState } from "./useAppFlow";
 
 describe("app flow reducer", () => {
   it("starts a match and clears screen-specific state", () => {
@@ -73,32 +68,6 @@ describe("app flow reducer", () => {
     });
   });
 
-  it("finds only the first human move for practice feedback", () => {
-    const players = createDefaultPlayerSettings();
-    const cpuMove = createMoveRecord({
-      disc: "white",
-      moveNumber: 1,
-      square: 18,
-    });
-    const firstHumanMove = createMoveRecord({
-      disc: "black",
-      moveNumber: 2,
-      square: 26,
-    });
-    const secondHumanMove = createMoveRecord({
-      disc: "black",
-      moveNumber: 4,
-      square: 37,
-    });
-
-    expect(
-      getFirstHumanPracticeMove(
-        [cpuMove, firstHumanMove, secondHumanMove],
-        players,
-      ),
-    ).toBe(firstHumanMove);
-  });
-
   it("keeps invalid practice-only transitions unchanged", () => {
     const gameState: AppFlowState = { screen: "game" };
 
@@ -155,27 +124,5 @@ function createFeedbackContext(): PracticeFeedbackContext {
     reasons: ["turningPoint"],
     scoreAfter: 0,
     square: 20,
-  };
-}
-
-function createMoveRecord({
-  disc,
-  moveNumber,
-  square,
-}: {
-  disc: MoveRecord["disc"];
-  moveNumber: number;
-  square: number;
-}): MoveRecord {
-  const board = createInitialBoard();
-
-  return {
-    boardAfter: board,
-    boardBefore: board,
-    disc,
-    flippedSquares: [],
-    legalMovesBefore: [square],
-    moveNumber,
-    square,
   };
 }
