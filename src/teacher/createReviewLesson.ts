@@ -45,7 +45,7 @@ export function createReviewLesson(review: GameReview): ReviewLesson {
         footerText: createPracticeFooterText(practiceTarget),
         kind: "practiceTarget",
         move: practiceTarget,
-        title: "次はこれを試してみよう",
+        title: "ここから練習",
       },
     ],
     niceMove,
@@ -107,22 +107,22 @@ function createPracticeEmptyText(move: ReviewedMove | null): string {
 
 function createPracticeFooterText(move: ReviewedMove | null): string {
   if (move === null) {
-    return "次の対局で見るポイント: 角の近くに置く前に、空いている角を一回だけ見てみよう。";
+    return "練習ポイント: 角の近くに置く前に、空いている角を一回だけ見てみよう。";
   }
 
   if (move.review.reasons.includes("cornerGiven")) {
-    return "次の対局で見るポイント: 角まわりを一回だけ確認しよう。";
+    return "練習ポイント: 角まわりを一回だけ確認しよう。";
   }
 
   if (move.review.reasons.includes("dangerSquare")) {
-    return "次の対局で見るポイント: 角の近くは急がず、形を見てから置いてみよう。";
+    return "練習ポイント: 角の近くは急がず、形を見てから置いてみよう。";
   }
 
   if (move.review.reasons.includes("mobilityLoss")) {
-    return "次の対局で見るポイント: 置いたあとに、自分と相手の置ける場所を見てみよう。";
+    return "練習ポイント: 置いたあとに、自分と相手の置ける場所を見てみよう。";
   }
 
-  return "次の対局で見るポイント: 置いたあとに、相手がどこへ置けるか見てみよう。";
+  return "練習ポイント: 置いたあとに、相手がどこへ置けるか見てみよう。";
 }
 
 function formatSquare(square: number): string {

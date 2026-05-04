@@ -153,7 +153,7 @@ function ReviewMoveComparisonPanel({
         )}
       </div>
       <p className="review-comparison__focus">
-        <strong>次に見るポイント:</strong> {comparison.nextFocus}
+        <strong>見るポイント:</strong> {comparison.nextFocus}
       </p>
     </div>
   );

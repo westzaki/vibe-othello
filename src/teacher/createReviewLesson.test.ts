@@ -29,7 +29,7 @@ describe("createReviewLesson", () => {
     expect(lesson.cards.map((card) => card.title)).toEqual([
       "今日のナイス",
       "ここが分かれ道だったかも",
-      "次はこれを試してみよう",
+      "ここから練習",
     ]);
   });
 
