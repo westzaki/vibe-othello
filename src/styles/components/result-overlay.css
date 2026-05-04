@@ -153,14 +153,19 @@
 }
 
 .result-overlay__actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  width: min(100%, 360px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-top: 10px;
 }
 
+.result-overlay__actions .game-action {
+  flex: initial;
+}
+
 .result-overlay__actions .game-action--primary {
+  grid-column: 1 / -1;
   color: var(--color-cta-text);
   border-color: var(--color-cta-border);
   background: var(--color-cta-bg);
