@@ -1,3 +1,4 @@
+import { countEmptySquares } from "../cpu";
 import type { SquareIndex } from "../game/othello";
 import type {
   GameReview,
@@ -7,6 +8,8 @@ import type {
   ReviewMoveComparison,
   ReviewedMove,
 } from "./reviewTypes";
+
+const exactEndgameMessageEmptyThreshold = 10;
 
 export function createGameReviewMessages(
   review: GameReview,
@@ -26,11 +29,12 @@ export function createMoveReviewMessage(
   reviewedMove: MoveReview | ReviewedMove,
 ): MoveReviewMessage {
   const review = getMoveReview(reviewedMove);
+  const usesExactEndgame = usesExactEndgameEvaluation(reviewedMove);
 
   return {
-    comparison: createMoveComparison(reviewedMove),
-    explanation: createExplanation(review),
-    suggestion: createSuggestion(review),
+    comparison: createMoveComparison(reviewedMove, usesExactEndgame),
+    explanation: createExplanation(review, usesExactEndgame),
+    suggestion: createSuggestion(review, usesExactEndgame),
   };
 }
 
@@ -40,6 +44,7 @@ function getMoveReview(reviewedMove: MoveReview | ReviewedMove): MoveReview {
 
 function createMoveComparison(
   reviewedMove: MoveReview | ReviewedMove,
+  usesExactEndgame: boolean,
 ): ReviewMoveComparison | undefined {
   if (!("review" in reviewedMove) || reviewedMove.review.kind !== "bad") {
     return undefined;
@@ -57,15 +62,19 @@ function createMoveComparison(
       ? null
       : {
           bestScore: review.bestScore,
-          explanation: createTrialMoveExplanation(review, trialCandidate),
+          explanation: createTrialMoveExplanation(
+            review,
+            trialCandidate,
+            usesExactEndgame,
+          ),
           reasons: trialCandidate?.reasons ?? [],
           square: review.bestSquare,
         };
 
   return {
-    nextFocus: createComparisonFocus(review),
+    nextFocus: createComparisonFocus(review, usesExactEndgame),
     playedMove: {
-      explanation: createPlayedMoveExplanation(review),
+      explanation: createPlayedMoveExplanation(review, usesExactEndgame),
       playedScore: review.playedScore,
       reasons: review.reasons,
       square: review.square,
@@ -74,7 +83,14 @@ function createMoveComparison(
   };
 }
 
-function createPlayedMoveExplanation(review: MoveReview): string {
+function createPlayedMoveExplanation(
+  review: MoveReview,
+  usesExactEndgame: boolean,
+): string {
+  if (usesExactEndgame) {
+    return "終盤なので、最後まで進めたときの石の残り方まで見ると少し苦しい形だったかも。";
+  }
+
   if (review.reasons.includes("cornerGiven")) {
     return "置いた後に、相手が角へ近づける形になりやすかったかも。";
   }
@@ -97,7 +113,12 @@ function createPlayedMoveExplanation(review: MoveReview): string {
 function createTrialMoveExplanation(
   review: MoveReview,
   trialCandidate: ReviewedMove["candidateMoves"][number] | null,
+  usesExactEndgame: boolean,
 ): string {
+  if (usesExactEndgame) {
+    return "最後まで置いたときに、こちらの石を少し残しやすい手かも。";
+  }
+
   if (trialCandidate?.reasons.includes("corner")) {
     return "角を大事にしながら、流れを作りやすい手かも。";
   }
@@ -121,7 +142,14 @@ function createTrialMoveExplanation(
   return "返す数だけでなく、相手にいい手をあげにくいか比べてみたい手かも。";
 }
 
-function createComparisonFocus(review: MoveReview): string {
+function createComparisonFocus(
+  review: MoveReview,
+  usesExactEndgame: boolean,
+): string {
+  if (usesExactEndgame) {
+    return "終盤は、今返す数より最後に残る石数を比べてみよう。";
+  }
+
   if (review.reasons.includes("cornerGiven")) {
     return "相手の角チャンスが増えていないか見てみよう。";
   }
@@ -141,8 +169,17 @@ function createComparisonFocus(review: MoveReview): string {
   return "置いた後に、相手がどこへ置けるか見てみよう。";
 }
 
-function createExplanation(review: MoveReview): string {
+function createExplanation(
+  review: MoveReview,
+  usesExactEndgame: boolean,
+): string {
   if (review.kind === "bad") {
+    if (usesExactEndgame) {
+      return `${formatSquare(
+        review.square,
+      )} は終盤の分かれ道だったかも。最後まで進めると、別の手のほうが石を残しやすい局面でした。`;
+    }
+
     if (review.reasons.includes("cornerGiven")) {
       return `${formatSquare(
         review.square,
@@ -189,9 +226,18 @@ function createExplanation(review: MoveReview): string {
   )} は自然に打てていました。次も盤面全体を見ながら選んでみよう。`;
 }
 
-function createSuggestion(review: MoveReview): string | undefined {
+function createSuggestion(
+  review: MoveReview,
+  usesExactEndgame: boolean,
+): string | undefined {
   if (review.kind !== "bad" || review.bestSquare === null) {
     return undefined;
+  }
+
+  if (usesExactEndgame) {
+    return `この終盤では ${formatSquare(
+      review.bestSquare,
+    )} も試してみる？最後まで置いたときに、どちらの石が多く残るか比べると見えやすいかも。`;
   }
 
   return `この局面では ${formatSquare(
@@ -201,6 +247,10 @@ function createSuggestion(review: MoveReview): string | undefined {
 
 function createAdvice(reviewedMoves: ReviewedMove[]): string {
   const badMoves = reviewedMoves.filter((move) => move.review.kind === "bad");
+
+  if (badMoves.some(usesExactEndgameEvaluation)) {
+    return "終盤は、今たくさん返す手よりも最後に石が残る手を比べてみよう。そこに気づけると、接戦を勝ちに変えやすくなるよ。";
+  }
 
   if (badMoves.some((move) => move.review.reasons.includes("cornerGiven"))) {
     return "次は、置いた後に相手が角へ行けるかを一回だけ見てみよう。そこに気づけると、次はかなり勝ちやすくなるよ。";
@@ -219,6 +269,16 @@ function createAdvice(reviewedMoves: ReviewedMove[]): string {
   }
 
   return "いい流れで打てています。次は角と、相手の置ける場所を少し意識できると、もっと勝ちに近づけそう。";
+}
+
+function usesExactEndgameEvaluation(
+  reviewedMove: MoveReview | ReviewedMove,
+): reviewedMove is ReviewedMove {
+  return (
+    "review" in reviewedMove &&
+    countEmptySquares(reviewedMove.boardBefore) <=
+      exactEndgameMessageEmptyThreshold
+  );
 }
 
 function formatSquare(square: SquareIndex): string {
