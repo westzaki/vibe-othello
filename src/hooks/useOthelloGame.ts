@@ -31,6 +31,7 @@ import {
 } from "../game/session";
 import { formatGameSessionNotice } from "./formatGameSessionNotice";
 import { useCpuTurn } from "./useCpuTurn";
+import { useMoveAnimationState } from "./useMoveAnimationState";
 import { useMoveSounds } from "./useMoveSounds";
 
 type UseOthelloGameOptions = {
@@ -76,20 +77,18 @@ export function useOthelloGame({
 }: UseOthelloGameOptions = {}): OthelloGameController {
   const [session, setSession] = useState(createGameSession);
   const [players, setPlayers] = useState(createDefaultPlayerSettings);
-  const [lastFlippedSquares, setLastFlippedSquares] = useState<SquareIndex[]>(
-    [],
-  );
-  const [flipAnimationId, setFlipAnimationId] = useState(0);
+  const {
+    clearAnimationState,
+    flipAnimationId,
+    flippedSquares,
+    recordMoveAnimation,
+  } = useMoveAnimationState();
   const legalMoves = useMemo(() => getSessionLegalMoves(session), [session]);
   const isPlaying = session.status === "playing";
   const currentPlayer = players[session.currentDisc];
   const currentPlayerType = currentPlayer.type;
   const canHumanPlay = isPlaying && currentPlayerType === "human";
   const canUndo = canUndoSessionMove(session, players);
-
-  function clearAnimationState() {
-    setLastFlippedSquares([]);
-  }
 
   function handleEndGame() {
     setSession((currentSession) => endGame(currentSession));
@@ -101,13 +100,12 @@ export function useOthelloGame({
       const result = placeCurrentDisc(currentSession, square);
 
       if (result.move !== null) {
-        setLastFlippedSquares(result.move.flippedSquares);
-        setFlipAnimationId((currentId) => currentId + 1);
+        recordMoveAnimation(result.move);
       }
 
       return result.session;
     });
-  }, []);
+  }, [recordMoveAnimation]);
 
   const isCpuThinking = useCpuTurn({
     currentPlayer,
@@ -118,7 +116,7 @@ export function useOthelloGame({
   useMoveSounds({
     enabled: enabled && soundEnabled,
     flipAnimationId,
-    flippedSquares: lastFlippedSquares,
+    flippedSquares,
   });
 
   function handleReplaceSession(nextSession: GameSession) {
@@ -195,7 +193,7 @@ export function useOthelloGame({
     discCounts: session.discCounts,
     endReason: session.endReason,
     flipAnimationId,
-    flippedSquares: lastFlippedSquares,
+    flippedSquares,
     gameStatus: session.status,
     isCpuThinking,
     isPlaying: session.status === "playing",
