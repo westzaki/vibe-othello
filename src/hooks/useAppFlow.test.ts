@@ -77,6 +77,16 @@ describe("app flow reducer", () => {
 
   it("moves back to the expected app-level screens", () => {
     expect(
+      appFlowReducer({ screen: "start" }, { type: "OPEN_SETTINGS" }),
+    ).toEqual({
+      screen: "settings",
+    });
+    expect(
+      appFlowReducer({ screen: "settings" }, { type: "BACK_TO_START" }),
+    ).toEqual({
+      screen: "start",
+    });
+    expect(
       appFlowReducer(
         { screen: "review", moveNumber: 4 },
         {

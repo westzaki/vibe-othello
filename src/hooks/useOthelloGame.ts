@@ -35,6 +35,7 @@ import { useMoveSounds } from "./useMoveSounds";
 
 type UseOthelloGameOptions = {
   enabled?: boolean;
+  soundEnabled?: boolean;
 };
 
 export type OthelloGameController = {
@@ -71,6 +72,7 @@ export type OthelloGameController = {
 
 export function useOthelloGame({
   enabled = true,
+  soundEnabled = true,
 }: UseOthelloGameOptions = {}): OthelloGameController {
   const [session, setSession] = useState(createGameSession);
   const [players, setPlayers] = useState(createDefaultPlayerSettings);
@@ -114,7 +116,7 @@ export function useOthelloGame({
     session,
   });
   useMoveSounds({
-    enabled,
+    enabled: enabled && soundEnabled,
     flipAnimationId,
     flippedSquares: lastFlippedSquares,
   });
@@ -130,13 +132,19 @@ export function useOthelloGame({
   }
 
   function handleStartNewGame() {
-    unlockGameAudio();
+    if (soundEnabled) {
+      unlockGameAudio();
+    }
+
     setSession(startNewGame());
     clearAnimationState();
   }
 
   function handleStartPracticeSession(options: PracticeSessionOptions) {
-    unlockGameAudio();
+    if (soundEnabled) {
+      unlockGameAudio();
+    }
+
     setSession(startPracticeSession(options));
     clearAnimationState();
   }

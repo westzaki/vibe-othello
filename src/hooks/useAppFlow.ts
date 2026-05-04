@@ -3,13 +3,11 @@ import type { CpuLevel } from "../cpu";
 import type { DiscColor } from "../game/othello";
 import { createMatchPlayerSettings, type GameMode } from "../game/matchSetup";
 import type { PracticeSessionOptions } from "../game/session";
-import {
-  useOthelloGame,
-  type OthelloGameController,
-} from "./useOthelloGame";
+import { useOthelloGame, type OthelloGameController } from "./useOthelloGame";
 
 export type AppFlowState =
   | { screen: "start" }
+  | { screen: "settings" }
   | { screen: "game" }
   | { screen: "review"; moveNumber: number }
   | {
@@ -21,6 +19,7 @@ export type AppFlowState =
 export type AppScreen = AppFlowState["screen"];
 
 export type AppFlowAction =
+  | { type: "OPEN_SETTINGS" }
   | { type: "START_MATCH" }
   | { type: "PLAY_AGAIN" }
   | { type: "BACK_TO_START" }
@@ -42,6 +41,8 @@ export function appFlowReducer(
   action: AppFlowAction,
 ): AppFlowState {
   switch (action.type) {
+    case "OPEN_SETTINGS":
+      return { screen: "settings" };
     case "START_MATCH":
     case "PLAY_AGAIN":
     case "BACK_TO_RESULT":
@@ -72,11 +73,21 @@ export function appFlowReducer(
   }
 }
 
-export function useAppFlow() {
+type UseAppFlowOptions = {
+  soundEnabled?: boolean;
+};
+
+export function useAppFlow({ soundEnabled = true }: UseAppFlowOptions = {}) {
   const [state, dispatch] = useReducer(appFlowReducer, initialAppFlowState);
   const { screen } = state;
-  const game = useOthelloGame({ enabled: screen === "game" });
-  const practiceGame = useOthelloGame({ enabled: screen === "practice" });
+  const game = useOthelloGame({
+    enabled: screen === "game",
+    soundEnabled,
+  });
+  const practiceGame = useOthelloGame({
+    enabled: screen === "practice",
+    soundEnabled,
+  });
   const reviewMoveNumber = getCurrentReviewMoveNumber(state);
 
   function startMatch(
@@ -103,6 +114,10 @@ export function useAppFlow() {
     game.resetGame();
     practiceGame.resetGame();
     dispatch({ type: "BACK_TO_START" });
+  }
+
+  function openSettings() {
+    dispatch({ type: "OPEN_SETTINGS" });
   }
 
   function openReview() {
@@ -151,6 +166,7 @@ export function useAppFlow() {
     backToStart,
     endGame,
     openReview,
+    openSettings,
     playAgain,
     practicePlayAgain,
     selectReviewMove,

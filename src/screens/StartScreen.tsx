@@ -6,6 +6,7 @@ type StartScreenProps = {
   initialCpuLevel: CpuLevel;
   initialHumanDisc: HumanDisc;
   initialMode: GameMode;
+  onOpenSettings: () => void;
   onStart: (mode: GameMode, cpuLevel: CpuLevel, humanDisc: HumanDisc) => void;
 };
 
@@ -13,6 +14,7 @@ export function StartScreen({
   initialCpuLevel,
   initialHumanDisc,
   initialMode,
+  onOpenSettings,
   onStart,
 }: StartScreenProps) {
   const [mode, setMode] = useState<GameMode>(initialMode);
@@ -149,6 +151,14 @@ export function StartScreen({
           >
             <span className="start-panel__start-step">4</span>
             スタート
+          </button>
+          <button
+            className="start-panel__settings"
+            onClick={onOpenSettings}
+            type="button"
+          >
+            <span aria-hidden="true">⚙</span>
+            設定
           </button>
         </div>
       </div>
