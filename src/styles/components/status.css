@@ -112,20 +112,6 @@
   text-transform: capitalize;
 }
 
-.game-message {
-  margin: 0;
-  border: 1px solid var(--color-border-honey);
-  border-radius: var(--radius-md);
-  padding: 9px 12px;
-  color: var(--color-honey-strong);
-  background:
-    linear-gradient(180deg, rgba(255, 251, 235, 0.98), rgba(255, 248, 222, 0.86)),
-    rgba(255, 248, 222, 0.9);
-  font-size: 0.88rem;
-  font-weight: 700;
-  line-height: 1.5;
-}
-
 .turn-status__copy {
   display: grid;
   min-width: 0;

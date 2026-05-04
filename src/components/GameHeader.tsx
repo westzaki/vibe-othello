@@ -13,7 +13,6 @@ type GameHeaderProps = {
   isCpuThinking: boolean;
   isPlaying: boolean;
   isUndoDisabled: boolean;
-  message: string | null;
   onUndo: () => void;
   players: PlayerSettings;
   showUndo: boolean;
@@ -30,7 +29,6 @@ export function GameHeader({
   isCpuThinking,
   isPlaying,
   isUndoDisabled,
-  message,
   onEndGame,
   onNewGame,
   onUndo,
@@ -94,11 +92,6 @@ export function GameHeader({
             <strong>{discCounts.white}</strong>
           </span>
         </div>
-        {message !== null && (
-          <p className="game-message" role="status">
-            {message}
-          </p>
-        )}
       </div>
 
       <div className="game-actions" aria-label="Game controls">

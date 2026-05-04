@@ -29,7 +29,6 @@ import {
   type MoveRecord,
   type PracticeSessionOptions,
 } from "../game/session";
-import { formatGameSessionNotice } from "./formatGameSessionNotice";
 import { useCpuTurn } from "./useCpuTurn";
 import { useMoveAnimationState } from "./useMoveAnimationState";
 import { useMoveSounds } from "./useMoveSounds";
@@ -55,7 +54,6 @@ export type OthelloGameController = {
   isPlaying: boolean;
   lastMove: SquareIndex | null;
   legalMoves: SquareIndex[];
-  message: string | null;
   moveHistory: MoveRecord[];
   notice: GameSessionNotice | null;
   players: PlayerSettings;
@@ -202,7 +200,6 @@ export function useOthelloGame({
     isPlaying: session.status === "playing",
     lastMove: session.lastMove,
     legalMoves,
-    message: formatGameSessionNotice(session.notice),
     moveHistory: session.moveHistory,
     notice: session.notice,
     players,
