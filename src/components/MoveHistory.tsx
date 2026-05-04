@@ -30,14 +30,11 @@ export function MoveHistory({ moves }: MoveHistoryProps) {
                 />
                 <span className="move-history__main">
                   <span className="move-history__move-number">
-                    #{move.moveNumber}
+                    {move.moveNumber}手目
                   </span>
                   <span className="move-history__square">
                     {formatSquare(move.square)}
                   </span>
-                </span>
-                <span className="move-history__flips">
-                  +{move.flippedSquares.length}
                 </span>
               </li>
             ))}

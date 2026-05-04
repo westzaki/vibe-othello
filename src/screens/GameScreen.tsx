@@ -116,11 +116,12 @@ export function GameScreen({
                 onEndGame={onEndGame}
                 onNewGame={onBackToStart}
                 onUndo={game.undoMove}
+                players={game.players}
                 showUndo={game.undoEnabled}
                 winner={game.winner}
               />
 
-              <AdvantageBar advantage={advantage} />
+              <AdvantageBar advantage={advantage} players={game.players} />
             </>
           )}
         </aside>
