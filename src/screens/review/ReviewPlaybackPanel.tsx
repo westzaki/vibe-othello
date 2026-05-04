@@ -5,14 +5,16 @@ import type { PositionReview } from "../../teacher";
 import { ReviewLegend } from "./ReviewLegend";
 import { ReviewPlaybackControls } from "./ReviewPlaybackControls";
 import { ReviewPlaybackDetail } from "./ReviewPlaybackDetail";
+import type { ReviewPlaybackMode } from "./reviewPlayback";
 
 type ReviewPlaybackPanelProps = {
   currentBoard: Board;
   currentMove: MoveRecord | null;
   currentMoveNumber: number;
   maxMoveNumber: number;
+  mode: ReviewPlaybackMode;
   onGoToMove: (moveNumber: number) => void;
-  onStartPractice: () => void;
+  onStartPractice?: () => void;
   positionReview: PositionReview;
 };
 
@@ -21,6 +23,7 @@ export function ReviewPlaybackPanel({
   currentMove,
   currentMoveNumber,
   maxMoveNumber,
+  mode,
   onGoToMove,
   onStartPractice,
   positionReview,
@@ -32,6 +35,7 @@ export function ReviewPlaybackPanel({
         currentMove={currentMove}
         currentMoveNumber={currentMoveNumber}
         maxMoveNumber={maxMoveNumber}
+        mode={mode}
         positionReview={positionReview}
       />
       <ReviewBoard
@@ -46,7 +50,9 @@ export function ReviewPlaybackPanel({
         onGoToMove={onGoToMove}
         onStartPractice={onStartPractice}
       />
-      <ReviewLegend />
+      <ReviewLegend
+        bestLabel={mode === "reviewTarget" ? "試してみたい手" : "次のおすすめ"}
+      />
     </section>
   );
 }

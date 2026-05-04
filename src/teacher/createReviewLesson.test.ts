@@ -7,7 +7,7 @@ describe("createReviewLesson", () => {
   it("chooses one nice move and one turning point from existing highlights", () => {
     const niceMove = createReviewedMove({
       kind: "good",
-      moveNumber: 3,
+      moveNumber: 5,
       square: 20,
     });
     const turningPoint = createReviewedMove({
@@ -64,6 +64,56 @@ describe("createReviewLesson", () => {
     expect(lesson.turningPointCandidate).toBeNull();
     expect(lesson.practiceTarget).toBeNull();
     expect(lesson.cards.every((card) => card.move === null)).toBe(true);
+  });
+
+  it("does not force a very early ordinary move into the nice move card", () => {
+    const earlyMove = createReviewedMove({
+      kind: "good",
+      moveNumber: 1,
+      square: 19,
+    });
+
+    const lesson = createReviewLesson(
+      createGameReview({
+        badMoves: [],
+        goodMoves: [earlyMove],
+      }),
+    );
+
+    expect(lesson.niceMove).toBeNull();
+    expect(lesson.cards[0].move).toBeNull();
+  });
+
+  it("uses practice copy only when there is a practice target", () => {
+    const turningPoint = createReviewedMove({
+      kind: "bad",
+      moveNumber: 53,
+      square: 48,
+    });
+    const withPractice = createReviewLesson(
+      createGameReview({
+        badMoves: [turningPoint],
+        goodMoves: [],
+      }),
+    );
+    const withoutPractice = createReviewLesson(
+      createGameReview({
+        badMoves: [],
+        goodMoves: [],
+      }),
+    );
+
+    expect(withPractice.cards[2].bodyText).toContain("#53 の局面");
+    expect(withPractice.cards[2].emptyText).not.toContain(
+      "すぐ練習したい局面は少なめ",
+    );
+    expect(withPractice.cards[2].emptyText).toBe("");
+    expect(withPractice.cards[2].actionLabel).toBe("この局面から練習する");
+    expect(withPractice.cards.filter((card) => card.footerText).length).toBe(1);
+    expect(withoutPractice.cards[2].emptyText).toContain(
+      "すぐ練習したい局面は少なめ",
+    );
+    expect(withoutPractice.cards[2].actionLabel).toBeUndefined();
   });
 });
 

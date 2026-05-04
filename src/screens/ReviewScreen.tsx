@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { createInitialBoard } from "../game/othello";
 import type { PracticeSessionOptions } from "../game/session";
 import type { OthelloGameController } from "../hooks/useOthelloGame";
 import {
@@ -9,13 +8,16 @@ import {
   reviewGame,
 } from "../teacher";
 import { ReviewMoveSection } from "./review/ReviewMoveSection";
+import {
+  getPracticeActionMove,
+  getReviewCardMoves,
+} from "./review/reviewLessonDisplay";
 import { ReviewPlaybackPanel } from "./review/ReviewPlaybackPanel";
 import {
   clampMoveNumber,
   createPlaybackBoards,
-  createPlaybackPositionReview,
   createPracticeOptionsFromMoveNumber,
-  getNextDiscForMoveNumber,
+  createReviewPlaybackDisplay,
 } from "./review/reviewPlayback";
 import { getReviewedDisc } from "./review/reviewPlayers";
 
@@ -43,19 +45,6 @@ export function ReviewScreen({
   );
   const maxMoveNumber = playbackBoards.length - 1;
   const safeMoveNumber = clampMoveNumber(currentMoveNumber, maxMoveNumber);
-  const currentBoard = playbackBoards[safeMoveNumber] ?? createInitialBoard();
-  const currentMove =
-    safeMoveNumber === 0
-      ? null
-      : (game.moveHistory[safeMoveNumber - 1] ?? null);
-  const positionReview = useMemo(
-    () =>
-      createPlaybackPositionReview(
-        currentBoard,
-        getNextDiscForMoveNumber(game.moveHistory, safeMoveNumber),
-      ),
-    [currentBoard, game.moveHistory, safeMoveNumber],
-  );
   const review = useMemo(
     () =>
       reviewedDisc === null
@@ -92,17 +81,31 @@ export function ReviewScreen({
   }, [lesson]);
   const activeReviewedMove =
     selectableMoves.find((move) => move.moveNumber === safeMoveNumber) ?? null;
+  const playbackDisplay = useMemo(
+    () =>
+      createReviewPlaybackDisplay(
+        game.moveHistory,
+        playbackBoards,
+        safeMoveNumber,
+        activeReviewedMove,
+      ),
+    [activeReviewedMove, game.moveHistory, playbackBoards, safeMoveNumber],
+  );
 
   function goToMove(moveNumber: number) {
     onMoveNumberChange(clampMoveNumber(moveNumber, maxMoveNumber));
   }
 
   function startPractice() {
+    startPracticeFromMove(safeMoveNumber);
+  }
+
+  function startPracticeFromMove(moveNumber: number) {
     onStartPractice(
       createPracticeOptionsFromMoveNumber(
         game.moveHistory,
         playbackBoards,
-        safeMoveNumber,
+        moveNumber,
       ),
     );
   }
@@ -120,31 +123,46 @@ export function ReviewScreen({
         ) : (
           <div className="review-layout">
             <ReviewPlaybackPanel
-              currentBoard={currentBoard}
-              currentMove={currentMove}
-              currentMoveNumber={safeMoveNumber}
+              currentBoard={playbackDisplay.board}
+              currentMove={playbackDisplay.currentMove}
+              currentMoveNumber={playbackDisplay.currentMoveNumber}
               maxMoveNumber={maxMoveNumber}
+              mode={playbackDisplay.mode}
               onGoToMove={goToMove}
-              onStartPractice={startPractice}
-              positionReview={positionReview}
+              onStartPractice={
+                playbackDisplay.mode === "reviewTarget"
+                  ? undefined
+                  : startPractice
+              }
+              positionReview={playbackDisplay.positionReview}
             />
 
             <div className="review-summary">
-              {lesson.cards.map((card) => (
-                <ReviewMoveSection
-                  key={card.kind}
-                  bodyText={card.bodyText}
-                  emptyText={card.emptyText}
-                  footerText={
-                    card.kind === "practiceTarget" ? messages.advice : undefined
-                  }
-                  messages={messages}
-                  moves={card.move === null ? [] : [card.move]}
-                  onSelectMove={goToMove}
-                  selectedMoveNumber={activeReviewedMove?.moveNumber ?? null}
-                  title={card.title}
-                />
-              ))}
+              {lesson.cards.map((card) => {
+                const practiceActionMove = getPracticeActionMove(card);
+
+                return (
+                  <ReviewMoveSection
+                    key={card.kind}
+                    actionLabel={card.actionLabel}
+                    bodyText={card.bodyText}
+                    emptyText={card.emptyText}
+                    footerText={card.footerText}
+                    messages={messages}
+                    moves={getReviewCardMoves(card)}
+                    onAction={
+                      practiceActionMove === null || card.actionLabel === undefined
+                        ? undefined
+                        : () =>
+                            startPracticeFromMove(practiceActionMove.moveNumber)
+                    }
+                    onSelectMove={goToMove}
+                    selectedMoveNumber={activeReviewedMove?.moveNumber ?? null}
+                    showComparison={card.kind === "turningPoint"}
+                    title={card.title}
+                  />
+                );
+              })}
             </div>
           </div>
         )}

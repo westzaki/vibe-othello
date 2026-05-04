@@ -21,6 +21,7 @@ export type {
   MoveReviewReason,
   ReviewCard,
   ReviewCardKind,
+  ReviewMoveComparison,
   ReviewedMove,
   ReviewGameOptions,
   ReviewLesson,
