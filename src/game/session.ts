@@ -17,6 +17,11 @@ import type { PlayerSettings } from "./players";
 
 export type GameStatus = "notStarted" | "playing" | "ended";
 export type GameEndReason = "completed" | "abandoned";
+export type GameSessionNotice = {
+  nextDisc: DiscColor;
+  skippedDisc: DiscColor;
+  type: "pass";
+};
 
 export type GameSession = {
   board: Board;
@@ -24,8 +29,8 @@ export type GameSession = {
   discCounts: DiscCounts;
   endReason: GameEndReason | null;
   lastMove: SquareIndex | null;
-  message: string | null;
   moveHistory: MoveRecord[];
+  notice: GameSessionNotice | null;
   status: GameStatus;
   winner: Winner | null;
 };
@@ -61,8 +66,8 @@ type CreateSessionOptions = {
   currentDisc: DiscColor;
   endReason?: GameEndReason | null;
   lastMove?: SquareIndex | null;
-  message?: string | null;
   moveHistory?: MoveRecord[];
+  notice?: GameSessionNotice | null;
   status: GameStatus;
   winner?: Winner | null;
 };
@@ -88,8 +93,8 @@ export function startPracticeSession({
       currentDisc: nextDisc,
       endReason: "completed",
       lastMove,
-      message: null,
       moveHistory: [],
+      notice: null,
       status: "ended",
       winner: getWinner(practiceBoard),
     });
@@ -104,8 +109,8 @@ export function startPracticeSession({
     currentDisc,
     endReason: null,
     lastMove,
-    message: nextDiscCanMove ? null : createPassMessage(nextDisc, otherDisc),
     moveHistory: [],
+    notice: nextDiscCanMove ? null : createPassNotice(nextDisc, otherDisc),
     status: "playing",
     winner: null,
   });
@@ -116,7 +121,7 @@ export function endGame(session: GameSession): GameSession {
     ...session,
     discCounts: countDiscs(session.board),
     endReason: "abandoned",
-    message: null,
+    notice: null,
     status: "ended",
     winner: null,
   };
@@ -159,8 +164,8 @@ export function undoSessionMove(
     currentDisc,
     endReason: null,
     lastMove: previousMove?.square ?? null,
-    message: getUndoMessage(currentDisc, previousMove),
     moveHistory: nextMoveHistory,
+    notice: getUndoNotice(currentDisc, previousMove),
     status: "playing",
     winner: null,
   });
@@ -215,8 +220,8 @@ export function placeCurrentDisc(
         discCounts,
         endReason: "completed",
         lastMove: square,
-        message: null,
         moveHistory: nextMoveHistory,
+        notice: null,
         status: "ended",
         winner: getWinner(nextBoard),
       },
@@ -235,10 +240,10 @@ export function placeCurrentDisc(
       currentDisc,
       discCounts,
       lastMove: square,
-      message: nextDiscCanMove
-        ? null
-        : createPassMessage(nextDisc, session.currentDisc),
       moveHistory: nextMoveHistory,
+      notice: nextDiscCanMove
+        ? null
+        : createPassNotice(nextDisc, session.currentDisc),
     },
   };
 }
@@ -283,15 +288,15 @@ function getSingleHumanDisc(players: PlayerSettings): DiscColor | null {
   return blackIsHuman ? "black" : "white";
 }
 
-function getUndoMessage(
+function getUndoNotice(
   currentDisc: DiscColor,
   previousMove: MoveRecord | null,
-): string | null {
+): GameSessionNotice | null {
   if (previousMove === null || previousMove.disc !== currentDisc) {
     return null;
   }
 
-  return createPassMessage(getNextDisc(currentDisc), currentDisc);
+  return createPassNotice(getNextDisc(currentDisc), currentDisc);
 }
 
 function createInitialSession(status: GameStatus): GameSession {
@@ -307,8 +312,8 @@ function createSession({
   currentDisc,
   endReason = null,
   lastMove = null,
-  message = null,
   moveHistory = [],
+  notice = null,
   status,
   winner = null,
 }: CreateSessionOptions): GameSession {
@@ -318,19 +323,20 @@ function createSession({
     discCounts: countDiscs(board),
     endReason,
     lastMove,
-    message,
     moveHistory,
+    notice,
     status,
     winner,
   };
 }
 
-function createPassMessage(skippedDisc: DiscColor, nextDisc: DiscColor): string {
-  return `${formatDisc(skippedDisc)} has no legal moves. ${formatDisc(
+function createPassNotice(
+  skippedDisc: DiscColor,
+  nextDisc: DiscColor,
+): GameSessionNotice {
+  return {
     nextDisc,
-  )} plays again.`;
-}
-
-function formatDisc(disc: DiscColor): string {
-  return disc === "black" ? "Black" : "White";
+    skippedDisc,
+    type: "pass",
+  };
 }

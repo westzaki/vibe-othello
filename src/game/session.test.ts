@@ -23,7 +23,7 @@ describe("game session", () => {
     expect(session.discCounts).toEqual({ black: 2, white: 2 });
     expect(session.endReason).toBeNull();
     expect(session.lastMove).toBeNull();
-    expect(session.message).toBeNull();
+    expect(session.notice).toBeNull();
     expect(session.moveHistory).toEqual([]);
     expect(session.winner).toBeNull();
     expect(getSessionLegalMoves(session)).toEqual([]);
@@ -37,7 +37,7 @@ describe("game session", () => {
     expect(session.discCounts).toEqual({ black: 2, white: 2 });
     expect(session.endReason).toBeNull();
     expect(session.lastMove).toBeNull();
-    expect(session.message).toBeNull();
+    expect(session.notice).toBeNull();
     expect(session.moveHistory).toEqual([]);
     expect(session.winner).toBeNull();
     expect(getSessionLegalMoves(session)).toEqual([19, 26, 37, 44]);
@@ -55,7 +55,7 @@ describe("game session", () => {
     expect(practiceSession.currentDisc).toBe("white");
     expect(practiceSession.discCounts).toEqual({ black: 4, white: 1 });
     expect(practiceSession.lastMove).toBe(19);
-    expect(practiceSession.message).toBeNull();
+    expect(practiceSession.notice).toBeNull();
     expect(practiceSession.moveHistory).toEqual([]);
     expect(getSessionLegalMoves(practiceSession)).toEqual([18, 20, 34]);
   });
@@ -84,9 +84,11 @@ describe("game session", () => {
     expect(practiceSession.status).toBe("playing");
     expect(practiceSession.currentDisc).toBe("black");
     expect(practiceSession.lastMove).toBe(2);
-    expect(practiceSession.message).toBe(
-      "White has no legal moves. Black plays again.",
-    );
+    expect(practiceSession.notice).toEqual({
+      nextDisc: "black",
+      skippedDisc: "white",
+      type: "pass",
+    });
     expect(practiceSession.moveHistory).toEqual([]);
     expect(getSessionLegalMoves(practiceSession)).toEqual([5]);
   });
@@ -127,7 +129,7 @@ describe("game session", () => {
     expect(result.session.board[27]).toBe("black");
     expect(result.session.discCounts).toEqual({ black: 4, white: 1 });
     expect(result.session.lastMove).toBe(19);
-    expect(result.session.message).toBeNull();
+    expect(result.session.notice).toBeNull();
     expect(result.session.currentDisc).toBe("white");
     expect(result.session.moveHistory).toHaveLength(1);
     expect(result.session.moveHistory[0]).toEqual({
@@ -175,9 +177,11 @@ describe("game session", () => {
     expect(result.session.status).toBe("playing");
     expect(result.session.currentDisc).toBe("black");
     expect(result.session.lastMove).toBe(2);
-    expect(result.session.message).toBe(
-      "White has no legal moves. Black plays again.",
-    );
+    expect(result.session.notice).toEqual({
+      nextDisc: "black",
+      skippedDisc: "white",
+      type: "pass",
+    });
     expect(result.session.moveHistory).toHaveLength(1);
     expect(result.session.moveHistory[0].legalMovesBefore).toEqual([2, 5]);
     expect(getSessionLegalMoves(result.session)).toEqual([5]);
@@ -222,7 +226,7 @@ describe("game session", () => {
     expect(undoneSession?.currentDisc).toBe("black");
     expect(undoneSession?.discCounts).toEqual({ black: 2, white: 2 });
     expect(undoneSession?.lastMove).toBeNull();
-    expect(undoneSession?.message).toBeNull();
+    expect(undoneSession?.notice).toBeNull();
     expect(undoneSession?.moveHistory).toEqual([]);
     expect(undoneSession?.status).toBe("playing");
   });
@@ -255,9 +259,7 @@ describe("game session", () => {
     expect(undoneSession).not.toBeNull();
     expect(undoneSession?.board).toEqual(afterOpeningCpuMove.board);
     expect(undoneSession?.currentDisc).toBe("white");
-    expect(undoneSession?.moveHistory).toEqual(
-      afterOpeningCpuMove.moveHistory,
-    );
+    expect(undoneSession?.moveHistory).toEqual(afterOpeningCpuMove.moveHistory);
     expect(undoneSession?.lastMove).toBe(afterOpeningCpuMove.lastMove);
   });
 
@@ -315,7 +317,7 @@ function createPlayingSession(
     discCounts: { black: 0, white: 0 },
     endReason: null,
     lastMove: null,
-    message: null,
+    notice: null,
     moveHistory: [],
     status: "playing",
     winner: null,
