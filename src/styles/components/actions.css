@@ -74,3 +74,88 @@
     radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.28), transparent 8rem),
     linear-gradient(180deg, #c5bff4, #978ee0);
 }
+
+.game-action--danger {
+  color: #b85c52;
+  border-color: rgba(255, 173, 153, 0.5);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 238, 232, 0.9)),
+    #ffffff;
+}
+
+.game-action--danger:hover:not(:disabled) {
+  border-color: rgba(216, 126, 112, 0.62);
+  background: linear-gradient(180deg, #ffffff, #fff1ed);
+}
+
+.game-end-confirm {
+  position: fixed;
+  z-index: 30;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(255, 210, 122, 0.16),
+      transparent 22rem
+    ),
+    rgba(63, 61, 74, 0.34);
+}
+
+.game-end-confirm__card {
+  display: grid;
+  width: min(100%, 420px);
+  gap: 16px;
+  border: 1px solid rgba(255, 173, 153, 0.42);
+  border-radius: 26px;
+  padding: clamp(18px, 5vw, 24px);
+  background:
+    radial-gradient(
+      circle at 18% 0%,
+      rgba(255, 210, 122, 0.14),
+      transparent 10rem
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.96),
+      rgba(255, 248, 244, 0.88)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 30px 72px rgba(63, 61, 74, 0.24),
+    0 14px 30px rgba(118, 100, 88, 0.12);
+}
+
+.game-end-confirm__copy {
+  display: grid;
+  gap: 6px;
+  text-align: center;
+}
+
+.game-end-confirm__title,
+.game-end-confirm__description {
+  margin: 0;
+}
+
+.game-end-confirm__title {
+  color: #5c568f;
+  font-size: clamp(1.15rem, 4.6vw, 1.45rem);
+  font-weight: 950;
+  line-height: 1.4;
+}
+
+.game-end-confirm__description {
+  color: #777384;
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.game-end-confirm__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}

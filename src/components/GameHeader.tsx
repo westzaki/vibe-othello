@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { DiscColor, DiscCounts, Winner } from "../game/othello";
 import type { GameEndReason, GameStatus } from "../game/session";
 
@@ -30,6 +31,21 @@ export function GameHeader({
   showUndo,
   winner,
 }: GameHeaderProps) {
+  const [isEndConfirmOpen, setIsEndConfirmOpen] = useState(false);
+
+  function requestEndGame() {
+    setIsEndConfirmOpen(true);
+  }
+
+  function cancelEndGame() {
+    setIsEndConfirmOpen(false);
+  }
+
+  function confirmEndGame() {
+    setIsEndConfirmOpen(false);
+    onEndGame();
+  }
+
   return (
     <div className="game-heading">
       <h1 id="game-title">Vibe オセロ</h1>
@@ -87,8 +103,8 @@ export function GameHeader({
                 まった
               </button>
             )}
-            <button className="game-action" onClick={onEndGame} type="button">
-              やめる
+            <button className="game-action" onClick={requestEndGame} type="button">
+              対局をやめる
             </button>
           </>
         ) : (
@@ -101,6 +117,46 @@ export function GameHeader({
           </button>
         )}
       </div>
+
+      {isPlaying && isEndConfirmOpen && (
+        <div
+          className="game-end-confirm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="game-end-confirm-title"
+          aria-describedby="game-end-confirm-description"
+        >
+          <div className="game-end-confirm__card">
+            <div className="game-end-confirm__copy">
+              <p id="game-end-confirm-title" className="game-end-confirm__title">
+                この対局をおわりますか？
+              </p>
+              <p
+                id="game-end-confirm-description"
+                className="game-end-confirm__description"
+              >
+                今の対局は中断されます
+              </p>
+            </div>
+            <div className="game-end-confirm__actions">
+              <button
+                className="game-action"
+                onClick={cancelEndGame}
+                type="button"
+              >
+                対局にもどる
+              </button>
+              <button
+                className="game-action game-action--danger"
+                onClick={confirmEndGame}
+                type="button"
+              >
+                対局をおわる
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
