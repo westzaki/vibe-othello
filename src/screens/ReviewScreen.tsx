@@ -72,6 +72,14 @@ export function ReviewScreen({
           <p className="review-panel__status">
             ふたり対戦のふりかえりは、今はお休み中です。1人でCPUと遊んだあとに、コーチがポイントを見つけるよ。
           </p>
+        ) : reviewModel.status === "loading" ? (
+          <p className="review-panel__status" role="status">
+            ふりかえりを準備中です…
+          </p>
+        ) : reviewModel.status === "error" ? (
+          <p className="review-panel__status" role="alert">
+            ふりかえりを作れませんでした。結果画面に戻って、もう一度試してみてください。
+          </p>
         ) : (
           <div className="review-layout">
             <ReviewPlaybackPanel

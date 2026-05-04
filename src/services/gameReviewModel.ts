@@ -44,6 +44,21 @@ export type UnavailableGameReviewModel = GameReviewModelBase & {
   status: "unavailable";
 };
 
+export type LoadingGameReviewModel = GameReviewModelBase & {
+  lesson: null;
+  messages: null;
+  review: null;
+  status: "loading";
+};
+
+export type ErrorGameReviewModel = GameReviewModelBase & {
+  errorMessage: string;
+  lesson: null;
+  messages: null;
+  review: null;
+  status: "error";
+};
+
 export type ReadyGameReviewModel = GameReviewModelBase & {
   lesson: ReviewLesson;
   messages: GameReviewMessages;
@@ -53,6 +68,8 @@ export type ReadyGameReviewModel = GameReviewModelBase & {
 };
 
 export type GameReviewModel =
+  | ErrorGameReviewModel
+  | LoadingGameReviewModel
   | ReadyGameReviewModel
   | UnavailableGameReviewModel;
 
@@ -62,39 +79,62 @@ export function createGameReviewModel({
   players,
   winner,
 }: GameReviewModelOptions): GameReviewModel {
-  const reviewedDisc = getReviewedDisc(players);
-  const reviewOutcome = getReviewOutcome(reviewedDisc, winner);
-  const playbackBoards = createPlaybackBoards(moveHistory);
-  const maxMoveNumber = playbackBoards.length - 1;
-  const safeMoveNumber = clampMoveNumber(currentMoveNumber, maxMoveNumber);
+  const base = createGameReviewModelBase({
+    currentMoveNumber,
+    moveHistory,
+    players,
+    winner,
+  });
 
-  if (reviewedDisc === null || reviewOutcome === null) {
-    return createUnavailableGameReviewModel({
-      maxMoveNumber,
-      moveHistory,
-      playbackBoards,
-      reviewedDisc,
-      safeMoveNumber,
-    });
+  if (base.reviewedDisc === null || base.reviewOutcome === null) {
+    return createUnavailableGameReviewModelFromBase(base);
   }
 
   const review = reviewGame(moveHistory, {
-    reviewedDisc,
+    reviewedDisc: base.reviewedDisc,
     ...defaultTeacherReviewConfig,
   });
+
+  return createGameReviewModelFromReview({
+    currentMoveNumber,
+    moveHistory,
+    players,
+    review,
+    winner,
+  });
+}
+
+export function createGameReviewModelFromReview({
+  currentMoveNumber,
+  moveHistory,
+  players,
+  review,
+  winner,
+}: GameReviewModelOptions & { review: GameReview }): GameReviewModel {
+  const base = createGameReviewModelBase({
+    currentMoveNumber,
+    moveHistory,
+    players,
+    winner,
+  });
+
+  if (base.reviewedDisc === null || base.reviewOutcome === null) {
+    return createUnavailableGameReviewModelFromBase(base);
+  }
+
   const messages = createGameReviewMessages(review);
-  const lesson = createReviewLesson(review, reviewOutcome);
+  const lesson = createReviewLesson(review, base.reviewOutcome);
   const selectableMoves = getSelectableReviewMoves(lesson);
   const displayedReviewedMove = getDisplayedReviewedMove(
     lesson,
-    safeMoveNumber,
+    base.safeMoveNumber,
     selectableMoves,
   );
   const displayedMoveNumber =
-    displayedReviewedMove?.moveNumber ?? safeMoveNumber;
+    displayedReviewedMove?.moveNumber ?? base.safeMoveNumber;
   const playbackDisplay = createReviewPlaybackDisplay(
     moveHistory,
-    playbackBoards,
+    base.playbackBoards,
     displayedMoveNumber,
     displayedReviewedMove,
   );
@@ -103,31 +143,71 @@ export function createGameReviewModel({
     displayedMoveNumber,
     displayedReviewedMove,
     lesson,
-    maxMoveNumber,
+    maxMoveNumber: base.maxMoveNumber,
     messages,
-    playbackBoards,
+    playbackBoards: base.playbackBoards,
     playbackDisplay,
     review,
-    reviewedDisc,
-    safeMoveNumber,
+    reviewedDisc: base.reviewedDisc,
+    safeMoveNumber: base.safeMoveNumber,
     selectableMoves,
     status: "ready",
   };
 }
 
-function createUnavailableGameReviewModel({
-  maxMoveNumber,
+export function createLoadingGameReviewModel(
+  options: GameReviewModelOptions,
+): GameReviewModel {
+  const base = createGameReviewModelBase(options);
+
+  if (base.reviewedDisc === null || base.reviewOutcome === null) {
+    return createUnavailableGameReviewModelFromBase(base);
+  }
+
+  return createLoadingGameReviewModelFromBase(base);
+}
+
+export function createUnavailableGameReviewModel(
+  options: GameReviewModelOptions,
+): UnavailableGameReviewModel {
+  return createUnavailableGameReviewModelFromBase(
+    createGameReviewModelBase(options),
+  );
+}
+
+export function createErrorGameReviewModel(
+  options: GameReviewModelOptions,
+  errorMessage: string,
+): GameReviewModel {
+  const base = createGameReviewModelBase(options);
+
+  if (base.reviewedDisc === null || base.reviewOutcome === null) {
+    return createUnavailableGameReviewModelFromBase(base);
+  }
+
+  return {
+    errorMessage,
+    lesson: null,
+    messages: null,
+    review: null,
+    ...base,
+    status: "error",
+  };
+}
+
+function createGameReviewModelBase({
+  currentMoveNumber,
   moveHistory,
-  playbackBoards,
-  reviewedDisc,
-  safeMoveNumber,
-}: {
-  maxMoveNumber: number;
-  moveHistory: MoveRecord[];
-  playbackBoards: Board[];
-  reviewedDisc: DiscColor | null;
-  safeMoveNumber: number;
-}): UnavailableGameReviewModel {
+  players,
+  winner,
+}: GameReviewModelOptions): GameReviewModelBase & {
+  reviewOutcome: ReturnType<typeof getReviewOutcome>;
+} {
+  const reviewedDisc = getReviewedDisc(players);
+  const reviewOutcome = getReviewOutcome(reviewedDisc, winner);
+  const playbackBoards = createPlaybackBoards(moveHistory);
+  const maxMoveNumber = playbackBoards.length - 1;
+  const safeMoveNumber = clampMoveNumber(currentMoveNumber, maxMoveNumber);
   const playbackDisplay = createReviewPlaybackDisplay(
     moveHistory,
     playbackBoards,
@@ -138,16 +218,37 @@ function createUnavailableGameReviewModel({
   return {
     displayedMoveNumber: safeMoveNumber,
     displayedReviewedMove: null,
-    lesson: null,
     maxMoveNumber,
-    messages: null,
     playbackBoards,
     playbackDisplay,
-    review: null,
     reviewedDisc,
+    reviewOutcome,
     safeMoveNumber,
     selectableMoves: [],
+  };
+}
+
+function createUnavailableGameReviewModelFromBase(
+  base: GameReviewModelBase,
+): UnavailableGameReviewModel {
+  return {
+    ...base,
+    lesson: null,
+    messages: null,
+    review: null,
     status: "unavailable",
+  };
+}
+
+function createLoadingGameReviewModelFromBase(
+  base: GameReviewModelBase,
+): LoadingGameReviewModel {
+  return {
+    ...base,
+    lesson: null,
+    messages: null,
+    review: null,
+    status: "loading",
   };
 }
 
