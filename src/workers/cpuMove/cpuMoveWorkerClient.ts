@@ -45,6 +45,10 @@ function getWorker(): Worker {
     }
 
     pendingRequests.clear();
+
+    const failedWorker = worker;
+    worker = null;
+    failedWorker?.terminate();
   };
 
   return worker;

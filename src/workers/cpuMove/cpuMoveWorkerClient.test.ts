@@ -12,6 +12,7 @@ class FakeWorker {
   onerror: WorkerErrorHandler | null = null;
   onmessage: WorkerMessageHandler | null = null;
   postedMessages: unknown[] = [];
+  terminated = false;
 
   constructor() {
     FakeWorker.instances.push(this);
@@ -19,6 +20,10 @@ class FakeWorker {
 
   postMessage(message: unknown): void {
     this.postedMessages.push(message);
+  }
+
+  terminate(): void {
+    this.terminated = true;
   }
 }
 
@@ -91,5 +96,42 @@ describe("CPU move worker client", () => {
 
     await expect(firstResponse).rejects.toThrow("Worker crashed");
     await expect(secondResponse).rejects.toThrow("Worker crashed");
+  });
+
+  it("recreates the worker for the next request after a worker error", async () => {
+    const { chooseCpuMoveInWorker } = await import("./cpuMoveWorkerClient");
+    const firstResponse = chooseCpuMoveInWorker({
+      board: [],
+      disc: "black",
+      level: "level6",
+      requestId: 1,
+      type: "chooseCpuMove",
+    });
+
+    FakeWorker.instances[0]?.onerror?.({
+      message: "Worker crashed",
+    } as ErrorEvent);
+
+    await expect(firstResponse).rejects.toThrow("Worker crashed");
+    expect(FakeWorker.instances[0]?.terminated).toBe(true);
+
+    chooseCpuMoveInWorker({
+      board: [],
+      disc: "white",
+      level: "level6",
+      requestId: 2,
+      type: "chooseCpuMove",
+    });
+
+    expect(FakeWorker.instances).toHaveLength(2);
+    expect(FakeWorker.instances[1]?.postedMessages).toEqual([
+      {
+        board: [],
+        disc: "white",
+        level: "level6",
+        requestId: 2,
+        type: "chooseCpuMove",
+      },
+    ]);
   });
 });
