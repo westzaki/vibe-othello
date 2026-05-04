@@ -137,6 +137,14 @@
   list-style: none;
 }
 
+.review-summary__caption {
+  margin: 0;
+  color: #777384;
+  font-size: 0.82rem;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
 .review-summary__item,
 .review-summary__advice,
 .review-summary__empty {

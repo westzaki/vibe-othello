@@ -4,6 +4,7 @@ import type { PracticeSessionOptions } from "../game/session";
 import type { useOthelloGame } from "../hooks/useOthelloGame";
 import {
   createGameReviewMessages,
+  createReviewLesson,
   defaultTeacherReviewConfig,
   reviewGame,
 } from "../teacher";
@@ -69,15 +70,26 @@ export function ReviewScreen({
     () => (review === null ? null : createGameReviewMessages(review)),
     [review],
   );
-  const selectableMoves = useMemo(
-    () =>
-      review === null
-        ? []
-        : [...review.highlights.goodMoves, ...review.highlights.badMoves].sort(
-            (first, second) => first.moveNumber - second.moveNumber,
-          ),
+  const lesson = useMemo(
+    () => (review === null ? null : createReviewLesson(review)),
     [review],
   );
+  const selectableMoves = useMemo(() => {
+    if (lesson === null) {
+      return [];
+    }
+
+    const movesByNumber = new Map(
+      lesson.cards
+        .map((card) => card.move)
+        .filter((move) => move !== null)
+        .map((move) => [move.moveNumber, move]),
+    );
+
+    return [...movesByNumber.values()].sort(
+      (first, second) => first.moveNumber - second.moveNumber,
+    );
+  }, [lesson]);
   const activeReviewedMove =
     selectableMoves.find((move) => move.moveNumber === safeMoveNumber) ?? null;
 
@@ -101,7 +113,7 @@ export function ReviewScreen({
         <p className="eyebrow">Teacher Review</p>
         <h1 id="review-title">ふりかえり</h1>
 
-        {review === null || messages === null ? (
+        {review === null || messages === null || lesson === null ? (
           <p className="review-panel__status">
             ふたり対戦のふりかえりは、今はお休み中です
           </p>
@@ -118,28 +130,21 @@ export function ReviewScreen({
             />
 
             <div className="review-summary">
-              <ReviewMoveSection
-                emptyText="今回は小さな良い判断が積み重なっていました。次はナイスな場面を一緒に見つけよう。"
-                messages={messages}
-                moves={review.highlights.goodMoves}
-                onSelectMove={goToMove}
-                selectedMoveNumber={activeReviewedMove?.moveNumber ?? null}
-                title="今日のナイス"
-              />
-              <ReviewMoveSection
-                emptyText="大きな分かれ道は少なめでした。今の調子で、角の近くを少しだけ意識してみよう。"
-                messages={messages}
-                moves={review.highlights.badMoves}
-                onSelectMove={goToMove}
-                selectedMoveNumber={activeReviewedMove?.moveNumber ?? null}
-                title="勝負どころ"
-              />
-              <section className="review-summary__section">
-                <h2 className="review-summary__title">
-                  次に意識したいポイント
-                </h2>
-                <p className="review-summary__advice">{messages.advice}</p>
-              </section>
+              {lesson.cards.map((card) => (
+                <ReviewMoveSection
+                  key={card.kind}
+                  bodyText={card.bodyText}
+                  emptyText={card.emptyText}
+                  footerText={
+                    card.kind === "practiceTarget" ? messages.advice : undefined
+                  }
+                  messages={messages}
+                  moves={card.move === null ? [] : [card.move]}
+                  onSelectMove={goToMove}
+                  selectedMoveNumber={activeReviewedMove?.moveNumber ?? null}
+                  title={card.title}
+                />
+              ))}
             </div>
           </div>
         )}

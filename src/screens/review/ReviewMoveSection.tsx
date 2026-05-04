@@ -7,7 +7,9 @@ import type {
 import { formatSquare } from "./reviewFormat";
 
 type ReviewMoveSectionProps = {
+  bodyText?: string;
   emptyText: string;
+  footerText?: string;
   messages: GameReviewMessages;
   moves: GameReview["reviewedMoves"];
   onSelectMove: (moveNumber: number) => void;
@@ -16,7 +18,9 @@ type ReviewMoveSectionProps = {
 };
 
 export function ReviewMoveSection({
+  bodyText,
   emptyText,
+  footerText,
   messages,
   moves,
   onSelectMove,
@@ -26,6 +30,9 @@ export function ReviewMoveSection({
   return (
     <section className="review-summary__section">
       <h2 className="review-summary__title">{title}</h2>
+      {bodyText !== undefined && (
+        <p className="review-summary__caption">{bodyText}</p>
+      )}
       {moves.length === 0 ? (
         <p className="review-summary__empty">{emptyText}</p>
       ) : (
@@ -40,6 +47,9 @@ export function ReviewMoveSection({
             />
           ))}
         </ul>
+      )}
+      {footerText !== undefined && (
+        <p className="review-summary__advice">{footerText}</p>
       )}
     </section>
   );
