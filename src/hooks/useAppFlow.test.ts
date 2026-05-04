@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { createInitialBoard } from "../game/othello";
-import type { PracticeSessionOptions } from "../game/session";
-import { appFlowReducer, type AppFlowState } from "./useAppFlow";
+import { createDefaultPlayerSettings } from "../game/players";
+import type { MoveRecord, PracticeSessionOptions } from "../game/session";
+import type { PracticeFeedbackContext } from "../teacher";
+import {
+  appFlowReducer,
+  getFirstHumanPracticeMove,
+  type AppFlowState,
+} from "./useAppFlow";
 
 describe("app flow reducer", () => {
   it("starts a match and clears screen-specific state", () => {
@@ -38,6 +44,7 @@ describe("app flow reducer", () => {
 
   it("keeps the practice start options and returns to the selected review move", () => {
     const start = createPracticeOptions();
+    const feedbackContext = createFeedbackContext();
     const practiceState = appFlowReducer(
       {
         screen: "review",
@@ -45,6 +52,7 @@ describe("app flow reducer", () => {
       },
       {
         type: "START_PRACTICE",
+        feedbackContext,
         returnMoveNumber: 8,
         start,
       },
@@ -52,6 +60,7 @@ describe("app flow reducer", () => {
 
     expect(practiceState).toEqual({
       screen: "practice",
+      feedbackContext,
       returnMoveNumber: 8,
       start,
     });
@@ -62,6 +71,32 @@ describe("app flow reducer", () => {
       screen: "review",
       moveNumber: 8,
     });
+  });
+
+  it("finds only the first human move for practice feedback", () => {
+    const players = createDefaultPlayerSettings();
+    const cpuMove = createMoveRecord({
+      disc: "white",
+      moveNumber: 1,
+      square: 18,
+    });
+    const firstHumanMove = createMoveRecord({
+      disc: "black",
+      moveNumber: 2,
+      square: 26,
+    });
+    const secondHumanMove = createMoveRecord({
+      disc: "black",
+      moveNumber: 4,
+      square: 37,
+    });
+
+    expect(
+      getFirstHumanPracticeMove(
+        [cpuMove, firstHumanMove, secondHumanMove],
+        players,
+      ),
+    ).toBe(firstHumanMove);
   });
 
   it("keeps invalid practice-only transitions unchanged", () => {
@@ -110,5 +145,37 @@ function createPracticeOptions(): PracticeSessionOptions {
     board: createInitialBoard(),
     lastMove: 19,
     nextDisc: "white",
+  };
+}
+
+function createFeedbackContext(): PracticeFeedbackContext {
+  return {
+    bestSquare: 26,
+    disc: "black",
+    reasons: ["turningPoint"],
+    scoreAfter: 0,
+    square: 20,
+  };
+}
+
+function createMoveRecord({
+  disc,
+  moveNumber,
+  square,
+}: {
+  disc: MoveRecord["disc"];
+  moveNumber: number;
+  square: number;
+}): MoveRecord {
+  const board = createInitialBoard();
+
+  return {
+    boardAfter: board,
+    boardBefore: board,
+    disc,
+    flippedSquares: [],
+    legalMovesBefore: [square],
+    moveNumber,
+    square,
   };
 }

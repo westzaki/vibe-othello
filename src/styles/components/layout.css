@@ -134,6 +134,17 @@
   font-weight: 950;
 }
 
+.practice-banner__feedback {
+  margin: 0;
+  border-radius: 14px;
+  padding: 10px 11px;
+  color: #3f594f;
+  background: rgba(255, 255, 255, 0.68);
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
 .game-table {
   display: grid;
   grid-area: board;

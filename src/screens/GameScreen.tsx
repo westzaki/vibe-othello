@@ -26,6 +26,7 @@ type GameScreenProps = {
   onEndGame: () => void;
   onOpenReview: () => void;
   onPlayAgain: () => void;
+  practiceFeedbackText?: string | null;
 };
 
 export function GameScreen({
@@ -36,6 +37,7 @@ export function GameScreen({
   onEndGame,
   onOpenReview,
   onPlayAgain,
+  practiceFeedbackText = null,
 }: GameScreenProps) {
   const advantage = useMemo(() => calculateAdvantage(game.board), [game.board]);
   const { isPassNoticeVisible, passNotice } = usePassNoticeVisibility({
@@ -70,6 +72,11 @@ export function GameScreen({
             <div className="practice-banner" aria-label="Practice session">
               <span>練習モード</span>
               <strong>ふりかえりから練習中</strong>
+              {practiceFeedbackText !== null && (
+                <p className="practice-banner__feedback" role="status">
+                  {practiceFeedbackText}
+                </p>
+              )}
               {onBackToReview !== undefined && (
                 <button
                   className="game-action"

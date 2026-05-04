@@ -9,7 +9,8 @@ import { StartScreen } from "./screens/StartScreen";
 export default function App() {
   const { settings, updateSoundEnabled } = useAppSettings();
   const appFlow = useAppFlow({ soundEnabled: settings.soundEnabled });
-  const { game, practiceGame, reviewMoveNumber, screen } = appFlow;
+  const { game, practiceFeedback, practiceGame, reviewMoveNumber, screen } =
+    appFlow;
 
   return (
     <main className="app">
@@ -45,6 +46,7 @@ export default function App() {
           onEndGame={practiceGame.endGame}
           onOpenReview={appFlow.backToReview}
           onPlayAgain={appFlow.practicePlayAgain}
+          practiceFeedbackText={practiceFeedback?.text ?? null}
         />
       ) : (
         <GameScreen
