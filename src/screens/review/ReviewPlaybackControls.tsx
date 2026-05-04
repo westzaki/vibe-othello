@@ -2,7 +2,7 @@ type ReviewPlaybackControlsProps = {
   currentMoveNumber: number;
   maxMoveNumber: number;
   onGoToMove: (moveNumber: number) => void;
-  onStartPractice: () => void;
+  onStartPractice?: () => void;
 };
 
 export function ReviewPlaybackControls({
@@ -32,13 +32,15 @@ export function ReviewPlaybackControls({
           次へ
         </button>
       </div>
-      <button
-        className="game-action game-action--primary review-playback__practice"
-        onClick={onStartPractice}
-        type="button"
-      >
-        ここから練習
-      </button>
+      {onStartPractice !== undefined && (
+        <button
+          className="game-action review-playback__practice"
+          onClick={onStartPractice}
+          type="button"
+        >
+          ここから練習
+        </button>
+      )}
     </div>
   );
 }
