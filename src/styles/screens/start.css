@@ -233,7 +233,7 @@
 .start-panel__section {
   display: grid;
   gap: 12px;
-  border: 1px solid var(--color-control-border);
+  border: 1px solid color-mix(in srgb, var(--color-control-border) 62%, transparent);
   border-radius: var(--radius-lg);
   padding: clamp(12px, 2vw, 16px);
   background:
@@ -241,12 +241,12 @@
     var(--color-control-bg);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    0 10px 20px rgba(118, 86, 55, 0.08);
+    0 8px 16px rgba(118, 86, 55, 0.055);
   text-align: left;
 }
 
 .start-panel__header + .start-panel__section {
-  border-color: var(--color-selected-border);
+  border-color: color-mix(in srgb, var(--color-control-border) 72%, transparent);
 }
 
 .start-panel__section--mode {
@@ -362,13 +362,13 @@
 .mode-selector__button {
   position: relative;
   display: grid;
-  align-items: end;
-  justify-items: start;
+  align-items: center;
+  justify-items: center;
   gap: 8px;
-  min-height: clamp(86px, 13vw, 112px);
-  padding: 14px 14px 14px 46px;
+  min-height: clamp(68px, 8vw, 82px);
+  padding: 16px 18px 14px;
   font-size: clamp(0.94rem, 3.4vw, 1.04rem);
-  text-align: left;
+  text-align: center;
 }
 
 .mode-selector__button > span {
@@ -648,7 +648,7 @@
   }
 
   .mode-selector__button {
-    min-height: 72px;
+    min-height: 60px;
   }
 
   .start-panel__action {
