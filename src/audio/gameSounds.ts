@@ -12,36 +12,48 @@ export function unlockGameAudio() {
 
 export function playPlaceDiscSound() {
   playTapSound({
-    attackSeconds: 0.004,
-    decaySeconds: 0.09,
-    frequency: 170,
-    gain: 0.12,
-    noiseGain: 0.04,
+    attackSeconds: 0.006,
+    chimeGain: 0.01,
+    chimeRatio: 1.54,
+    decaySeconds: 0.14,
+    frequency: 245,
+    gain: 0.07,
+    noiseGain: 0.009,
+    pitchDropRatio: 0.78,
   });
 }
 
 export function playFlipDiscSound() {
   playTapSound({
-    attackSeconds: 0.003,
-    decaySeconds: 0.07,
-    frequency: 520,
-    gain: 0.07,
-    noiseGain: 0.025,
+    attackSeconds: 0.005,
+    chimeGain: 0.006,
+    chimeRatio: 1.44,
+    decaySeconds: 0.105,
+    frequency: 435,
+    gain: 0.043,
+    noiseGain: 0.006,
+    pitchDropRatio: 0.9,
   });
 }
 
 function playTapSound({
   attackSeconds,
+  chimeGain,
+  chimeRatio,
   decaySeconds,
   frequency,
   gain,
   noiseGain,
+  pitchDropRatio,
 }: {
   attackSeconds: number;
+  chimeGain: number;
+  chimeRatio: number;
   decaySeconds: number;
   frequency: number;
   gain: number;
   noiseGain: number;
+  pitchDropRatio: number;
 }) {
   const context = getAudioContext();
 
@@ -56,36 +68,63 @@ function playTapSound({
   const now = context.currentTime;
   const oscillator = context.createOscillator();
   const oscillatorGain = context.createGain();
+  const chime = context.createOscillator();
+  const chimeGainNode = context.createGain();
+  const toneFilter = context.createBiquadFilter();
   const noise = createNoiseSource(context);
   const noiseFilter = context.createBiquadFilter();
   const noiseGainNode = context.createGain();
 
-  oscillator.type = "triangle";
+  oscillator.type = "sine";
   oscillator.frequency.setValueAtTime(frequency, now);
   oscillator.frequency.exponentialRampToValueAtTime(
-    Math.max(60, frequency * 0.55),
+    Math.max(80, frequency * pitchDropRatio),
     now + decaySeconds,
   );
+  toneFilter.type = "lowpass";
+  toneFilter.frequency.setValueAtTime(1200, now);
+  toneFilter.Q.setValueAtTime(0.7, now);
   oscillatorGain.gain.setValueAtTime(0.0001, now);
   oscillatorGain.gain.exponentialRampToValueAtTime(gain, now + attackSeconds);
   oscillatorGain.gain.exponentialRampToValueAtTime(0.0001, now + decaySeconds);
 
-  noiseFilter.type = "bandpass";
-  noiseFilter.frequency.setValueAtTime(frequency * 2.2, now);
-  noiseFilter.Q.setValueAtTime(2.8, now);
-  noiseGainNode.gain.setValueAtTime(noiseGain, now);
-  noiseGainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.035);
+  chime.type = "sine";
+  chime.frequency.setValueAtTime(frequency * chimeRatio, now);
+  chime.frequency.exponentialRampToValueAtTime(
+    frequency * chimeRatio * 1.08,
+    now + decaySeconds * 0.75,
+  );
+  chimeGainNode.gain.setValueAtTime(0.0001, now);
+  chimeGainNode.gain.exponentialRampToValueAtTime(
+    chimeGain,
+    now + attackSeconds * 1.4,
+  );
+  chimeGainNode.gain.exponentialRampToValueAtTime(
+    0.0001,
+    now + decaySeconds * 0.82,
+  );
 
-  oscillator.connect(oscillatorGain);
+  noiseFilter.type = "bandpass";
+  noiseFilter.frequency.setValueAtTime(frequency * 1.35, now);
+  noiseFilter.Q.setValueAtTime(1.1, now);
+  noiseGainNode.gain.setValueAtTime(noiseGain, now);
+  noiseGainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+
+  oscillator.connect(toneFilter);
+  toneFilter.connect(oscillatorGain);
   oscillatorGain.connect(context.destination);
+  chime.connect(chimeGainNode);
+  chimeGainNode.connect(context.destination);
   noise.connect(noiseFilter);
   noiseFilter.connect(noiseGainNode);
   noiseGainNode.connect(context.destination);
 
   oscillator.start(now);
+  chime.start(now);
   noise.start(now);
-  oscillator.stop(now + decaySeconds + 0.02);
-  noise.stop(now + 0.04);
+  oscillator.stop(now + decaySeconds + 0.03);
+  chime.stop(now + decaySeconds + 0.03);
+  noise.stop(now + 0.055);
 }
 
 function createNoiseSource(context: AudioContext): AudioBufferSourceNode {

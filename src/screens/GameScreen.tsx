@@ -63,6 +63,7 @@ export function GameScreen({
           lastMove={game.lastMove}
           legalMoves={game.canHumanPlay ? game.legalMoves : []}
           onSquareClick={game.placeCurrentDisc}
+          placedSquare={game.placedSquare}
         />
       </div>
 

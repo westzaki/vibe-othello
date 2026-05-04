@@ -4,8 +4,8 @@ import type { PlayerConfig } from "../game/players";
 import type { GameSession } from "../game/session";
 import { chooseCpuMoveAsync } from "../services/cpuMoveService";
 
-const cpuMoveDelayMs = 350;
-const cpuMoveDelayAfterPassMs = 2800;
+const cpuMoveDelayMs = 650;
+const cpuMoveDelayAfterPassMs = 3200;
 let nextCpuMoveRequestId = 0;
 
 type UseCpuTurnParams = {

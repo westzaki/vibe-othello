@@ -3,7 +3,7 @@ import type {
   DiscColor,
   SquareIndex,
 } from "../game/othello";
-import { GameDisc } from "./GameDisc";
+import { GameDisc, type DiscFlipAxis } from "./GameDisc";
 
 const columnLabels = ["A", "B", "C", "D", "E", "F", "G", "H"];
 const rowLabels = ["1", "2", "3", "4", "5", "6", "7", "8"];
@@ -16,6 +16,7 @@ type BoardProps = {
   lastMove: SquareIndex | null;
   legalMoves: SquareIndex[];
   onSquareClick: (square: SquareIndex) => void;
+  placedSquare: SquareIndex | null;
 };
 
 export function Board({
@@ -26,6 +27,7 @@ export function Board({
   lastMove,
   legalMoves,
   onSquareClick,
+  placedSquare,
 }: BoardProps) {
   return (
     <div className="board-frame" aria-label="Playable Othello board">
@@ -50,6 +52,12 @@ export function Board({
             const isLegal = legalMoves.includes(square);
             const isLastMove = square === lastMove && cell !== null;
             const flipIndex = flippedSquares.indexOf(square);
+            const flipMotion =
+              flipIndex >= 0 && placedSquare !== null
+                ? getFlipMotion(square, placedSquare)
+                : null;
+            const isPlacedSquare =
+              placedSquare === square && flipAnimationId > 0 && cell !== null;
 
             return (
               <button
@@ -71,12 +79,16 @@ export function Board({
                 {cell !== null && (
                   <GameDisc
                     color={cell}
-                    flipDelay={flipIndex >= 0 ? flipIndex * 70 : null}
+                    flipAxis={flipMotion?.axis ?? null}
+                    flipDelay={flipMotion?.delay ?? null}
                     key={
                       flipIndex >= 0
                         ? `${square}-${flipAnimationId}`
+                        : isPlacedSquare
+                          ? `${square}-${flipAnimationId}-placed`
                         : `${square}-stable`
                     }
+                    placeDelay={isPlacedSquare ? 0 : null}
                   />
                 )}
               </button>
@@ -86,6 +98,28 @@ export function Board({
       </div>
     </div>
   );
+}
+
+function getFlipMotion(
+  square: SquareIndex,
+  placedSquare: SquareIndex,
+): { axis: DiscFlipAxis; delay: number } {
+  const squareRow = Math.floor(square / 8);
+  const squareColumn = square % 8;
+  const placedRow = Math.floor(placedSquare / 8);
+  const placedColumn = placedSquare % 8;
+  const rowDelta = squareRow - placedRow;
+  const columnDelta = squareColumn - placedColumn;
+  const distance = Math.max(Math.abs(rowDelta), Math.abs(columnDelta));
+  const directionLength = Math.hypot(rowDelta, columnDelta) || 1;
+
+  return {
+    axis: {
+      x: -columnDelta / directionLength,
+      y: rowDelta / directionLength,
+    },
+    delay: 115 + Math.max(0, distance - 1) * 48,
+  };
 }
 
 function getEmptySquareLabel(
