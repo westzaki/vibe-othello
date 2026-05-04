@@ -17,6 +17,8 @@ export type ReviewGameResponse = {
   review: GameReview;
 };
 
+const reviewWorkerTimeoutMs = 3000;
+
 let nextWorkerRequestId = 0;
 
 export async function reviewGameAsync(
@@ -26,12 +28,16 @@ export async function reviewGameAsync(
   nextWorkerRequestId += 1;
 
   try {
-    const response = await reviewGameInWorker({
-      moveHistory: request.moveHistory,
-      options: request.options,
-      requestId: workerRequestId,
-      type: "reviewGame",
-    });
+    const response = await withTimeout(
+      reviewGameInWorker({
+        moveHistory: request.moveHistory,
+        options: request.options,
+        requestId: workerRequestId,
+        type: "reviewGame",
+      }),
+      reviewWorkerTimeoutMs,
+      () => cancelReviewWorkerRequest(workerRequestId),
+    );
 
     if (response.type === "gameReviewed") {
       return {
@@ -52,4 +58,28 @@ function reviewGameSync(request: ReviewGameRequest): ReviewGameResponse {
     requestId: request.requestId,
     review: reviewGame(request.moveHistory, request.options),
   };
+}
+
+function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  onTimeout: () => void,
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      onTimeout();
+      reject(new Error("Review worker timed out"));
+    }, timeoutMs);
+
+    promise.then(
+      (value) => {
+        clearTimeout(timeoutId);
+        resolve(value);
+      },
+      (error: unknown) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      },
+    );
+  });
 }
