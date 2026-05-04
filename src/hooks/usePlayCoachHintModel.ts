@@ -9,6 +9,8 @@ import {
 } from "../teacher";
 
 const coachHintPollMs = 250;
+const helpfulCoachHintVisibleMs = 5200;
+const riskCoachHintVisibleMs = 3200;
 
 type UsePlayCoachHintModelParams = {
   advantage: Advantage;
@@ -49,6 +51,7 @@ export function usePlayCoachHintModel({
     }
 
     const startedAt = getCurrentTimeMs();
+    let hideTimeoutId: number | null = null;
     const intervalId = window.setInterval(() => {
       const nextModel = createCoachHintModel({
         advantage,
@@ -67,11 +70,22 @@ export function usePlayCoachHintModel({
         key: hintKey,
         model: nextModel,
       });
+      hideTimeoutId = window.setTimeout(
+        () => {
+          setModelState((currentModelState) =>
+            currentModelState?.key === hintKey ? null : currentModelState,
+          );
+        },
+        getCoachHintVisibleMs(nextModel),
+      );
       window.clearInterval(intervalId);
     }, coachHintPollMs);
 
     return () => {
       window.clearInterval(intervalId);
+      if (hideTimeoutId !== null) {
+        window.clearTimeout(hideTimeoutId);
+      }
     };
   }, [
     advantage,
@@ -88,6 +102,12 @@ export function usePlayCoachHintModel({
 
 function getCurrentTimeMs(): number {
   return typeof performance === "undefined" ? Date.now() : performance.now();
+}
+
+function getCoachHintVisibleMs(model: CoachHintModel): number {
+  return model.hint.kind === "cornerRisk"
+    ? riskCoachHintVisibleMs
+    : helpfulCoachHintVisibleMs;
 }
 
 function createHintKey({
