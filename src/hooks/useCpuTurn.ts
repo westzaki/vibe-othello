@@ -1,11 +1,12 @@
 import { useEffect } from "react";
-import { chooseCpuMove } from "../cpu";
 import type { SquareIndex } from "../game/othello";
 import type { PlayerConfig } from "../game/players";
 import type { GameSession } from "../game/session";
+import { chooseCpuMoveAsync } from "../services/cpuMoveService";
 
 const cpuMoveDelayMs = 350;
 const cpuMoveDelayAfterPassMs = 2800;
+let nextCpuMoveRequestId = 0;
 
 type UseCpuTurnParams = {
   currentPlayer: PlayerConfig;
@@ -22,43 +23,53 @@ export function useCpuTurn({
 }: UseCpuTurnParams): boolean {
   const isCpuThinking =
     enabled && session.status === "playing" && currentPlayer.type === "cpu";
+  const cpuLevel = currentPlayer.cpuLevel;
 
   useEffect(() => {
     if (!isCpuThinking) {
       return;
     }
 
+    let cancelled = false;
+    const requestId = `cpu-move-${nextCpuMoveRequestId}`;
+    nextCpuMoveRequestId += 1;
     const moveDelayMs =
       session.notice?.type === "pass"
         ? cpuMoveDelayAfterPassMs
         : cpuMoveDelayMs;
 
     const timeoutId = window.setTimeout(() => {
-      const move = chooseCpuMove(
-        session.board,
-        session.currentDisc,
-        currentPlayer.cpuLevel,
-      );
-
-      if (move === null) {
-        if (import.meta.env.DEV) {
-          console.warn(
-            "CPU turn could not choose a legal move.",
-            {
-              cpuLevel: currentPlayer.cpuLevel,
-              currentDisc: session.currentDisc,
-            },
-          );
+      void chooseCpuMoveAsync({
+        board: session.board,
+        disc: session.currentDisc,
+        level: cpuLevel,
+        requestId,
+      }).then((response) => {
+        if (cancelled || response.requestId !== requestId) {
+          return;
         }
 
-        return;
-      }
+        if (response.move === null) {
+          if (import.meta.env.DEV) {
+            console.warn("CPU turn could not choose a legal move.", {
+              cpuLevel,
+              currentDisc: session.currentDisc,
+              requestId,
+            });
+          }
 
-      onPlaceDisc(move);
+          return;
+        }
+
+        onPlaceDisc(response.move);
+      });
     }, moveDelayMs);
 
-    return () => window.clearTimeout(timeoutId);
-  }, [currentPlayer, isCpuThinking, onPlaceDisc, session]);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [cpuLevel, isCpuThinking, onPlaceDisc, session]);
 
   return isCpuThinking;
 }
