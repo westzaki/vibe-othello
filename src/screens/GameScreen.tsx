@@ -75,56 +75,6 @@ export function GameScreen({
 
   return (
     <section className="game-shell" aria-label="Othello game">
-      <aside className="game-sidebar" aria-label="Game controls and status">
-        {mode === "practice" && (
-          <div className="practice-banner" aria-label="Practice session">
-            <span>練習モード</span>
-            <strong>ふりかえりから練習中</strong>
-            {onBackToReview !== undefined && (
-              <button
-                className="game-action"
-                onClick={onBackToReview}
-                type="button"
-              >
-                ふりかえりへ
-              </button>
-            )}
-          </div>
-        )}
-
-        {resultWinner !== null ? (
-          <GameResultOverlay
-            discCounts={game.discCounts}
-            onBackToStart={onBackToStart}
-            onOpenReview={
-              mode === "match" && canOpenReview(game) ? onOpenReview : undefined
-            }
-            onPlayAgain={onPlayAgain}
-            winner={resultWinner}
-          />
-        ) : (
-          <>
-            <GameHeader
-              currentDisc={game.currentDisc}
-              discCounts={game.discCounts}
-              endReason={game.endReason}
-              gameStatus={game.gameStatus}
-              isPlaying={game.isPlaying}
-              isUndoDisabled={game.isCpuThinking}
-              message={game.message}
-              onEndGame={onEndGame}
-              onNewGame={onBackToStart}
-              onUndo={game.undoMove}
-              showUndo={game.canUndo}
-              winner={game.winner}
-            />
-
-            <AdvantageBar advantage={advantage} />
-          </>
-        )}
-
-      </aside>
-
       <div className="game-table">
         <Board
           board={game.board}
@@ -137,8 +87,61 @@ export function GameScreen({
         />
       </div>
 
-      <div className="game-history-panel">
-        <MoveHistory moves={game.moveHistory} />
+      <div className="game-side-rail">
+        <aside className="game-sidebar" aria-label="Game controls and status">
+          {mode === "practice" && (
+            <div className="practice-banner" aria-label="Practice session">
+              <span>練習モード</span>
+              <strong>ふりかえりから練習中</strong>
+              {onBackToReview !== undefined && (
+                <button
+                  className="game-action"
+                  onClick={onBackToReview}
+                  type="button"
+                >
+                  ふりかえりへ
+                </button>
+              )}
+            </div>
+          )}
+
+          {resultWinner !== null ? (
+            <GameResultOverlay
+              discCounts={game.discCounts}
+              onBackToStart={onBackToStart}
+              onOpenReview={
+                mode === "match" && canOpenReview(game)
+                  ? onOpenReview
+                  : undefined
+              }
+              onPlayAgain={onPlayAgain}
+              winner={resultWinner}
+            />
+          ) : (
+            <>
+              <GameHeader
+                currentDisc={game.currentDisc}
+                discCounts={game.discCounts}
+                endReason={game.endReason}
+                gameStatus={game.gameStatus}
+                isPlaying={game.isPlaying}
+                isUndoDisabled={game.isCpuThinking}
+                message={game.message}
+                onEndGame={onEndGame}
+                onNewGame={onBackToStart}
+                onUndo={game.undoMove}
+                showUndo={game.canUndo}
+                winner={game.winner}
+              />
+
+              <AdvantageBar advantage={advantage} />
+            </>
+          )}
+        </aside>
+
+        <div className="game-history-panel">
+          <MoveHistory moves={game.moveHistory} />
+        </div>
       </div>
 
       {passNotice !== null &&

@@ -33,40 +33,47 @@ export function GameHeader({
   return (
     <div className="game-heading">
       <h1 id="game-title">Vibe Othello</h1>
-      <div className="score-row" aria-label="Current score">
-        <span className="score-chip score-chip--black">
-          黒
-          <strong>{discCounts.black}</strong>
-        </span>
-        <span className="score-chip score-chip--white">
-          白
-          <strong>{discCounts.white}</strong>
-        </span>
-      </div>
-      <div className="game-status-row">
-        <p className="session-status">
-          {getStatusLabel(gameStatus, endReason)}
-        </p>
-        {gameStatus === "ended" &&
-        endReason === "completed" &&
-        winner !== null ? (
-          <p className="result-status">{getResultLabel(winner, discCounts)}</p>
-        ) : gameStatus === "ended" && endReason === "abandoned" ? (
-          <p className="result-status">Match stopped</p>
-        ) : (
-          <p className="turn-status">
-            <span className={`turn-disc turn-disc--${currentDisc}`}>
-              {formatDisc(currentDisc)}
-            </span>
-            の番
+      <div className="game-heading__status">
+        <div className="score-row" aria-label="Current score">
+          <span className="score-chip score-chip--black">
+            黒
+            <strong>{discCounts.black}</strong>
+          </span>
+          <span className="score-chip score-chip--white">
+            白
+            <strong>{discCounts.white}</strong>
+          </span>
+        </div>
+        <div className="game-status-row">
+          {gameStatus !== "playing" && (
+            <p className="session-status">
+              {getStatusLabel(gameStatus, endReason)}
+            </p>
+          )}
+          {gameStatus === "ended" &&
+          endReason === "completed" &&
+          winner !== null ? (
+            <p className="result-status">
+              {getResultLabel(winner, discCounts)}
+            </p>
+          ) : gameStatus === "ended" && endReason === "abandoned" ? (
+            <p className="result-status">Match stopped</p>
+          ) : (
+            <p className="turn-status">
+              <span className={`turn-disc turn-disc--${currentDisc}`}>
+                {formatDisc(currentDisc)}
+              </span>
+              の番
+            </p>
+          )}
+        </div>
+        {message !== null && (
+          <p className="game-message" role="status">
+            {message}
           </p>
         )}
       </div>
-      {message !== null && (
-        <p className="game-message" role="status">
-          {message}
-        </p>
-      )}
+
       <div className="game-actions" aria-label="Game controls">
         {isPlaying ? (
           <>

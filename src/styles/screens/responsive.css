@@ -8,22 +8,36 @@
   .game-shell {
     grid-template-columns: 1fr;
     grid-template-areas:
-      "sidebar"
       "board"
-      "history";
-    gap: 14px;
+      "rail";
+    gap: 12px;
+  }
+
+  .game-side-rail {
+    gap: 12px;
+    padding: 12px;
   }
 
   .game-sidebar {
-    padding: 14px;
+    gap: 0;
   }
 
   .game-table {
-    padding: 10px;
+    border-radius: 22px;
+    padding: 8px;
   }
 
   .game-heading {
     text-align: center;
+  }
+
+  .game-heading h1 {
+    font-size: clamp(1.38rem, 8vw, 1.72rem);
+  }
+
+  .game-heading__status {
+    gap: 8px;
+    padding-block: 12px;
   }
 
   .game-status-row,
@@ -32,7 +46,7 @@
   }
 
   .game-action {
-    flex: 1 1 128px;
+    flex: 1 1 124px;
   }
 
   h1 {
@@ -129,7 +143,23 @@
   }
 
   .board-frame {
-    width: min(100%, 560px);
+    width: 100%;
+    border-radius: 20px;
+    padding: clamp(8px, 3vw, 14px);
+  }
+
+  .board-coordinate-shell {
+    grid-template-columns: clamp(16px, 5vw, 20px) 1fr;
+    grid-template-rows: clamp(16px, 5vw, 20px) 1fr;
+    gap: 4px;
+  }
+
+  .move-history__list {
+    height: 132px;
+  }
+
+  .move-history__empty {
+    min-height: 132px;
   }
 
   .review-layout {
@@ -158,13 +188,17 @@
   .game-shell {
     grid-template-columns: 1fr;
     grid-template-areas:
-      "sidebar"
       "board"
-      "history";
+      "rail";
+    width: min(100%, 680px);
   }
 
   .game-sidebar {
     align-items: start;
+  }
+
+  .game-table {
+    padding: 12px;
   }
 
   .review-layout {
