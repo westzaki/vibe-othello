@@ -39,7 +39,10 @@ export function GameScreen({
   onPlayAgain,
   practiceFeedbackText = null,
 }: GameScreenProps) {
-  const advantage = useMemo(() => calculateAdvantage(game.board), [game.board]);
+  const advantage = useMemo(
+    () => calculateAdvantage(game.board, game.currentDisc),
+    [game.board, game.currentDisc],
+  );
   const { isPassNoticeVisible, passNotice } = usePassNoticeVisibility({
     lastMove: game.lastMove,
     moveCount: game.moveHistory.length,

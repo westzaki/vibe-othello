@@ -35,4 +35,14 @@ describe("advantage calculation", () => {
       whitePercent: 0,
     });
   });
+
+  it("uses exact reading near the end instead of strategic board weights", () => {
+    const board = createBoardFixture({ 0: null, 7: "white" }, "black");
+
+    expect(calculateAdvantage(board, "white")).toEqual({
+      blackPercent: 100,
+      leadingDisc: "black",
+      whitePercent: 0,
+    });
+  });
 });
