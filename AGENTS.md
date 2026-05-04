@@ -264,87 +264,12 @@ Do not add new dependencies unless explicitly approved by the user.
 
 Do not add React Router unless explicitly approved.
 
-## Architecture Principles
+## Architecture Reference
 
-The application should be designed so that the Othello domain logic can be reused outside React.
+Architecture boundaries are defined in:
 
-Separate the code into major areas:
+- docs/architecture.md
 
-1. React UI layer
-2. Vanilla TypeScript Othello rules layer
-3. Vanilla TypeScript session/game-flow layer
-4. Vanilla TypeScript CPU / AI layer
-5. Vanilla TypeScript teacher / coach review layer
-6. UI-side audio and animation layer
+Before changing game/session, CPU, teacher/review, services, workers, or screen boundaries, read docs/architecture.md and keep the dependency direction aligned with it.
 
-The exact file structure does not need to be perfect from the beginning. Start simple, then refactor as responsibilities become clear.
-
-## Dependency Direction
-
-Keep dependency direction simple.
-
-React UI and React hooks may import vanilla TypeScript game modules.
-
-CPU logic may import Othello rules and reusable evaluation helpers.
-
-Teacher / coach logic may import Othello rules, CPU evaluation helpers, and move history types.
-
-Othello rules must not import React, React components, browser APIs, or DOM APIs.
-
-CPU strategy and evaluation logic should not import React or React components.
-
-The dependency direction should be:
-
-```text
-React UI / hooks -> game session
-React UI / hooks -> CPU public API
-React UI / hooks -> teacher review public API
-CPU logic -> game rules
-teacher logic -> game rules / CPU evaluation helpers
-game rules -> no React, no browser APIs, no DOM dependencies
-```
-
-## Expected App Structure
-
-The app is evolving into a small browser game with multiple screens and game phases.
-
-Use this mental model:
-
-- Start screen:
-  - Choose 1P or 2P mode
-  - In 1P mode, choose CPU level
-  - In 1P mode, choose the human disc color: Black or White
-  - If the human chooses Black, the human plays first
-  - If the human chooses White, the CPU plays Black and moves first
-
-- Game screen:
-  - Contains both the active playing state and the completed result phase
-  - The board should remain in the same central position when the game ends
-  - Do not navigate to a separate result screen that hides or relocates the final board
-  - The completed result should be treated as a phase inside the Game screen, not as a separate app-level screen
-
-- Review screen:
-  - Shows teacher/coach review after a completed game
-  - Uses completed game history
-  - Should feel encouraging and educational
-  - Allows move playback and board inspection
-  - Selecting reviewed moves should not mutate the completed game session
-
-- Practice screen:
-  - Allows the user to restart from a reviewed position
-  - Uses a separate practice game session
-  - Must not mutate or overwrite the completed match being reviewed
-  - Should allow returning to the Review screen when appropriate
-
-Major app-level screens should be:
-```text
-start -> game -> review -> practice
-```
-Important distinction:
-
-- result = a phase inside Game screen
-- practice = a separate app-level screen/session
-
-The completed match and the practice session should be kept separate.
-
-Practice mode should start from a reviewed position by creating a new playable session from a board snapshot, such as `boardBefore`, instead of rewinding or mutating the completed match.
+Keep AGENTS.md focused on durable development rules. Put architecture-specific detail in docs/architecture.md instead of duplicating it here.
