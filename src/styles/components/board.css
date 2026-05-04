@@ -1,13 +1,18 @@
 .board-frame {
   width: min(100%, 680px);
   padding: clamp(12px, 2.8vw, 22px);
-  border: 1px solid rgba(138, 104, 71, 0.4);
-  border-radius: 28px;
+  border: 1px solid rgba(138, 104, 71, 0.34);
+  border-radius: var(--radius-xl);
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.18), transparent 34%),
-    linear-gradient(135deg, #b28b62, #805a39 43%, #cda77a 100%);
+    linear-gradient(
+      135deg,
+      var(--color-board-frame-light),
+      var(--color-board-frame-dark) 43%,
+      #d1ac82 100%
+    );
   box-shadow:
-    0 28px 58px rgba(105, 85, 69, 0.21),
+    var(--shadow-board),
     0 0 0 8px rgba(255, 255, 255, 0.64),
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
     inset 0 -18px 26px rgba(91, 58, 34, 0.2);
@@ -30,7 +35,7 @@
 .board-column-labels,
 .board-row-labels {
   display: grid;
-  color: rgba(255, 248, 232, 0.94);
+  color: var(--color-board-coordinate);
   font-size: clamp(0.62rem, 1.8vw, 0.82rem);
   font-weight: 900;
   line-height: 1;
@@ -65,9 +70,9 @@
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
   overflow: hidden;
-  border: 2px solid #24533f;
-  border-radius: 14px;
-  background: #1f4a38;
+  border: 2px solid var(--color-board-edge);
+  border-radius: var(--radius-sm);
+  background: var(--color-board-edge);
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 18px 36px rgba(255, 255, 255, 0.08),
@@ -78,13 +83,14 @@
   position: relative;
   aspect-ratio: 1;
   padding: 0;
-  border-right: 1px solid rgba(31, 74, 56, 0.72);
+  border-right: 1px solid var(--color-board-line);
   border-top: 0;
   border-left: 0;
-  border-bottom: 1px solid rgba(31, 74, 56, 0.72);
+  border-bottom: 1px solid var(--color-board-line);
   border-radius: 0;
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.14), transparent 44%), #55bd8e;
+    linear-gradient(145deg, rgba(255, 255, 255, 0.14), transparent 44%),
+    var(--color-board-green);
   cursor: default;
   perspective: 520px;
   appearance: none;
@@ -97,13 +103,14 @@
 
 .board-square:focus-visible {
   z-index: 1;
-  outline: 3px solid #f0c86b;
+  outline: 3px solid var(--focus-ring);
   outline-offset: -3px;
 }
 
 .board-square--legal:hover {
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.24), transparent 44%), #5fc999;
+    linear-gradient(145deg, rgba(255, 255, 255, 0.24), transparent 44%),
+    var(--color-board-green-hover);
 }
 
 .board-square:nth-child(8n) {
@@ -121,7 +128,7 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: rgba(255, 248, 222, 0.86);
+  background: var(--color-honey-wash);
   box-shadow:
     0 0 0 4px rgba(255, 210, 122, 0.24),
     0 0 14px rgba(255, 210, 122, 0.38);
@@ -134,11 +141,11 @@
 }
 
 .board-square--last-move .disc {
-  outline: 3px solid #f0c86b;
+  outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
   box-shadow:
     0 0 0 1px rgba(32, 23, 12, 0.8),
-    0 0 22px rgba(240, 200, 107, 0.62),
+    0 0 22px rgba(240, 200, 107, 0.66),
     inset -8px -10px 14px rgba(0, 0, 0, 0.28),
     inset 5px 6px 10px rgba(255, 255, 255, 0.2),
     0 8px 14px rgba(0, 0, 0, 0.28);
@@ -177,18 +184,18 @@
 .disc--black {
   background: radial-gradient(
     circle at 35% 28%,
-    #60645e 0%,
-    #20231f 36%,
-    #090a09 100%
+    var(--color-disc-black-a) 0%,
+    var(--color-disc-black-b) 36%,
+    var(--color-disc-black-c) 100%
   );
 }
 
 .disc--white {
   background: radial-gradient(
     circle at 35% 28%,
-    #ffffff 0%,
-    #eee6d6 48%,
-    #c8baa1 100%
+    var(--color-disc-white-a) 0%,
+    var(--color-disc-white-b) 48%,
+    var(--color-disc-white-c) 100%
   );
 }
 

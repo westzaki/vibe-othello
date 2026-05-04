@@ -14,7 +14,7 @@
 
 .move-history__title {
   margin: 0;
-  color: #7770b8;
+  color: var(--color-accent);
   font-size: 0.76rem;
   font-weight: 950;
   text-transform: uppercase;
@@ -25,9 +25,9 @@
   min-width: 28px;
   min-height: 24px;
   place-items: center;
-  border: 1px solid rgba(255, 204, 112, 0.5);
-  border-radius: 999px;
-  color: #7d5d19;
+  border: 1px solid var(--color-border-honey);
+  border-radius: var(--radius-round);
+  color: var(--color-honey-strong);
   background:
     linear-gradient(180deg, rgba(255, 251, 235, 0.98), rgba(255, 248, 222, 0.88)),
     rgba(255, 248, 222, 0.9);
@@ -40,7 +40,7 @@
   min-height: 120px;
   align-content: start;
   margin: 0;
-  color: #777384;
+  color: var(--color-text-muted);
   font-size: 0.84rem;
   font-weight: 800;
 }
@@ -61,8 +61,8 @@
   align-items: center;
   gap: 9px;
   min-height: 36px;
-  border: 1px solid rgba(184, 176, 225, 0.22);
-  border-radius: 15px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   padding: 7px 9px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 251, 244, 0.5)),
@@ -79,18 +79,18 @@
 .move-history__disc--black {
   background: radial-gradient(
     circle at 35% 28%,
-    #60645e 0%,
-    #20231f 36%,
-    #090a09 100%
+    var(--color-disc-black-a) 0%,
+    var(--color-disc-black-b) 36%,
+    var(--color-disc-black-c) 100%
   );
 }
 
 .move-history__disc--white {
   background: radial-gradient(
     circle at 35% 28%,
-    #ffffff 0%,
-    #eee6d6 48%,
-    #c8baa1 100%
+    var(--color-disc-white-a) 0%,
+    var(--color-disc-white-b) 48%,
+    var(--color-disc-white-c) 100%
   );
 }
 
@@ -104,17 +104,17 @@
 
 .move-history__move-number,
 .move-history__flips {
-  color: #777384;
+  color: var(--color-text-muted);
   font-size: 0.76rem;
   font-weight: 850;
 }
 
 .move-history__square {
-  color: #34323e;
+  color: var(--color-text-strong);
   font-size: 0.92rem;
   font-weight: 950;
 }
 
 .move-history__flips {
-  color: #7d5d19;
+  color: var(--color-honey-strong);
 }
