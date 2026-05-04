@@ -58,6 +58,7 @@ export type OthelloGameController = {
   message: string | null;
   moveHistory: MoveRecord[];
   notice: GameSessionNotice | null;
+  placedSquare: SquareIndex | null;
   players: PlayerSettings;
   winner: Winner | null;
   endGame: () => void;
@@ -84,6 +85,7 @@ export function useOthelloGame({
     clearAnimationState,
     flipAnimationId,
     flippedSquares,
+    placedSquare,
     recordMoveAnimation,
   } = useMoveAnimationState();
   const legalMoves = useMemo(() => getSessionLegalMoves(session), [session]);
@@ -120,6 +122,7 @@ export function useOthelloGame({
     enabled: enabled && soundEnabled,
     flipAnimationId,
     flippedSquares,
+    placedSquare,
   });
 
   function handleReplaceSession(nextSession: GameSession) {
@@ -205,6 +208,7 @@ export function useOthelloGame({
     message: formatGameSessionNotice(session.notice),
     moveHistory: session.moveHistory,
     notice: session.notice,
+    placedSquare,
     players,
     winner: session.winner,
     endGame: handleEndGame,

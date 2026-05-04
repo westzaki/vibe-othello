@@ -2,19 +2,21 @@ import { useEffect } from "react";
 import { playFlipDiscSound, playPlaceDiscSound } from "../audio/gameSounds";
 import type { SquareIndex } from "../game/othello";
 
-const firstFlipSoundDelayMs = 110;
-const flipSoundDelayMs = 70;
+const firstFlipSoundDelayMs = 115;
+const flipSoundDelayMs = 48;
 
 type UseMoveSoundsParams = {
   enabled: boolean;
   flipAnimationId: number;
   flippedSquares: SquareIndex[];
+  placedSquare: SquareIndex | null;
 };
 
 export function useMoveSounds({
   enabled,
   flipAnimationId,
   flippedSquares,
+  placedSquare,
 }: UseMoveSoundsParams) {
   useEffect(() => {
     if (!enabled || flipAnimationId === 0) {
@@ -23,10 +25,10 @@ export function useMoveSounds({
 
     playPlaceDiscSound();
 
-    const timeoutIds = flippedSquares.map((_, index) =>
+    const timeoutIds = flippedSquares.map((square, index) =>
       window.setTimeout(
         playFlipDiscSound,
-        firstFlipSoundDelayMs + index * flipSoundDelayMs,
+        getFlipSoundDelay(square, placedSquare, index),
       ),
     );
 
@@ -35,5 +37,26 @@ export function useMoveSounds({
         window.clearTimeout(timeoutId);
       }
     };
-  }, [enabled, flipAnimationId, flippedSquares]);
+  }, [enabled, flipAnimationId, flippedSquares, placedSquare]);
+}
+
+function getFlipSoundDelay(
+  square: SquareIndex,
+  placedSquare: SquareIndex | null,
+  fallbackIndex: number,
+): number {
+  if (placedSquare === null) {
+    return firstFlipSoundDelayMs + fallbackIndex * flipSoundDelayMs;
+  }
+
+  const squareRow = Math.floor(square / 8);
+  const squareColumn = square % 8;
+  const placedRow = Math.floor(placedSquare / 8);
+  const placedColumn = placedSquare % 8;
+  const distance = Math.max(
+    Math.abs(squareRow - placedRow),
+    Math.abs(squareColumn - placedColumn),
+  );
+
+  return firstFlipSoundDelayMs + Math.max(0, distance - 1) * flipSoundDelayMs;
 }
