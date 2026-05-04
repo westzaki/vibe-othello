@@ -39,6 +39,7 @@ const goodMoveScoreGap = 8;
 const badMoveScoreGap = 28;
 const exactEndgameReviewEmptyThreshold = 10;
 const exactEndgameReviewScoreWeight = 10;
+const cornerGivenScorePenalty = 90;
 const mobilitySwingThreshold = 3;
 const dangerSquaresByCorner = new Map<SquareIndex, SquareIndex[]>([
   [0, [1, 8, 9]],
@@ -101,17 +102,21 @@ function reviewMove(
     searchDepth,
   );
   const candidateMoves = moveScores.scores.map<CandidateMoveReview>(
-    ({ move: square, score }, index) => ({
-      square,
-      score,
-      rank: index + 1,
-      reasons: getCandidateReasons({
-        boardAfter: move.boardAfter,
-        boardBefore: move.boardBefore,
-        disc: move.disc,
+    ({ move: square, score }, index) => {
+      const boardAfter = placeDisc(move.boardBefore, square, move.disc);
+
+      return {
         square,
-      }),
-    }),
+        score,
+        rank: index + 1,
+        reasons: getCandidateReasons({
+          boardAfter,
+          boardBefore: move.boardBefore,
+          disc: move.disc,
+          square,
+        }),
+      };
+    },
   );
   const bestCandidate = candidateMoves[0] ?? null;
   const playedCandidate =
@@ -158,10 +163,35 @@ function getReviewMoveScores(
 
   return {
     evaluationSource: "minimax",
-    scores: getMinimaxMoveScores(board, disc, {
-      searchDepth,
-    }),
+    scores: getTeacherAdjustedMoveScores(
+      board,
+      disc,
+      getMinimaxMoveScores(board, disc, {
+        searchDepth,
+      }),
+    ),
   };
+}
+
+function getTeacherAdjustedMoveScores(
+  board: Board,
+  disc: DiscColor,
+  moveScores: MinimaxMoveScore[],
+): MinimaxMoveScore[] {
+  return moveScores
+    .map(({ move, score }) => {
+      const boardAfter = placeDisc(board, move, disc);
+
+      return {
+        move,
+        score:
+          score -
+          (newlyGivesCorner(board, boardAfter, disc)
+            ? cornerGivenScorePenalty
+            : 0),
+      };
+    })
+    .sort((firstMove, secondMove) => secondMove.score - firstMove.score);
 }
 
 function getExactEndgameMoveScores(
@@ -190,6 +220,10 @@ function getCandidateReasons(context: ReviewContext): MoveReviewReason[] {
 
   if (isDangerSquare(context.boardBefore, context.square)) {
     reasons.push("dangerSquare");
+  }
+
+  if (newlyGivesCorner(context.boardBefore, context.boardAfter, context.disc)) {
+    reasons.push("cornerGiven");
   }
 
   return reasons;
