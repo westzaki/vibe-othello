@@ -23,6 +23,7 @@ describe("createReviewLesson", () => {
         badMoves: [turningPoint],
         goodMoves: [niceMove],
       }),
+      "loss",
     );
 
     expect(lesson.niceMove).toBe(niceMove);
@@ -48,6 +49,7 @@ describe("createReviewLesson", () => {
         badMoves: [],
         goodMoves: [niceMove],
       }),
+      "loss",
     );
 
     expect(lesson.turningPointCandidate).toBeNull();
@@ -61,6 +63,7 @@ describe("createReviewLesson", () => {
         badMoves: [],
         goodMoves: [],
       }),
+      "loss",
     );
 
     expect(lesson.niceMove).toBeNull();
@@ -82,6 +85,7 @@ describe("createReviewLesson", () => {
         badMoves: [],
         goodMoves: [earlyMove],
       }),
+      "loss",
     );
 
     expect(lesson.niceMove).toBeNull();
@@ -100,12 +104,14 @@ describe("createReviewLesson", () => {
         badMoves: [turningPoint],
         goodMoves: [],
       }),
+      "loss",
     );
     const withoutPractice = createReviewLesson(
       createGameReview({
         badMoves: [],
         goodMoves: [],
       }),
+      "loss",
     );
 
     expect(withPractice.cards[2].bodyText).toContain("53手目の局面");
@@ -143,6 +149,7 @@ describe("createReviewLesson", () => {
         badMoves: [scoreDrop, turningPoint],
         goodMoves: [],
       }),
+      "loss",
     );
 
     expect(lesson.turningPointCandidate).toBe(turningPoint);
@@ -163,12 +170,78 @@ describe("createReviewLesson", () => {
         badMoves: [turningPoint],
         goodMoves: [],
       }),
+      "loss",
     );
 
     expect(lesson.turningPointCandidate).toBe(turningPoint);
     expect(lesson.practiceTarget).toBeNull();
     expect(lesson.cards[2].move).toBeNull();
     expect(lesson.cards[2].actionLabel).toBeUndefined();
+  });
+
+  it("creates a win lesson centered on reproducible good decisions", () => {
+    const niceMove = createReviewedMove({
+      kind: "good",
+      moveNumber: 18,
+      reasons: ["mobilityGain"],
+      square: 26,
+    });
+    const turningPoint = createReviewedMove({
+      bestSquare: 45,
+      kind: "bad",
+      moveNumber: 30,
+      square: 44,
+    });
+
+    const lesson = createReviewLesson(
+      createGameReview({
+        badMoves: [turningPoint],
+        goodMoves: [niceMove],
+      }),
+      "win",
+    );
+
+    expect(lesson.cards.map((card) => card.title)).toEqual([
+      "勝てたポイント",
+      "次も使ってみよう",
+    ]);
+    expect(lesson.cards.map((card) => card.title)).not.toContain(
+      "ここが分かれ道だったかも",
+    );
+    expect(lesson.cards.map((card) => card.title)).not.toContain(
+      "今日のナイス",
+    );
+    expect(lesson.niceMove).toBe(niceMove);
+    expect(lesson.turningPointCandidate).toBe(niceMove);
+    expect(lesson.practiceTarget).toBeNull();
+    expect(lesson.cards[1].move).toBeNull();
+    expect(lesson.cards[1].actionLabel).toBeUndefined();
+  });
+
+  it("keeps the learning lesson for draw with gentler one-more-step copy", () => {
+    const turningPoint = createReviewedMove({
+      bestSquare: 45,
+      kind: "bad",
+      moveNumber: 30,
+      square: 44,
+    });
+
+    const lesson = createReviewLesson(
+      createGameReview({
+        badMoves: [turningPoint],
+        goodMoves: [],
+      }),
+      "draw",
+    );
+
+    expect(lesson.cards.map((card) => card.title)).toEqual([
+      "今日のナイス",
+      "ここが分かれ道だったかも",
+      "ここから練習",
+    ]);
+    expect(lesson.cards[1].bodyText).toContain("一歩抜け出すポイント");
+    expect(lesson.practiceTarget).toBe(turningPoint);
+    expect(lesson.cards[2].actionLabel).toBe("この局面から練習する");
   });
 });
 

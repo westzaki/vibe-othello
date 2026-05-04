@@ -45,5 +45,6 @@ export type {
   ReviewedMove,
   ReviewGameOptions,
   ReviewLesson,
+  ReviewOutcome,
   TurningPointAnalysisConfig,
 } from "./reviewTypes";

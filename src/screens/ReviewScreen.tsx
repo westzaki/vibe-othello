@@ -22,7 +22,7 @@ import {
   createPracticeOptionsFromMoveNumber,
   createReviewPlaybackDisplay,
 } from "./review/reviewPlayback";
-import { getReviewedDisc } from "./review/reviewPlayers";
+import { getReviewedDisc, getReviewOutcome } from "./review/reviewPlayers";
 
 type ReviewScreenProps = {
   currentMoveNumber: number;
@@ -45,6 +45,7 @@ export function ReviewScreen({
   onStartPractice,
 }: ReviewScreenProps) {
   const reviewedDisc = getReviewedDisc(game.players);
+  const reviewOutcome = getReviewOutcome(reviewedDisc, game.winner);
   const playbackBoards = useMemo(
     () => createPlaybackBoards(game.moveHistory),
     [game.moveHistory],
@@ -66,8 +67,11 @@ export function ReviewScreen({
     [review],
   );
   const lesson = useMemo(
-    () => (review === null ? null : createReviewLesson(review)),
-    [review],
+    () =>
+      review === null || reviewOutcome === null
+        ? null
+        : createReviewLesson(review, reviewOutcome),
+    [review, reviewOutcome],
   );
   const selectableMoves = useMemo(() => {
     if (lesson === null) {
@@ -136,7 +140,7 @@ export function ReviewScreen({
 
         {review === null || messages === null || lesson === null ? (
           <p className="review-panel__status">
-            ふたり対戦のふりかえりは、今はお休み中です
+            ふたり対戦のふりかえりは、今はお休み中です。1人でCPUと遊んだあとに、コーチがポイントを見つけるよ。
           </p>
         ) : (
           <div className="review-layout">
