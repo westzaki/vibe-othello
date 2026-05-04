@@ -12,27 +12,27 @@
   width: 100%;
   justify-items: stretch;
   gap: clamp(18px, 2.4vw, 28px);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-paper-border);
   border-radius: var(--radius-2xl);
   padding: clamp(18px, 3vw, 34px);
   text-align: left;
   background:
     radial-gradient(
       circle at 14% 0%,
-      rgba(117, 190, 169, 0.1),
+      rgba(243, 185, 79, 0.14),
       transparent 16rem
     ),
     radial-gradient(
       circle at 92% 10%,
-      rgba(184, 176, 225, 0.12),
+      rgba(88, 183, 127, 0.1),
       transparent 16rem
     ),
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.96),
-      rgba(255, 252, 246, 0.94)
+      rgba(255, 250, 242, 0.98),
+      rgba(255, 240, 207, 0.82)
     ),
-    var(--color-surface);
+    var(--color-paper);
   box-shadow:
     var(--shadow-hairline),
     var(--shadow-panel);
@@ -99,19 +99,19 @@
   justify-items: stretch;
   gap: 14px;
   min-width: 0;
-  border: 1px solid var(--color-border-mint);
+  border: 1px solid color-mix(in srgb, var(--color-paper-border) 82%, transparent);
   border-radius: var(--radius-lg);
   padding: clamp(14px, 2vw, 20px);
   background:
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.9),
-      rgba(241, 251, 246, 0.72)
+      rgba(255, 250, 242, 0.9),
+      rgba(255, 240, 210, 0.62)
     ),
-    var(--color-surface-glass);
+    var(--color-paper-soft);
   box-shadow:
     var(--shadow-hairline),
-    0 14px 34px rgba(89, 129, 118, 0.12);
+    0 14px 30px rgba(118, 86, 55, 0.1);
 }
 
 .review-board-panel__header {
@@ -149,23 +149,23 @@
   display: grid;
   gap: 12px;
   min-width: 0;
-  border: 1px solid var(--color-border);
+  border: 1px solid color-mix(in srgb, var(--color-paper-border) 72%, transparent);
   border-radius: var(--radius-lg);
   padding: clamp(14px, 2vw, 18px);
   background:
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.92),
-      rgba(255, 252, 246, 0.82)
+      rgba(255, 250, 242, 0.94),
+      rgba(255, 246, 226, 0.78)
     ),
-    rgba(255, 255, 255, 0.74);
+    var(--color-paper-soft);
   box-shadow:
     var(--shadow-hairline),
     0 12px 26px rgba(118, 100, 88, 0.08);
 }
 
 .review-summary__section--turningPoint {
-  border-color: rgba(240, 200, 107, 0.42);
+  border-color: var(--color-border-honey);
   background:
     linear-gradient(
       180deg,
@@ -176,7 +176,7 @@
 }
 
 .review-summary__section--practiceTarget {
-  border-color: rgba(117, 190, 169, 0.44);
+  border-color: color-mix(in srgb, var(--color-board-green) 42%, var(--color-paper-border));
 }
 
 .review-summary__title {
@@ -184,16 +184,16 @@
   margin: 0;
   border-radius: 999px;
   padding: 5px 11px;
-  color: var(--color-accent-strong);
-  background: var(--color-accent-wash);
+  color: var(--color-bibi-cocoa);
+  background: var(--color-bibi-honey-soft);
   font-size: 0.92rem;
   font-weight: 950;
   line-height: 1.35;
 }
 
 .review-summary__section--niceMove .review-summary__title {
-  color: var(--color-mint-strong);
-  background: var(--color-mint-wash);
+  color: var(--color-board-green-dark);
+  background: color-mix(in srgb, var(--color-board-green) 16%, var(--color-paper-soft));
 }
 
 .review-summary__section--turningPoint .review-summary__title {
@@ -202,8 +202,8 @@
 }
 
 .review-summary__section--practiceTarget .review-summary__title {
-  color: var(--color-mint-strong);
-  background: var(--color-mint-wash);
+  color: var(--color-board-green-dark);
+  background: color-mix(in srgb, var(--color-board-green) 16%, var(--color-paper-soft));
 }
 
 .review-summary__list {
@@ -225,10 +225,10 @@
 .review-summary__item,
 .review-summary__advice,
 .review-summary__empty {
-  border: 1px solid var(--color-border);
+  border: 1px solid color-mix(in srgb, var(--color-paper-border) 68%, transparent);
   border-radius: var(--radius-md);
   padding: 12px;
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 250, 242, 0.78);
 }
 
 .review-summary__item {
@@ -246,14 +246,14 @@
 
 .review-summary__item:hover,
 .review-summary__item--selected {
-  border-color: rgba(117, 190, 169, 0.62);
-  background: rgba(233, 249, 243, 0.78);
+  border-color: var(--color-selected-border);
+  background: var(--color-selected-bg);
 }
 
 .review-summary__item--selected {
   box-shadow:
-    inset 4px 0 0 #75bea9,
-    0 0 0 1px rgba(117, 190, 169, 0.28);
+    inset 4px 0 0 var(--color-selected-mark),
+    0 0 0 1px rgba(201, 130, 49, 0.18);
 }
 
 .review-summary__item:focus-visible {
@@ -287,13 +287,27 @@
 }
 
 .review-summary__suggestion {
-  color: var(--color-mint-strong);
+  color: var(--color-board-green-dark);
 }
 
 .review-summary__action {
   width: 100%;
   min-height: 50px;
   margin-block-start: 2px;
+  color: var(--color-cta-text);
+  border-color: var(--color-cta-border);
+  background: var(--color-cta-bg);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.36),
+    inset 0 -3px 0 rgba(95, 57, 18, 0.18),
+    0 14px 24px rgba(201, 130, 49, 0.22);
+  text-shadow: 0 1px 0 rgba(255, 248, 234, 0.48);
+}
+
+.review-summary__action:hover:not(:disabled) {
+  color: var(--color-cta-text);
+  border-color: var(--color-cta-border);
+  background: var(--color-cta-bg-hover);
 }
 
 .review-comparison {
@@ -302,7 +316,7 @@
   border: 1px solid rgba(240, 200, 107, 0.34);
   border-radius: var(--radius-sm);
   padding: 10px;
-  background: rgba(255, 250, 235, 0.64);
+  background: var(--color-bibi-honey-soft);
 }
 
 .review-comparison__moves {
@@ -317,7 +331,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xs);
   padding: 10px;
-  background: var(--color-surface-glass);
+  background: var(--color-paper-soft);
 }
 
 .review-comparison__moves span {
@@ -346,7 +360,7 @@
 
 .review-panel__actions {
   justify-content: center;
-  border-block-start: 1px solid var(--color-border);
+  border-block-start: 1px solid color-mix(in srgb, var(--color-paper-border) 58%, transparent);
   padding-block: 18px 0;
 }
 
@@ -357,7 +371,7 @@
 .review-board {
   width: min(100%, 500px);
   min-width: 0;
-  border: clamp(7px, 1.4vw, 10px) solid var(--color-board-frame);
+  border: clamp(7px, 1.4vw, 10px) solid color-mix(in srgb, var(--color-wood) 78%, var(--color-bibi-cocoa));
   border-radius: var(--radius-lg);
   padding: clamp(7px, 1.4vw, 10px);
   color: var(--color-board-coordinate);
@@ -365,9 +379,9 @@
     linear-gradient(145deg, rgba(255, 255, 255, 0.16), transparent 34%),
     linear-gradient(
       135deg,
-      var(--color-board-frame-light),
-      var(--color-board-frame-dark) 42%,
-      #d1ac82 100%
+      color-mix(in srgb, var(--color-wood-soft) 74%, white),
+      color-mix(in srgb, var(--color-wood) 78%, var(--color-bibi-cocoa)) 42%,
+      color-mix(in srgb, var(--color-wood-dark) 72%, var(--color-wood)) 100%
     );
   box-shadow:
     0 18px 38px rgba(105, 85, 69, 0.16),
