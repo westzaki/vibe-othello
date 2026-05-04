@@ -23,21 +23,31 @@ export function StartScreen({
 
   return (
     <section className="start-screen" aria-labelledby="start-title">
-      <div className="start-screen__header">
-        <h1 id="start-title">Vibe オセロ</h1>
-        <p className="start-screen__lead">
-          あそびかたをえらんで対局をはじめよう
-        </p>
-      </div>
+      <div className="start-screen__hero">
+        <div className="start-screen__header">
+          <p className="start-screen__eyebrow">やさしく学べるオセロ</p>
+          <h1 id="start-title">Vibe オセロ</h1>
+          <p className="start-screen__lead">
+            相手にいい手をあげない一手を、あそびながら見つけよう
+          </p>
+        </div>
 
-      <div className="start-screen__board-preview" aria-hidden="true">
-        <span className="start-screen__disc start-screen__disc--black" />
-        <span className="start-screen__disc start-screen__disc--white" />
-        <span className="start-screen__disc start-screen__disc--white" />
-        <span className="start-screen__disc start-screen__disc--black" />
+        <div className="start-screen__board-preview" aria-hidden="true">
+          <span className="start-screen__disc start-screen__disc--black" />
+          <span className="start-screen__disc start-screen__disc--white" />
+          <span className="start-screen__disc start-screen__disc--white" />
+          <span className="start-screen__disc start-screen__disc--black" />
+        </div>
       </div>
 
       <div className="start-panel" aria-label="Match setup">
+        <div className="start-panel__header">
+          <p className="start-panel__eyebrow">対局の準備</p>
+          <p className="start-panel__lead">
+            あそびかたと色をえらんだら、すぐにはじめられます
+          </p>
+        </div>
+
         <div className="start-panel__section">
           <h2 className="start-panel__title">
             <span className="start-panel__step">1</span>
@@ -131,14 +141,16 @@ export function StartScreen({
           </div>
         </div>
 
-        <button
-          className="game-action game-action--primary start-panel__start"
-          onClick={() => onStart(mode, cpuLevel, humanDisc)}
-          type="button"
-        >
-          <span className="start-panel__start-step">4</span>
-          スタート
-        </button>
+        <div className="start-panel__action">
+          <button
+            className="game-action game-action--primary start-panel__start"
+            onClick={() => onStart(mode, cpuLevel, humanDisc)}
+            type="button"
+          >
+            <span className="start-panel__start-step">4</span>
+            スタート
+          </button>
+        </div>
       </div>
     </section>
   );
