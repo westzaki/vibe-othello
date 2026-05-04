@@ -19,6 +19,7 @@ describe("review service", () => {
   beforeEach(() => {
     cancelReviewWorkerRequestMock.mockReset();
     reviewGameInWorkerMock.mockReset();
+    vi.useRealTimers();
   });
 
   it("returns a worker review through an async app-facing API", async () => {
@@ -99,5 +100,42 @@ describe("review service", () => {
       review: reviewGame(session.moveHistory, options),
     });
     expect(cancelReviewWorkerRequestMock).not.toHaveBeenCalled();
+  });
+
+  it("falls back to sync review when the worker times out", async () => {
+    const session = placeCurrentDisc(startNewGame(), 19).session;
+    const options = {
+      reviewedDisc: "black",
+      searchDepth: 1,
+    } as const;
+    const setTimeoutSpy = vi
+      .spyOn(globalThis, "setTimeout")
+      .mockImplementation((handler) => {
+        if (typeof handler === "function") {
+          handler();
+        }
+
+        return 0 as unknown as ReturnType<typeof setTimeout>;
+      });
+
+    reviewGameInWorkerMock.mockReturnValue(new Promise(() => {}));
+
+    try {
+      const response = await reviewGameAsync({
+        moveHistory: session.moveHistory,
+        options,
+        requestId: "timeout-review",
+      });
+
+      expect(response).toEqual({
+        requestId: "timeout-review",
+        review: reviewGame(session.moveHistory, options),
+      });
+      expect(cancelReviewWorkerRequestMock).toHaveBeenCalledWith(
+        expect.any(Number),
+      );
+    } finally {
+      setTimeoutSpy.mockRestore();
+    }
   });
 });
