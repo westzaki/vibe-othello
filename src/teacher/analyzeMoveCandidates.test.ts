@@ -97,4 +97,45 @@ describe("teacher move candidate analysis", () => {
       }),
     ).toEqual(["dangerSquare", "cornerGiven"]);
   });
+
+  it("marks candidates that improve current player mobility", () => {
+    const board = createBoardFixture({
+      18: "white",
+      19: "black",
+      27: "white",
+      28: "black",
+      35: "black",
+      36: "white",
+    });
+    const analysis = analyzeMoveCandidates(board, "black", {
+      searchDepth: 1,
+    });
+    const mobilityCandidate = analysis.candidateMoves.find(
+      (candidate) => candidate.square === 26,
+    );
+
+    expect(mobilityCandidate?.reasons).toContain("mobilityGain");
+  });
+
+  it("marks candidates that reduce current player mobility", () => {
+    const board = createBoardFixture({
+      1: "black",
+      9: "black",
+      17: "black",
+      18: "white",
+      19: "black",
+      27: "white",
+      28: "black",
+      35: "black",
+      36: "white",
+    });
+    const analysis = analyzeMoveCandidates(board, "white", {
+      searchDepth: 1,
+    });
+    const mobilityCandidate = analysis.candidateMoves.find(
+      (candidate) => candidate.square === 11,
+    );
+
+    expect(mobilityCandidate?.reasons).toContain("mobilityLoss");
+  });
 });

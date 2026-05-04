@@ -1,7 +1,4 @@
-import {
-  getMobilityDifference,
-  strategicEvaluateBoard,
-} from "../cpu";
+import { strategicEvaluateBoard } from "../cpu";
 import type { MoveRecord } from "../game/session";
 import type {
   GameReview,
@@ -25,7 +22,6 @@ const defaultSearchDepth = 3;
 const defaultMaxHighlights = 2;
 const goodMoveScoreGap = 8;
 const badMoveScoreGap = 28;
-const mobilitySwingThreshold = 3;
 
 export function reviewGame(
   moveHistory: MoveRecord[],
@@ -84,7 +80,6 @@ function reviewMove(
   const bestScore = bestCandidate?.score ?? null;
   const scoreGap = bestScore === null ? 0 : bestScore - playedScore;
   const reasons = getMoveReasons(
-    move,
     scoreGap,
     isTurningPoint,
     playedCandidate?.reasons ??
@@ -117,15 +112,11 @@ function reviewMove(
 }
 
 function getMoveReasons(
-  move: MoveRecord,
   scoreGap: number,
   isTurningPoint: boolean,
   candidateReasons: MoveReviewReason[],
 ): MoveReviewReason[] {
   const reasons: MoveReviewReason[] = [];
-  const mobilityBefore = getMobilityDifference(move.boardBefore, move.disc);
-  const mobilityAfter = getMobilityDifference(move.boardAfter, move.disc);
-  const mobilitySwing = mobilityAfter - mobilityBefore;
 
   if (scoreGap <= 0) {
     reasons.push("bestMove");
@@ -142,14 +133,6 @@ function getMoveReasons(
   }
 
   pushUniqueReasons(reasons, candidateReasons);
-
-  if (mobilitySwing >= mobilitySwingThreshold) {
-    reasons.push("mobilityGain");
-  }
-
-  if (mobilitySwing <= -mobilitySwingThreshold) {
-    reasons.push("mobilityLoss");
-  }
 
   if (reasons.length === 0) {
     reasons.push("stablePosition");
