@@ -29,49 +29,45 @@ export function createMoveReviewMessage(review: MoveReview): MoveReviewMessage {
 }
 
 function createExplanation(review: MoveReview): string {
-  const scoreGap = getScoreGap(review);
-
   if (review.kind === "bad") {
     if (review.reasons.includes("cornerGiven")) {
       return `${formatSquare(
         review.square,
-      )} の後に相手が角を狙いやすくなっており、苦しい流れにつながった可能性があります。`;
+      )} は勝負の分かれ道だったかも。置いた後に、相手が角へ近づけるか見てみるとよさそう。`;
     }
 
     if (review.reasons.includes("dangerSquare")) {
       return `${formatSquare(
         review.square,
-      )} は角の近くの危険なマスで、後の展開を難しくしやすい手に見えます。`;
+      )} は角の近くだね。ここは急がず、もう一回だけ形を見てみるのもアリかも。`;
     }
 
     return `${formatSquare(
       review.square,
-    )} は候補手との差が大きく、評価上は ${Math.round(
-      scoreGap,
-    )} 点ほど損をした可能性があります。`;
+    )} はちょっと分かれ道だったかも。次は置いた後の相手の返し手も見てみよう。`;
   }
 
   if (review.reasons.includes("corner")) {
     return `${formatSquare(
       review.square,
-    )} で角を取れたため、返されにくい強い形を作れています。`;
+    )} で角を取れたの、すごくいい判断だね。返されにくい場所を大事にできています。`;
   }
 
   if (review.reasons.includes("mobilityGain")) {
     return `${formatSquare(
       review.square,
-    )} は相手の選択肢を抑えながら、自分の次の手を増やせた良い手に見えます。`;
+    )} は相手を少し動きづらくできた手だね。次の形まで見られていていい感じ。`;
   }
 
   if (review.kind === "good") {
     return `${formatSquare(
       review.square,
-    )} は最善手に近く、局面の流れを崩しにくい手でした。`;
+    )} は流れを崩しにくい、落ち着いた一手だったと思う。ちゃんと考えた感じが出ています。`;
   }
 
   return `${formatSquare(
     review.square,
-  )} は大きな損は少なそうな、自然な進行の一手です。`;
+  )} は自然に打てていました。次も盤面全体を見ながら選んでみよう。`;
 }
 
 function createSuggestion(review: MoveReview): string | undefined {
@@ -81,29 +77,25 @@ function createSuggestion(review: MoveReview): string | undefined {
 
   return `この局面では ${formatSquare(
     review.bestSquare,
-  )} も候補に入れて、数手先の角や合法手の増減を比べるとよさそうです。`;
+  )} も候補に入れてみる？角まわりと、相手の置ける場所を少し比べると見えやすいかも。`;
 }
 
 function createAdvice(reviewedMoves: ReviewedMove[]): string {
   const badMoves = reviewedMoves.filter((move) => move.review.kind === "bad");
 
   if (badMoves.some((move) => move.review.reasons.includes("cornerGiven"))) {
-    return "次は、打った後に相手の角手が新しく生まれていないかを確認すると、終盤まで崩れにくくなります。";
+    return "次は、置いた後に相手が角へ行けるかを一回だけ見てみよう。そこに気づけると、次はかなり勝ちやすくなるよ。";
   }
 
   if (badMoves.some((move) => move.review.reasons.includes("dangerSquare"))) {
-    return "次は、角の周りのマスを急いで打たず、相手に角を渡しにくい形を意識するともっと安定しそうです。";
+    return "次は、角の近くを打つ前に少し立ち止まってみよう。急がず選べたら、かなりいい流れになりそう。";
   }
 
   if (badMoves.length > 0) {
-    return "次は、打った直後の枚数よりも、相手の返し手まで見て候補を比べると安定します。";
+    return "次は、たくさん取れる手だけでなく、相手が次に何をできるかも見てみよう。あと一歩でぐっと良くなりそう。";
   }
 
-  return "良い流れで打てています。次は角と合法手の数を意識し続けると、さらに安定しやすくなります。";
-}
-
-function getScoreGap(review: MoveReview): number {
-  return review.bestScore === null ? 0 : review.bestScore - review.playedScore;
+  return "いい流れで打てています。次は角と、相手の置ける場所を少し意識できると、もっと勝ちに近づけそう。";
 }
 
 function formatSquare(square: SquareIndex): string {
