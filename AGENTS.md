@@ -118,6 +118,16 @@ For code, documentation, or configuration changes, prefer this flow:
 7. Create a GitHub pull request targeting main using GitHub CLI (gh)
 8. Stop and wait for the user to review and merge
 
+For parallel Codex work on this repository, use Codex App Worktree mode instead of Local mode.
+
+Use one Codex thread = one worktree = one branch.
+
+Do not run multiple Codex threads in Local mode on the same repository checkout.
+
+If the current worktree, branch, or git status is unexpected, stop and report it before editing files.
+
+After the pull request is merged or the task is abandoned, remove the temporary worktree.
+
 Before creating a work branch, make sure local main is up to date with origin/main.
 
 Preferred branch start flow:
