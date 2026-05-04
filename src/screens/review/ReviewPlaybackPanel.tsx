@@ -22,20 +22,27 @@ export function ReviewPlaybackPanel({
 }: ReviewPlaybackPanelProps) {
   return (
     <section className="review-board-panel">
-      <p className="review-board-panel__status">
-        {mode === "reviewTarget"
-          ? `${currentMoveNumber}手目を置く前の局面`
-          : "この局面"}
-      </p>
-      <ReviewBoard
-        bestSquare={positionReview.bestSquare}
-        board={currentBoard}
-        legalMoves={positionReview.legalMoves}
-        playedSquare={currentMove?.square ?? null}
-      />
-      <ReviewLegend
-        bestLabel={mode === "reviewTarget" ? "試してみたい手" : "次に見たい手"}
-      />
+      <div className="review-board-panel__header">
+        <h2>局面確認</h2>
+        <p className="review-board-panel__status">
+          {mode === "reviewTarget"
+            ? `${currentMoveNumber}手目を置く前の局面`
+            : "この局面"}
+        </p>
+      </div>
+      <div className="review-board-panel__body">
+        <ReviewBoard
+          bestSquare={positionReview.bestSquare}
+          board={currentBoard}
+          legalMoves={positionReview.legalMoves}
+          playedSquare={currentMove?.square ?? null}
+        />
+        <ReviewLegend
+          bestLabel={
+            mode === "reviewTarget" ? "試してみたい手" : "次に見たい手"
+          }
+        />
+      </div>
     </section>
   );
 }

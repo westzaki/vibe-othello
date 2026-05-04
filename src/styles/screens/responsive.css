@@ -164,17 +164,54 @@
 
   .review-layout {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .review-panel {
     gap: 14px;
-    padding: 16px;
+    border-radius: 24px;
+    padding: 14px;
+  }
+
+  .review-panel__header {
+    gap: 5px;
+  }
+
+  .review-panel__header > p:last-child {
+    font-size: 0.9rem;
+  }
+
+  .review-summary {
+    gap: 12px;
+  }
+
+  .review-summary__section,
+  .review-board-panel {
+    border-radius: 20px;
+    padding: 12px;
   }
 
   .review-board {
     width: min(100%, 560px);
   }
 
+  .review-comparison__moves {
+    grid-template-columns: 1fr;
+  }
+
+  .review-summary__move-line {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .review-panel__actions {
+    gap: 8px;
+  }
+
+  .review-panel__nav-action {
+    flex: 1 1 140px;
+  }
 }
 
 @media (min-width: 521px) and (max-width: 900px) {
@@ -196,5 +233,10 @@
 
   .review-layout {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .review-screen {
+    width: min(100%, 760px);
   }
 }
