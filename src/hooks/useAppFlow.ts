@@ -1,19 +1,80 @@
-import { useState } from "react";
+import { useReducer } from "react";
 import type { CpuLevel } from "../cpu";
 import type { DiscColor } from "../game/othello";
 import { createMatchPlayerSettings, type GameMode } from "../game/matchSetup";
 import type { PracticeSessionOptions } from "../game/session";
 import { useOthelloGame } from "./useOthelloGame";
 
-export type AppScreen = "start" | "game" | "review" | "practice";
+export type AppFlowState =
+  | { screen: "start" }
+  | { screen: "game" }
+  | { screen: "review"; moveNumber: number }
+  | {
+      screen: "practice";
+      returnMoveNumber: number;
+      start: PracticeSessionOptions;
+    };
+
+export type AppScreen = AppFlowState["screen"];
+
+export type AppFlowAction =
+  | { type: "START_MATCH" }
+  | { type: "PLAY_AGAIN" }
+  | { type: "BACK_TO_START" }
+  | { type: "OPEN_REVIEW"; moveNumber: number }
+  | { type: "BACK_TO_RESULT" }
+  | { type: "SELECT_REVIEW_MOVE"; moveNumber: number }
+  | {
+      type: "START_PRACTICE";
+      returnMoveNumber: number;
+      start: PracticeSessionOptions;
+    }
+  | { type: "PRACTICE_PLAY_AGAIN" }
+  | { type: "BACK_TO_REVIEW" };
+
+const initialAppFlowState: AppFlowState = { screen: "start" };
+
+export function appFlowReducer(
+  state: AppFlowState,
+  action: AppFlowAction,
+): AppFlowState {
+  switch (action.type) {
+    case "START_MATCH":
+    case "PLAY_AGAIN":
+    case "BACK_TO_RESULT":
+      return { screen: "game" };
+    case "BACK_TO_START":
+      return { screen: "start" };
+    case "OPEN_REVIEW":
+    case "SELECT_REVIEW_MOVE":
+      return { screen: "review", moveNumber: action.moveNumber };
+    case "START_PRACTICE":
+      return {
+        screen: "practice",
+        returnMoveNumber: action.returnMoveNumber,
+        start: action.start,
+      };
+    case "PRACTICE_PLAY_AGAIN":
+      if (state.screen !== "practice") {
+        return state;
+      }
+
+      return state;
+    case "BACK_TO_REVIEW":
+      if (state.screen !== "practice") {
+        return state;
+      }
+
+      return { screen: "review", moveNumber: state.returnMoveNumber };
+  }
+}
 
 export function useAppFlow() {
-  const [screen, setScreen] = useState<AppScreen>("start");
+  const [state, dispatch] = useReducer(appFlowReducer, initialAppFlowState);
+  const { screen } = state;
   const game = useOthelloGame({ enabled: screen === "game" });
   const practiceGame = useOthelloGame({ enabled: screen === "practice" });
-  const [practiceStart, setPracticeStart] =
-    useState<PracticeSessionOptions | null>(null);
-  const [reviewMoveNumber, setReviewMoveNumber] = useState<number | null>(null);
+  const reviewMoveNumber = getCurrentReviewMoveNumber(state);
 
   function startMatch(
     mode: GameMode,
@@ -22,63 +83,59 @@ export function useAppFlow() {
   ) {
     game.setPlayers(createMatchPlayerSettings(mode, cpuLevel, humanDisc));
     game.startNewGame();
-    setReviewMoveNumber(null);
-    setPracticeStart(null);
-    setScreen("game");
+    dispatch({ type: "START_MATCH" });
   }
 
   function endGame() {
     game.endGame();
-    setScreen("start");
+    dispatch({ type: "BACK_TO_START" });
   }
 
   function playAgain() {
     game.startNewGame();
-    setReviewMoveNumber(null);
-    setPracticeStart(null);
-    setScreen("game");
+    dispatch({ type: "PLAY_AGAIN" });
   }
 
   function backToStart() {
     game.resetGame();
     practiceGame.resetGame();
-    setPracticeStart(null);
-    setReviewMoveNumber(null);
-    setScreen("start");
+    dispatch({ type: "BACK_TO_START" });
   }
 
   function openReview() {
-    setReviewMoveNumber(game.moveHistory.length);
-    setScreen("review");
+    dispatch({ type: "OPEN_REVIEW", moveNumber: game.moveHistory.length });
   }
 
   function backToResult() {
-    setScreen("game");
+    dispatch({ type: "BACK_TO_RESULT" });
   }
 
   function startPractice(options: PracticeSessionOptions) {
     copyPlayers(game, practiceGame);
     practiceGame.startPracticeSession(options);
-    setPracticeStart(options);
-    setScreen("practice");
+    dispatch({
+      type: "START_PRACTICE",
+      returnMoveNumber: getReviewMoveNumber(state, game.moveHistory.length),
+      start: options,
+    });
   }
 
   function practicePlayAgain() {
-    if (practiceStart === null) {
-      setScreen("review");
+    if (state.screen !== "practice") {
+      dispatch({ type: "BACK_TO_REVIEW" });
       return;
     }
 
-    practiceGame.startPracticeSession(practiceStart);
-    setScreen("practice");
+    practiceGame.startPracticeSession(state.start);
+    dispatch({ type: "PRACTICE_PLAY_AGAIN" });
   }
 
   function backToReview() {
-    setScreen("review");
+    dispatch({ type: "BACK_TO_REVIEW" });
   }
 
   function selectReviewMove(moveNumber: number) {
-    setReviewMoveNumber(moveNumber);
+    dispatch({ type: "SELECT_REVIEW_MOVE", moveNumber });
   }
 
   return {
@@ -104,4 +161,31 @@ function copyPlayers(
   target: ReturnType<typeof useOthelloGame>,
 ) {
   target.setPlayers(source.players);
+}
+
+function getReviewMoveNumber(
+  state: AppFlowState,
+  fallbackMoveNumber: number,
+): number {
+  if (state.screen === "review") {
+    return state.moveNumber;
+  }
+
+  if (state.screen === "practice") {
+    return state.returnMoveNumber;
+  }
+
+  return fallbackMoveNumber;
+}
+
+function getCurrentReviewMoveNumber(state: AppFlowState): number | null {
+  if (state.screen === "review") {
+    return state.moveNumber;
+  }
+
+  if (state.screen === "practice") {
+    return state.returnMoveNumber;
+  }
+
+  return null;
 }
