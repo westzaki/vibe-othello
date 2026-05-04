@@ -1,6 +1,7 @@
 import {
   countEmptySquares,
   getMinimaxMoveScores,
+  getMobilityDifference,
   solveExactEndgameDiscDifference,
   type MinimaxMoveScore,
 } from "../cpu";
@@ -32,6 +33,7 @@ export type AnalyzeMoveCandidatesOptions = {
 const exactEndgameReviewEmptyThreshold = 10;
 const exactEndgameReviewScoreWeight = 10;
 const cornerGivenScorePenalty = 90;
+const mobilitySwingThreshold = 3;
 const dangerSquaresByCorner = new Map<SquareIndex, SquareIndex[]>([
   [0, [1, 8, 9]],
   [7, [6, 14, 15]],
@@ -148,6 +150,18 @@ export function getMoveCandidateReasons(
 
   if (newlyGivesCorner(context.boardBefore, context.boardAfter, context.disc)) {
     reasons.push("cornerGiven");
+  }
+
+  const mobilitySwing =
+    getMobilityDifference(context.boardAfter, context.disc) -
+    getMobilityDifference(context.boardBefore, context.disc);
+
+  if (mobilitySwing >= mobilitySwingThreshold) {
+    reasons.push("mobilityGain");
+  }
+
+  if (mobilitySwing <= -mobilitySwingThreshold) {
+    reasons.push("mobilityLoss");
   }
 
   return reasons;
