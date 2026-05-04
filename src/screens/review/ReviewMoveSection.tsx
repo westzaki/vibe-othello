@@ -106,7 +106,7 @@ function ReviewMoveItem({
         type="button"
       >
         <div className="review-summary__move-line">
-          <span>#{move.moveNumber}</span>
+          <span>{move.moveNumber}手目</span>
           <strong>{showComparison ? comparisonLabel : formatSquare(move.square)}</strong>
         </div>
         {message !== undefined && (
@@ -153,7 +153,7 @@ function ReviewMoveComparisonPanel({
         )}
       </div>
       <p className="review-comparison__focus">
-        <strong>次に見るポイント:</strong> {comparison.nextFocus}
+        <strong>見るポイント:</strong> {comparison.nextFocus}
       </p>
     </div>
   );

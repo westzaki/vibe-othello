@@ -29,7 +29,7 @@ describe("createReviewLesson", () => {
     expect(lesson.cards.map((card) => card.title)).toEqual([
       "今日のナイス",
       "ここが分かれ道だったかも",
-      "次はこれを試してみよう",
+      "ここから練習",
     ]);
   });
 
@@ -103,7 +103,7 @@ describe("createReviewLesson", () => {
       }),
     );
 
-    expect(withPractice.cards[2].bodyText).toContain("#53 の局面");
+    expect(withPractice.cards[2].bodyText).toContain("53手目の局面");
     expect(withPractice.cards[2].emptyText).not.toContain(
       "すぐ練習したい局面は少なめ",
     );

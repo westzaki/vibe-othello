@@ -15,7 +15,7 @@ export function ReviewLegend({ bestLabel }: ReviewLegendProps) {
       </span>
       <span>
         <i className="review-legend__marker review-legend__marker--legal" />
-        合法手
+        置ける場所
       </span>
     </div>
   );

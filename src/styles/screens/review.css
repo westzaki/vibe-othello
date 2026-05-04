@@ -67,35 +67,11 @@
   gap: 12px;
 }
 
-.review-detail {
-  display: grid;
-  gap: 8px;
+.review-board-panel__status {
   margin: 0;
-}
-
-.review-detail div {
-  display: grid;
-  grid-template-columns: 78px minmax(0, 1fr);
-  gap: 10px;
-  border: 1px solid rgba(184, 176, 225, 0.24);
-  border-radius: 14px;
-  padding: 9px 10px;
-  background: rgba(255, 255, 255, 0.72);
-}
-
-.review-detail dt {
-  color: #7770b8;
-  font-size: 0.76rem;
-  font-weight: 900;
-}
-
-.review-detail dd {
-  margin: 0;
-  color: #34323e;
+  color: #777384;
   font-size: 0.84rem;
-  font-weight: 850;
-  line-height: 1.45;
-  overflow-wrap: anywhere;
+  font-weight: 900;
 }
 
 .review-summary__section {
@@ -260,45 +236,6 @@
 
 .review-panel__actions {
   justify-content: center;
-}
-
-.review-playback-group {
-  display: grid;
-  gap: 8px;
-}
-
-.review-playback {
-  display: grid;
-  grid-template-columns: minmax(96px, auto) minmax(78px, 1fr) minmax(96px, auto);
-  align-items: center;
-  gap: 8px;
-}
-
-.review-playback .game-action {
-  width: 100%;
-  min-height: 44px;
-}
-
-.review-playback .game-action:disabled {
-  opacity: 0.42;
-  cursor: not-allowed;
-}
-
-.review-playback__status {
-  display: grid;
-  min-height: 44px;
-  place-items: center;
-  border: 1px solid rgba(255, 204, 112, 0.42);
-  border-radius: 16px;
-  color: #7d5d19;
-  background: rgba(255, 248, 222, 0.9);
-  font-size: 0.86rem;
-  font-weight: 950;
-}
-
-.review-playback__practice {
-  width: 100%;
-  min-height: 46px;
 }
 
 .review-board {
