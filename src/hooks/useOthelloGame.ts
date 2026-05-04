@@ -46,6 +46,7 @@ export type OthelloGameController = {
   notice: GameSessionNotice | null;
   placedSquare: SquareIndex | null;
   players: PlayerSettings;
+  session: GameSession;
   winner: Winner | null;
   endGame: () => void;
   placeCurrentDisc: (square: SquareIndex) => void;
@@ -121,6 +122,7 @@ export function useOthelloGame({
     notice: session.notice,
     placedSquare,
     players,
+    session,
     winner: session.winner,
     endGame: sessionController.endGame,
     placeCurrentDisc: sessionController.placeCurrentDisc,

@@ -1,8 +1,10 @@
 import type { AppSettings } from "../hooks/useAppSettings";
+import type { CoachHintMode } from "../teacher";
 
 type SettingsScreenProps = {
   settings: AppSettings;
   onBackToStart: () => void;
+  onCoachHintModeChange: (mode: CoachHintMode) => void;
   onSoundEnabledChange: (soundEnabled: boolean) => void;
   onUndoEnabledChange: (undoEnabled: boolean) => void;
 };
@@ -10,6 +12,7 @@ type SettingsScreenProps = {
 export function SettingsScreen({
   settings,
   onBackToStart,
+  onCoachHintModeChange,
   onSoundEnabledChange,
   onUndoEnabledChange,
 }: SettingsScreenProps) {
@@ -37,6 +40,12 @@ export function SettingsScreen({
             label="まったを使う"
             onChange={onUndoEnabledChange}
           />
+          <SettingsSegmentedItem
+            description="1P対局中に、考える場所を短く出します"
+            label="ヒント"
+            onChange={onCoachHintModeChange}
+            value={settings.coachHintMode}
+          />
         </div>
 
         <div className="settings-panel__actions">
@@ -46,6 +55,59 @@ export function SettingsScreen({
         </div>
       </div>
     </section>
+  );
+}
+
+const coachHintModeOptions: Array<{
+  label: string;
+  value: CoachHintMode;
+}> = [
+  { label: "なし", value: "off" },
+  { label: "やさしめ", value: "gentle" },
+  { label: "こまめ", value: "active" },
+];
+
+type SettingsSegmentedItemProps = {
+  description: string;
+  label: string;
+  onChange: (value: CoachHintMode) => void;
+  value: CoachHintMode;
+};
+
+function SettingsSegmentedItem({
+  description,
+  label,
+  onChange,
+  value,
+}: SettingsSegmentedItemProps) {
+  return (
+    <div className="settings-item settings-item--stacked">
+      <div className="settings-item__text">
+        <h2>{label}</h2>
+        <p>{description}</p>
+      </div>
+      <div className="settings-segmented" role="radiogroup" aria-label={label}>
+        {coachHintModeOptions.map((option) => (
+          <button
+            aria-checked={option.value === value}
+            className={[
+              "settings-segmented__button",
+              option.value === value
+                ? "settings-segmented__button--active"
+                : null,
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            key={option.value}
+            onClick={() => onChange(option.value)}
+            role="radio"
+            type="button"
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 

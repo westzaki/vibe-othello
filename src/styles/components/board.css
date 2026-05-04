@@ -140,6 +140,48 @@
   display: block;
 }
 
+.board-square--coach-hint::before {
+  position: absolute;
+  z-index: 1;
+  inset: 14%;
+  border: 3px solid rgba(255, 225, 134, 0.96);
+  border-radius: 14px;
+  background: rgba(255, 230, 150, 0.16);
+  box-shadow:
+    0 0 0 4px rgba(255, 248, 220, 0.34),
+    0 0 18px rgba(255, 220, 112, 0.62);
+  content: "";
+  pointer-events: none;
+  animation: board-coach-hint-pulse 1100ms ease-in-out infinite;
+}
+
+.board-square--coach-hint-risk::before {
+  inset: 20%;
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(
+      45deg,
+      transparent calc(50% - 4px),
+      rgba(244, 147, 131, 0.96) calc(50% - 4px),
+      rgba(244, 147, 131, 0.96) calc(50% + 4px),
+      transparent calc(50% + 4px)
+    ),
+    linear-gradient(
+      -45deg,
+      transparent calc(50% - 4px),
+      rgba(244, 147, 131, 0.96) calc(50% - 4px),
+      rgba(244, 147, 131, 0.96) calc(50% + 4px),
+      transparent calc(50% + 4px)
+    );
+  box-shadow: none;
+  filter: drop-shadow(0 0 8px rgba(244, 147, 131, 0.62));
+}
+
+.board-square--coach-hint .disc {
+  z-index: 2;
+}
+
 .board-square--last-move .disc {
   outline: 3px solid #f5a6a6;
   outline-offset: 3px;
@@ -150,6 +192,19 @@
     inset -8px -10px 14px rgba(0, 0, 0, 0.28),
     inset 5px 6px 10px rgba(255, 255, 255, 0.2),
     0 8px 14px rgba(0, 0, 0, 0.28);
+}
+
+@keyframes board-coach-hint-pulse {
+  0%,
+  100% {
+    opacity: 0.42;
+    transform: scale(0.86);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .disc {

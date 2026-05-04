@@ -20,7 +20,7 @@ export {
   createPracticeFeedback,
   createPracticeFeedbackContext,
 } from "./practiceFeedback";
-export { createCoachHint } from "./createCoachHint";
+export { createCoachHint, createCoachHints } from "./createCoachHint";
 export type {
   CoachHint,
   CoachHintKind,

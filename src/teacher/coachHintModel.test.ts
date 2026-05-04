@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Advantage } from "../cpu";
+import { createInitialBoard } from "../game/othello";
 import { createMatchPlayerSettings } from "../game/matchSetup";
 import type { PlayerSettings } from "../game/players";
 import {
@@ -234,6 +235,27 @@ describe("teacher coach hint model", () => {
       }),
     );
     expect(model?.hint.message).toContain("C4");
+  });
+
+  it("uses a candidate fallback in active mode when no specific hint is found", () => {
+    const session = createPracticeSessionFromBoard(createInitialBoard(), "black");
+    const model = createCoachHintModel({
+      advantage: createAdvantage({ blackPercent: 70 }),
+      players: createOnePlayerSettings("black"),
+      session,
+      settings: { mode: "active" },
+      thinkingTimeMs: 1500,
+    });
+
+    expect(model).toEqual(
+      expect.objectContaining({
+        mode: "active",
+        hint: expect.objectContaining({
+          kind: "candidate",
+          square: expect.any(Number),
+        }),
+      }),
+    );
   });
 });
 

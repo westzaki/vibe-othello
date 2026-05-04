@@ -7,7 +7,12 @@ import { SettingsScreen } from "./screens/SettingsScreen";
 import { StartScreen } from "./screens/StartScreen";
 
 export default function App() {
-  const { settings, updateSoundEnabled, updateUndoEnabled } = useAppSettings();
+  const {
+    settings,
+    updateCoachHintMode,
+    updateSoundEnabled,
+    updateUndoEnabled,
+  } = useAppSettings();
   const appFlow = useAppFlow({
     soundEnabled: settings.soundEnabled,
     undoEnabled: settings.undoEnabled,
@@ -28,6 +33,7 @@ export default function App() {
       ) : screen === "settings" ? (
         <SettingsScreen
           onBackToStart={appFlow.backToStart}
+          onCoachHintModeChange={updateCoachHintMode}
           onSoundEnabledChange={updateSoundEnabled}
           onUndoEnabledChange={updateUndoEnabled}
           settings={settings}
@@ -54,6 +60,7 @@ export default function App() {
         />
       ) : (
         <GameScreen
+          coachHintSettings={{ mode: settings.coachHintMode }}
           game={game}
           onBackToStart={appFlow.backToStart}
           onEndGame={appFlow.endGame}
