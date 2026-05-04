@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createDebugSession } from "../debug/debugFixtures";
 import { createMatchPlayerSettings } from "../game/matchSetup";
 import {
   getSessionLegalMoves,
@@ -46,6 +47,27 @@ describe("createGameReviewModel", () => {
     expect(model.lesson.cards.length).toBeGreaterThan(0);
     expect(model.playbackBoards).toHaveLength(session.moveHistory.length + 1);
     expect(model.safeMoveNumber).toBe(2);
+  });
+
+  it("opens a winning review on a lesson position instead of the final board", () => {
+    const session = createDebugSession("blackWin");
+    const model = createGameReviewModel({
+      currentMoveNumber: session.moveHistory.length,
+      moveHistory: session.moveHistory,
+      players: createMatchPlayerSettings("onePlayer", "level1", "black"),
+      winner: session.winner,
+    });
+
+    expect(model.status).toBe("ready");
+
+    if (model.status !== "ready") {
+      return;
+    }
+
+    expect(model.safeMoveNumber).toBe(model.maxMoveNumber);
+    expect(model.displayedReviewedMove).not.toBeNull();
+    expect(model.displayedMoveNumber).not.toBe(model.maxMoveNumber);
+    expect(model.playbackDisplay.mode).toBe("reviewTarget");
   });
 });
 

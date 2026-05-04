@@ -10,16 +10,18 @@ export function createReviewLesson(
   review: GameReview,
   outcome: ReviewOutcome,
 ): ReviewLesson {
-  const { niceMove, practiceTarget, turningPointCandidate } =
+  const { niceMove, practiceTarget, turningPointCandidate, winningPoint } =
     selectReviewLessonMoves({
       badMoves: review.highlights.badMoves,
       goodMoves: review.highlights.goodMoves,
+      finalMoveNumber: review.moveCount,
+      reviewedMoves: review.reviewedMoves,
     });
 
   if (outcome === "win") {
     return createWinReviewLesson({
       niceMove,
-      winningPoint: niceMove,
+      winningPoint,
     });
   }
 

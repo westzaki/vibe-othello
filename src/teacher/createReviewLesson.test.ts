@@ -218,6 +218,63 @@ describe("createReviewLesson", () => {
     expect(lesson.cards[1].actionLabel).toBeUndefined();
   });
 
+  it("does not use the final reviewed move as the win lesson point", () => {
+    const earlierGoodMove = createReviewedMove({
+      kind: "good",
+      moveNumber: 24,
+      reasons: ["mobilityGain"],
+      square: 26,
+    });
+    const finalCornerMove = createReviewedMove({
+      kind: "good",
+      moveNumber: 60,
+      reasons: ["corner"],
+      square: 63,
+    });
+
+    const lesson = createReviewLesson(
+      createGameReview({
+        badMoves: [],
+        goodMoves: [finalCornerMove, earlierGoodMove],
+        moveCount: 60,
+      }),
+      "win",
+    );
+
+    expect(lesson.niceMove).toBe(earlierGoodMove);
+    expect(lesson.turningPointCandidate).toBe(earlierGoodMove);
+    expect(lesson.cards[0].move).toBe(earlierGoodMove);
+  });
+
+  it("falls back to an earlier reproducible move for win lessons", () => {
+    const earlierBestMove = createReviewedMove({
+      kind: "good",
+      moveNumber: 18,
+      reasons: ["bestMove"],
+      square: 20,
+    });
+    const finalCornerMove = createReviewedMove({
+      kind: "good",
+      moveNumber: 60,
+      reasons: ["corner"],
+      square: 63,
+    });
+
+    const lesson = createReviewLesson(
+      createGameReview({
+        badMoves: [],
+        goodMoves: [finalCornerMove],
+        moveCount: 60,
+        reviewedMoves: [earlierBestMove, finalCornerMove],
+      }),
+      "win",
+    );
+
+    expect(lesson.niceMove).toBeNull();
+    expect(lesson.turningPointCandidate).toBe(earlierBestMove);
+    expect(lesson.cards[0].move).toBe(earlierBestMove);
+  });
+
   it("keeps the learning lesson for draw with gentler one-more-step copy", () => {
     const turningPoint = createReviewedMove({
       bestSquare: 45,
@@ -248,13 +305,22 @@ describe("createReviewLesson", () => {
 function createGameReview({
   badMoves,
   goodMoves,
+  moveCount,
+  reviewedMoves,
 }: {
   badMoves: ReviewedMove[];
   goodMoves: ReviewedMove[];
+  moveCount?: number;
+  reviewedMoves?: ReviewedMove[];
 }): GameReview {
+  const reviewMoves = reviewedMoves ?? [...goodMoves, ...badMoves];
+
   return {
+    moveCount:
+      moveCount ??
+      Math.max(0, ...reviewMoves.map((move) => move.moveNumber)) + 4,
     reviewedDisc: "black",
-    reviewedMoves: [...goodMoves, ...badMoves],
+    reviewedMoves: reviewMoves,
     highlights: {
       badMoves,
       goodMoves,
