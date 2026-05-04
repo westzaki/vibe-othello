@@ -1,6 +1,7 @@
 @media (max-width: 520px) {
   .app {
     align-items: start;
+    justify-items: stretch;
     padding: 18px 12px;
   }
 
@@ -35,44 +36,83 @@
   }
 
   h1 {
-    font-size: 2rem;
+    font-size: clamp(1.8rem, 12vw, 2rem);
   }
 
   .start-screen {
+    justify-self: stretch;
     width: 100%;
-    max-width: calc(100vw - 24px);
+    max-width: 100%;
+    gap: 14px;
+    overflow: hidden;
+  }
+
+  .start-screen__hero {
     gap: 10px;
+  }
+
+  .start-screen__lead {
+    font-size: 0.92rem;
+    line-height: 1.55;
   }
 
   .start-screen__board-preview {
-    width: min(38vw, 140px);
-    border-width: 10px;
-    gap: 7px;
-    padding: 14px;
+    width: min(34vw, 120px);
   }
 
   .start-panel {
+    justify-self: stretch;
     width: 100%;
     max-width: 100%;
-    gap: 10px;
-    padding: 14px;
+    padding: 15px;
   }
 
   .start-panel__section {
-    padding: 12px;
+    gap: 11px;
+    padding: 14px 0;
+  }
+
+  .start-panel__section-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .start-panel__title {
+    font-size: 0.94rem;
   }
 
   .mode-selector,
   .disc-selector {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .mode-selector__button,
+  .disc-selector__button {
+    min-height: 52px;
+    border-radius: 15px;
+  }
+
+  .mode-selector__button {
+    gap: 6px;
+    padding-inline: 8px;
+  }
+
+  .mode-selector__button > span {
+    width: 18px;
+    height: 18px;
   }
 
   .cpu-star-selector {
-    gap: 6px;
+    gap: 4px;
   }
 
   .cpu-star-selector__button {
-    min-height: 38px;
+    min-height: 46px;
+  }
+
+  .start-panel__start {
+    min-height: 62px;
   }
 
   .board-frame {
