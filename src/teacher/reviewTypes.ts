@@ -13,7 +13,8 @@ export type MoveReviewReason =
   | "cornerGiven"
   | "dangerSquare"
   | "mobilityLoss"
-  | "scoreDrop";
+  | "scoreDrop"
+  | "turningPoint";
 
 export type CandidateMoveReview = {
   square: SquareIndex;
@@ -99,6 +100,7 @@ export type ReviewGameOptions = {
   maxHighlights?: number;
   reviewedDisc: DiscColor;
   searchDepth?: number;
+  turningPointAnalysis?: Partial<TurningPointAnalysisConfig>;
 };
 
 export type ReviewContext = {
@@ -106,4 +108,19 @@ export type ReviewContext = {
   boardBefore: Board;
   disc: DiscColor;
   square: SquareIndex;
+};
+
+export type EvaluationTimelineEntry = {
+  delta: number;
+  disc: DiscColor;
+  moveNumber: number;
+  scoreAfter: number;
+  scoreBefore: number;
+  square: SquareIndex;
+};
+
+export type TurningPointAnalysisConfig = {
+  dropThreshold: number;
+  lookaheadMoves: number;
+  recoveryMargin: number;
 };

@@ -21,6 +21,10 @@ import type {
   ReviewGameOptions,
   ReviewedMove,
 } from "./reviewTypes";
+import {
+  createEvaluationTimeline,
+  findTurningPointMoveNumbers,
+} from "./evaluationTimeline";
 
 const defaultSearchDepth = 3;
 const defaultMaxHighlights = 2;
@@ -40,9 +44,26 @@ export function reviewGame(
 ): GameReview {
   const searchDepth = options.searchDepth ?? defaultSearchDepth;
   const maxHighlights = options.maxHighlights ?? defaultMaxHighlights;
+  const evaluationTimeline = createEvaluationTimeline(
+    moveHistory,
+    options.reviewedDisc,
+  );
+  const turningPointMoveNumbers = new Set(
+    findTurningPointMoveNumbers(
+      evaluationTimeline,
+      options.reviewedDisc,
+      options.turningPointAnalysis,
+    ),
+  );
   const reviewedMoves = moveHistory
     .filter((move) => move.disc === options.reviewedDisc)
-    .map((move) => reviewMove(move, searchDepth));
+    .map((move) =>
+      reviewMove(
+        move,
+        searchDepth,
+        turningPointMoveNumbers.has(move.moveNumber),
+      ),
+    );
 
   return {
     reviewedDisc: options.reviewedDisc,
@@ -54,7 +75,11 @@ export function reviewGame(
   };
 }
 
-function reviewMove(move: MoveRecord, searchDepth: number): ReviewedMove {
+function reviewMove(
+  move: MoveRecord,
+  searchDepth: number,
+  isTurningPoint: boolean,
+): ReviewedMove {
   const moveScores = getMinimaxMoveScores(move.boardBefore, move.disc, {
     searchDepth,
   });
@@ -80,7 +105,7 @@ function reviewMove(move: MoveRecord, searchDepth: number): ReviewedMove {
     strategicEvaluateBoard(move.boardAfter, move.disc);
   const bestScore = bestCandidate?.score ?? null;
   const scoreGap = bestScore === null ? 0 : bestScore - playedScore;
-  const reasons = getMoveReasons(move, scoreGap);
+  const reasons = getMoveReasons(move, scoreGap, isTurningPoint);
   const kind = getMoveReviewKind(scoreGap, reasons);
 
   return {
@@ -118,6 +143,7 @@ function getCandidateReasons(context: ReviewContext): MoveReviewReason[] {
 function getMoveReasons(
   move: MoveRecord,
   scoreGap: number,
+  isTurningPoint: boolean,
 ): MoveReviewReason[] {
   const reasons: MoveReviewReason[] = [];
   const mobilityBefore = getMobilityDifference(move.boardBefore, move.disc);
@@ -132,6 +158,10 @@ function getMoveReasons(
 
   if (scoreGap >= badMoveScoreGap) {
     reasons.push("missedBestMove", "scoreDrop");
+  }
+
+  if (isTurningPoint) {
+    reasons.push("turningPoint");
   }
 
   if (isCorner(move.square)) {
@@ -167,6 +197,7 @@ function getMoveReviewKind(
 ): MoveReviewKind {
   if (
     scoreGap >= badMoveScoreGap ||
+    reasons.includes("turningPoint") ||
     reasons.includes("cornerGiven") ||
     (scoreGap > goodMoveScoreGap && reasons.includes("dangerSquare"))
   ) {
@@ -193,12 +224,50 @@ function getHighlightedMoves(
     .filter((move) => move.review.kind === kind)
     .sort((firstMove, secondMove) => {
       if (kind === "bad") {
-        return getScoreGap(secondMove.review) - getScoreGap(firstMove.review);
+        return compareBadHighlights(firstMove, secondMove);
       }
 
       return getScoreGap(firstMove.review) - getScoreGap(secondMove.review);
     })
     .slice(0, maxHighlights);
+}
+
+function compareBadHighlights(
+  firstMove: ReviewedMove,
+  secondMove: ReviewedMove,
+): number {
+  const priorityDifference =
+    getBadMovePriority(secondMove.review) -
+    getBadMovePriority(firstMove.review);
+
+  if (priorityDifference !== 0) {
+    return priorityDifference;
+  }
+
+  return getScoreGap(secondMove.review) - getScoreGap(firstMove.review);
+}
+
+function getBadMovePriority(review: MoveReview): number {
+  if (
+    review.reasons.includes("turningPoint") &&
+    review.reasons.includes("cornerGiven")
+  ) {
+    return 5;
+  }
+
+  if (review.reasons.includes("turningPoint")) {
+    return 4;
+  }
+
+  if (review.reasons.includes("cornerGiven")) {
+    return 3;
+  }
+
+  if (review.reasons.includes("dangerSquare")) {
+    return 2;
+  }
+
+  return 1;
 }
 
 function getScoreGap(review: MoveReview): number {

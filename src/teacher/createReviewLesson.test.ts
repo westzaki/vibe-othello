@@ -115,6 +115,33 @@ describe("createReviewLesson", () => {
     );
     expect(withoutPractice.cards[2].actionLabel).toBeUndefined();
   });
+
+  it("prioritizes turningPoint for the turning point card", () => {
+    const scoreDrop = createReviewedMove({
+      kind: "bad",
+      moveNumber: 24,
+      playedScore: -100,
+      reasons: ["scoreDrop"],
+      square: 20,
+    });
+    const turningPoint = createReviewedMove({
+      kind: "bad",
+      moveNumber: 30,
+      playedScore: -20,
+      reasons: ["turningPoint"],
+      square: 21,
+    });
+
+    const lesson = createReviewLesson(
+      createGameReview({
+        badMoves: [scoreDrop, turningPoint],
+        goodMoves: [],
+      }),
+    );
+
+    expect(lesson.turningPointCandidate).toBe(turningPoint);
+    expect(lesson.practiceTarget).toBe(turningPoint);
+  });
 });
 
 function createGameReview({
@@ -137,10 +164,14 @@ function createGameReview({
 function createReviewedMove({
   kind,
   moveNumber,
+  playedScore = 0,
+  reasons,
   square,
 }: {
   kind: MoveReviewKind;
   moveNumber: number;
+  playedScore?: number;
+  reasons?: ReviewedMove["review"]["reasons"];
   square: SquareIndex;
 }): ReviewedMove {
   const board = createEmptyBoard();
@@ -159,8 +190,8 @@ function createReviewedMove({
       disc: "black",
       kind,
       moveNumber,
-      playedScore: 0,
-      reasons: kind === "bad" ? ["scoreDrop"] : ["bestMove"],
+      playedScore,
+      reasons: reasons ?? (kind === "bad" ? ["scoreDrop"] : ["bestMove"]),
       scoreAfter: 0,
       scoreBefore: 0,
       square,
