@@ -36,7 +36,7 @@ describe("CPU move service", () => {
     expect(chooseCpuMoveInWorkerMock).not.toHaveBeenCalled();
   });
 
-  it("uses the worker for level 6 and keeps the service request id", async () => {
+  it("uses the configured worker CPU level and keeps the service request id", async () => {
     const board = createInitialBoard();
     chooseCpuMoveInWorkerMock.mockResolvedValue({
       move: 19,
@@ -64,7 +64,7 @@ describe("CPU move service", () => {
     });
   });
 
-  it("falls back to sync CPU when the level 6 worker rejects", async () => {
+  it("falls back to sync CPU when the worker CPU level rejects", async () => {
     const board = createInitialBoard();
     chooseCpuMoveInWorkerMock.mockRejectedValue(new Error("Worker failed"));
 
@@ -82,7 +82,7 @@ describe("CPU move service", () => {
     );
   });
 
-  it("falls back to sync CPU when the level 6 worker returns an error response", async () => {
+  it("falls back to sync CPU when the worker CPU level returns an error response", async () => {
     const board = createInitialBoard();
     chooseCpuMoveInWorkerMock.mockResolvedValue({
       message: "Worker CPU error",
@@ -102,7 +102,7 @@ describe("CPU move service", () => {
     expect(cancelCpuMoveWorkerRequestMock).not.toHaveBeenCalled();
   });
 
-  it("falls back to sync CPU when the level 6 worker times out", async () => {
+  it("falls back to sync CPU when the worker CPU level times out", async () => {
     const board = createInitialBoard();
     const setTimeoutSpy = vi
       .spyOn(globalThis, "setTimeout")

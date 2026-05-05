@@ -4,8 +4,14 @@
 export { calculateAdvantage } from "./evaluation/advantage";
 export type { Advantage } from "./evaluation/advantage";
 export { chooseCpuMove } from "./cpu";
-export { cpuLevelLabels, cpuLevels } from "./cpuLevels";
-export type { CpuLevel } from "./cpuLevels";
+export {
+  cpuLevelDefinitions,
+  cpuLevelLabels,
+  cpuLevels,
+  getCpuLevelDefinition,
+  usesCpuMoveWorker,
+} from "./cpuLevels";
+export type { CpuLevel, CpuLevelDefinition, CpuLevelRuntime } from "./cpuLevels";
 export { getCpuLevelPreset } from "./presets/cpuLevelPresets";
 export type { CpuLevelPreset } from "./presets/cpuLevelPresets";
 export {
