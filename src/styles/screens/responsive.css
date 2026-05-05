@@ -153,11 +153,12 @@
   }
 
   .cpu-star-selector {
-    gap: 4px;
+    gap: 3px;
     padding: 4px;
   }
 
   .cpu-star-selector__button {
+    font-size: clamp(1.08rem, 5.4vw, 1.42rem);
     min-height: 46px;
     border-radius: 12px;
   }

@@ -109,14 +109,15 @@
 }
 
 .cpu-star-selector {
-  display: flex;
+  display: grid;
   min-width: 0;
-  flex-wrap: nowrap;
-  gap: clamp(2px, 1vw, 6px);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(1px, 0.5vw, 4px);
   border: 1px solid color-mix(in srgb, var(--color-control-border) 62%, transparent);
   border-radius: var(--radius-md);
-  padding: 5px;
+  padding: 4px;
   background: var(--color-star-bg);
+  overflow: hidden;
 }
 
 .start-panel__section--inactive .cpu-star-selector {
@@ -126,8 +127,7 @@
 .cpu-star-selector__button {
   display: grid;
   min-width: 0;
-  flex: 1 1 0;
-  min-height: 44px;
+  min-height: 40px;
   place-items: center;
   border: 0;
   border-radius: var(--radius-xs);
@@ -135,9 +135,10 @@
   background: transparent;
   cursor: pointer;
   font: inherit;
-  font-size: clamp(1.42rem, 3.7vw, 1.86rem);
+  font-size: clamp(1.08rem, 2.1vw, 1.34rem);
   font-weight: 950;
   line-height: 1;
+  overflow: hidden;
   text-shadow: 0 2px 0 rgba(255, 255, 255, 0.78);
   transition:
     color 160ms ease,
