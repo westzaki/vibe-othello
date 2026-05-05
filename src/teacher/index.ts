@@ -41,6 +41,7 @@ export {
 } from "./createCoachHint";
 export type {
   CoachHint,
+  CoachHintGuidance,
   CoachHintKind,
   CoachHintMessageStyle,
   CoachHintSeverity,
@@ -74,12 +75,14 @@ export type {
 export {
   chooseTeacherGuidanceMove,
   selectTeacherGuidanceCandidate,
+  selectTeacherGuidanceSelection,
 } from "./teacherGuidanceMove";
 export type {
   TeacherGuidanceCandidate,
   TeacherGuidanceMode,
   TeacherGuidanceMoveOptions,
   TeacherGuidanceRefutation,
+  TeacherGuidanceSelection,
 } from "./teacherGuidanceMove";
 export { createReviewLesson } from "./createReviewLesson";
 export { defaultTeacherReviewConfig } from "./reviewConfig";

@@ -51,6 +51,11 @@ export type TeacherGuidanceCandidate = {
   teacherScore: number;
 };
 
+export type TeacherGuidanceSelection = {
+  candidate: CandidateMoveReview;
+  guidance: TeacherGuidanceCandidate | null;
+};
+
 const defaultTeacherGuidanceShallowSearchDepth = 3;
 const defaultTeacherGuidanceDeepSearchDepth = 6;
 const defaultTeacherGuidanceRefutationSearchDepth = 1;
@@ -126,6 +131,36 @@ export function selectTeacherGuidanceCandidate({
   board: Board;
   disc: DiscColor;
 } & TeacherGuidanceMoveOptions): CandidateMoveReview | null {
+  return (
+    selectTeacherGuidanceSelection({
+      analysis,
+      board,
+      deepSearchDepth,
+      disc,
+      guidanceMode,
+      isDisadvantaged,
+      refutationSearchDepth,
+      strongCandidateScoreGap,
+      topCandidateLimit,
+    })?.candidate ?? null
+  );
+}
+
+export function selectTeacherGuidanceSelection({
+  analysis,
+  board,
+  deepSearchDepth = defaultTeacherGuidanceDeepSearchDepth,
+  disc,
+  guidanceMode = "normal",
+  isDisadvantaged,
+  refutationSearchDepth = defaultTeacherGuidanceRefutationSearchDepth,
+  strongCandidateScoreGap = defaultTeacherGuidanceStrongCandidateScoreGap,
+  topCandidateLimit = defaultTeacherGuidanceTopCandidateLimit,
+}: {
+  analysis: MoveCandidateAnalysis;
+  board: Board;
+  disc: DiscColor;
+} & TeacherGuidanceMoveOptions): TeacherGuidanceSelection | null {
   const legalMoves = getLegalMoves(board, disc);
 
   if (legalMoves.length === 0) {
@@ -134,8 +169,17 @@ export function selectTeacherGuidanceCandidate({
 
   if (shouldUseTeacherExactEndgame(board, disc)) {
     const exactSquare = choosePerfectEndgameMove(board, disc);
+    const exactCandidate = findCandidateBySquare(
+      analysis.candidateMoves,
+      exactSquare,
+    );
 
-    return findCandidateBySquare(analysis.candidateMoves, exactSquare);
+    return exactCandidate === null
+      ? null
+      : {
+          candidate: exactCandidate,
+          guidance: null,
+        };
   }
 
   const deepenedScores = getDeepenedTeacherMoveScores({
@@ -155,12 +199,23 @@ export function selectTeacherGuidanceCandidate({
     strongCandidateScoreGap,
   });
 
-  return (
-    recommendationCandidates[0]?.candidate ??
-    deepenedScores[0] ??
-    analysis.candidateMoves[0] ??
-    null
-  );
+  const recommendation = recommendationCandidates[0];
+
+  if (recommendation !== undefined) {
+    return {
+      candidate: recommendation.candidate,
+      guidance: recommendation,
+    };
+  }
+
+  const fallbackCandidate = deepenedScores[0] ?? analysis.candidateMoves[0];
+
+  return fallbackCandidate === undefined
+    ? null
+    : {
+        candidate: fallbackCandidate,
+        guidance: null,
+      };
 }
 
 function findCandidateBySquare(

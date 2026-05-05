@@ -288,6 +288,89 @@ describe("teacher coach hints", () => {
     );
   });
 
+  it("carries teacher guidance context into best move hints", () => {
+    const hints = createCoachHintsFromAnalysis(
+      {
+        candidateMoves: [
+          createCandidateMove({
+            rank: 1,
+            reasons: [],
+            score: 100,
+            square: 19,
+          }),
+          createCandidateMove({
+            metrics: {
+              opponentMobilityAfter: 1,
+            },
+            rank: 2,
+            reasons: [],
+            score: 96,
+            square: 26,
+          }),
+        ],
+        evaluationSource: "minimax",
+      },
+      {
+        bestMoveGuidance: {
+          opponentPressureScore: 8,
+          opponentReplySpread: 12,
+          refutationSeverity: null,
+          scoreGapFromBest: 4,
+        },
+        bestMoveSquare: 26,
+        includeBestMoveHint: true,
+      },
+    );
+
+    expect(hints[0]).toEqual(
+      expect.objectContaining({
+        guidance: expect.objectContaining({
+          opponentPressureScore: 8,
+          refutationSeverity: null,
+        }),
+        kind: "bestMove",
+        square: 26,
+      }),
+    );
+    expect(hints[0]?.message).toContain("行き先を絞りやすく");
+  });
+
+  it("mentions strong replies when teacher guidance detects refutation risk", () => {
+    const hints = createCoachHintsFromAnalysis(
+      {
+        candidateMoves: [
+          createCandidateMove({
+            rank: 1,
+            reasons: [],
+            score: 100,
+            square: 19,
+          }),
+        ],
+        evaluationSource: "minimax",
+      },
+      {
+        bestMoveGuidance: {
+          opponentPressureScore: 0,
+          opponentReplySpread: null,
+          refutationSeverity: "high",
+          scoreGapFromBest: 0,
+        },
+        bestMoveSquare: 19,
+        includeBestMoveHint: true,
+      },
+    );
+
+    expect(hints[0]).toEqual(
+      expect.objectContaining({
+        guidance: expect.objectContaining({
+          refutationSeverity: "high",
+        }),
+        kind: "bestMove",
+      }),
+    );
+    expect(hints[0]?.message).toContain("強い返し");
+  });
+
 
   it("warns about moves that meaningfully reduce current player mobility", () => {
     const board = createBoardFixture({

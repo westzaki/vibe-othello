@@ -21,8 +21,9 @@ import type {
   ReviewEvaluationSource,
 } from "./reviewTypes";
 import { createShapeSignals } from "./playPositionShapeSignals";
-import { selectTeacherGuidanceCandidate } from "./teacherGuidanceMove";
-import type { TeacherGuidanceOptions } from "./coachHintTypes";
+import { selectTeacherGuidanceSelection } from "./teacherGuidanceMove";
+import type { CoachHintGuidance, TeacherGuidanceOptions } from "./coachHintTypes";
+import type { TeacherGuidanceCandidate } from "./teacherGuidanceMove";
 
 export type PlayPositionPhase = "opening" | "midgame" | "endgame";
 export type PlayPositionAdvantageSource =
@@ -137,8 +138,8 @@ export function createPlayPositionAnalysis(
     candidateAnalysis.evaluationSource,
   );
   const candidateMoves = candidateAnalysis.candidateMoves;
-  const teacherGuidanceCandidate = useTeacherGuidanceMove
-    ? selectTeacherGuidanceCandidate({
+  const teacherGuidanceSelection = useTeacherGuidanceMove
+    ? selectTeacherGuidanceSelection({
         analysis: candidateAnalysis,
         board,
         deepSearchDepth,
@@ -150,6 +151,7 @@ export function createPlayPositionAnalysis(
         topCandidateLimit,
       })
     : null;
+  const teacherGuidanceCandidate = teacherGuidanceSelection?.candidate ?? null;
   const advantageSource = getPlayAdvantageSource(
     baseAdvantageSource,
     moveEvaluationSource,
@@ -170,6 +172,9 @@ export function createPlayPositionAnalysis(
       ? teacherGuidanceCandidate.square
       : null;
   const coachHints = createCoachHintsFromAnalysis(candidateAnalysis, {
+    bestMoveGuidance: createCoachHintGuidance(
+      teacherGuidanceSelection?.guidance ?? null,
+    ),
     bestMoveSquare,
     includeBestMoveHint,
     includeCandidateFallback,
@@ -199,6 +204,21 @@ export function createPlayPositionAnalysis(
     phase,
     riskCandidates,
     shapeSignals,
+  };
+}
+
+function createCoachHintGuidance(
+  guidance: TeacherGuidanceCandidate | null,
+): CoachHintGuidance | null {
+  if (guidance === null) {
+    return null;
+  }
+
+  return {
+    opponentPressureScore: guidance.opponentPressureScore,
+    opponentReplySpread: guidance.opponentReplySpread,
+    refutationSeverity: guidance.refutation?.severity ?? null,
+    scoreGapFromBest: guidance.scoreGapFromBest,
   };
 }
 
