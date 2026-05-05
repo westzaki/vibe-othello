@@ -28,8 +28,14 @@ describe("teacher move candidate analysis", () => {
       expect.objectContaining({
         givesOpponentCorner: true,
         isDangerSquare: true,
+        opponentCornerMoveDelta: expect.any(Number),
+        opponentCornerMovesAfter: expect.any(Number),
+        opponentCornerMovesBefore: expect.any(Number),
         scoreGapFromBest: expect.any(Number),
       }),
+    );
+    expect(cornerGivingCandidate?.metrics.opponentCornerMoveDelta).toBeGreaterThan(
+      0,
     );
     expect(analysis.candidateMoves[0].square).not.toBe(9);
   });
@@ -203,6 +209,14 @@ describe("teacher move candidate analysis", () => {
       boardAfter,
       opponentDisc,
     ).length;
+    const opponentCornerMovesBefore = getLegalMoves(
+      board,
+      opponentDisc,
+    ).filter((move) => [0, 7, 56, 63].includes(move)).length;
+    const opponentCornerMovesAfter = getLegalMoves(
+      boardAfter,
+      opponentDisc,
+    ).filter((move) => [0, 7, 56, 63].includes(move)).length;
 
     expect(bestCandidate.metrics).toEqual({
       anchoredEdgeDelta: 0,
@@ -217,6 +231,10 @@ describe("teacher move candidate analysis", () => {
         playerMobilityAfter -
         opponentMobilityAfter -
         (playerMobilityBefore - opponentMobilityBefore),
+      opponentCornerMoveDelta:
+        opponentCornerMovesAfter - opponentCornerMovesBefore,
+      opponentCornerMovesAfter,
+      opponentCornerMovesBefore,
       opponentMobilityAfter,
       opponentMobilityBefore,
       opponentMobilityDelta: opponentMobilityAfter - opponentMobilityBefore,
