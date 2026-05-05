@@ -63,9 +63,24 @@ To run it manually:
 VITE_TEACHER_COMEBACK_BENCHMARK=1 npm run test:run -- src/teacher/teacherComebackBenchmark.test.ts
 ```
 
-The benchmark generates slightly disadvantaged positions, lets Teacher guidance play against Level 6, and summarizes wins, losses, draws, disc difference, first guidance time, and timeout count.
+The benchmark uses a fixed 30-position seed pack of slightly disadvantaged positions.
+It measures Teacher's first comeback response and the immediate Level 6 reply, then summarizes:
+
+- average advantage swing after the Level 6 reply
+- improved / held / worsened position counts
+- average disc difference after the reply
+- average Teacher guidance time
+- average Level 6 reply time
+- null move counts
+
+For a quicker local sample, limit the number of fixed positions:
+
+```sh
+VITE_TEACHER_COMEBACK_BENCHMARK=1 VITE_TEACHER_COMEBACK_BENCHMARK_LIMIT=5 npm run test:run -- src/teacher/teacherComebackBenchmark.test.ts
+```
 
 This is a rough product-quality signal, not a formal competitive strength rating.
+It intentionally avoids full game playouts so the benchmark can be run often while tuning Play hints and Review quality.
 
 ## Future Ideas
 
