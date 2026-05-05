@@ -24,6 +24,7 @@ export function CoachHintPanel({ model }: CoachHintPanelProps) {
     >
       {model.hints.map((hint) => {
         const isRiskHint = isRiskCoachHint(hint);
+        const isBestMoveHint = hint.kind === "bestMove";
 
         return (
           <div
@@ -32,6 +33,7 @@ export function CoachHintPanel({ model }: CoachHintPanelProps) {
               isRiskHint
                 ? "coach-hint__item--risk"
                 : "coach-hint__item--helpful",
+              isBestMoveHint ? "coach-hint__item--best" : "",
             ].join(" ")}
             key={`${hint.kind}-${hint.square ?? "none"}`}
           >

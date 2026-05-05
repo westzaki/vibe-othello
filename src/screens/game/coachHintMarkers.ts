@@ -38,5 +38,9 @@ function getCoachHintTone(hint: CoachHintModel["hint"]): BoardHintTone {
 function getCoachHintSeverity(
   hint: CoachHintModel["hint"],
 ): BoardHintSeverity | undefined {
-  return isRiskCoachHint(hint) ? hint.severity : undefined;
+  if (isRiskCoachHint(hint)) {
+    return hint.severity;
+  }
+
+  return hint.kind === "bestMove" ? "high" : "medium";
 }
