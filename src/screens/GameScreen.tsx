@@ -10,6 +10,7 @@ import { usePlayCoachHintModel } from "../hooks/usePlayCoachHintModel";
 import { usePlayPositionAnalysis } from "../hooks/usePlayPositionAnalysis";
 import {
   canRequestCoachAnalysis,
+  canShowCoachHintAfterOpening,
   canShowCoachBestMoveHint,
   createCoachPlayPositionAnalysisOptions,
   defaultCoachHintSettings,
@@ -58,7 +59,8 @@ export function GameScreen({
     mode === "match" &&
     coachHintSettings.mode !== "off" &&
     game.canHumanPlay &&
-    !game.isCpuThinking;
+    !game.isCpuThinking &&
+    canShowCoachHintAfterOpening(game.session);
   const coachAnalysisDelayMs = getCoachHintDelayMs(coachHintSettings.mode);
   const coachAnalysisRequestKey = useMemo(
     () =>

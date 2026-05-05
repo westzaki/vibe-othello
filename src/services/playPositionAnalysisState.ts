@@ -38,6 +38,14 @@ export function createPlayPositionAnalysisState(
   };
 }
 
+export function createSynchronousPlayPositionAnalysis({
+  board,
+  currentDisc,
+  options,
+}: PlayPositionAnalysisSources): PlayPositionAnalysis {
+  return createLightweightPlayPositionAnalysis(board, currentDisc, options);
+}
+
 export function getCurrentPlayPositionAnalysis(
   analysisState: StoredPlayPositionAnalysisState,
   sources: PlayPositionAnalysisSources,
@@ -48,11 +56,8 @@ export function getCurrentPlayPositionAnalysis(
 
   return createSynchronousPlayPositionAnalysis(sources);
 }
-
-function createSynchronousPlayPositionAnalysis({
-  board,
-  currentDisc,
-  options,
-}: PlayPositionAnalysisSources): PlayPositionAnalysis {
-  return createLightweightPlayPositionAnalysis(board, currentDisc, options);
+export function shouldUseSynchronousPlayPositionAnalysis(
+  options: CreatePlayPositionAnalysisOptions | undefined,
+): boolean {
+  return options?.skipMoveAnalysis === true;
 }

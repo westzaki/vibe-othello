@@ -4,7 +4,9 @@ import { createPlayPositionAnalysis } from "../teacher";
 import {
   createPlayPositionAnalysisKey,
   createPlayPositionAnalysisState,
+  createSynchronousPlayPositionAnalysis,
   getCurrentPlayPositionAnalysis,
+  shouldUseSynchronousPlayPositionAnalysis,
 } from "./playPositionAnalysisState";
 
 describe("play position analysis state", () => {
@@ -50,6 +52,29 @@ describe("play position analysis state", () => {
     expect(
       getCurrentPlayPositionAnalysis(state, { board, currentDisc: "black" }),
     ).toBe(analysis);
+  });
+
+  it("detects skipMoveAnalysis as a synchronous-only source", () => {
+    expect(
+      shouldUseSynchronousPlayPositionAnalysis({ skipMoveAnalysis: true }),
+    ).toBe(true);
+    expect(shouldUseSynchronousPlayPositionAnalysis(undefined)).toBe(false);
+  });
+
+  it("creates synchronous lightweight analysis for skipped sources", () => {
+    const board = createInitialBoard();
+
+    expect(
+      createSynchronousPlayPositionAnalysis({
+        board,
+        currentDisc: "black",
+        options: { skipMoveAnalysis: true },
+      }),
+    ).toEqual(
+      createPlayPositionAnalysis(board, "black", {
+        skipMoveAnalysis: true,
+      }),
+    );
   });
 
   it("falls back to a fresh sync analysis when stored sources are stale", () => {
