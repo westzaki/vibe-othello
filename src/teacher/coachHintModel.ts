@@ -32,6 +32,11 @@ export type CoachHintVisibilityContext = {
   thinkingTimeMs?: number;
 };
 
+export type CoachBestMoveAnalysisRequestContext =
+  CoachHintVisibilityContext & {
+    enabled?: boolean;
+  };
+
 export const defaultCoachHintSettings: CoachHintSettings = {
   mode: "gentle",
 };
@@ -82,6 +87,30 @@ export function canShowCoachHint({
     currentDisc: session.currentDisc,
     mode: settings.mode,
     thinkingTimeMs,
+  });
+}
+
+export function canRequestCoachBestMoveAnalysis({
+  enabled = true,
+  ...context
+}: CoachBestMoveAnalysisRequestContext): boolean {
+  if (!enabled) {
+    return false;
+  }
+
+  if (!canShowCoachBestMoveHint(context.session)) {
+    return false;
+  }
+
+  if (!canPrepareCoachHint(context)) {
+    return false;
+  }
+
+  return canTriggerCoachHint({
+    advantage: context.advantage,
+    currentDisc: context.session.currentDisc,
+    mode: context.settings.mode,
+    thinkingTimeMs: context.thinkingTimeMs ?? 0,
   });
 }
 
@@ -180,6 +209,18 @@ export function createCoachPlayPositionAnalysisOptions(
   };
 }
 
+export function getCoachHintDelayMs(mode: CoachHintMode): number | null {
+  if (mode === "active") {
+    return activeHintDelayMs;
+  }
+
+  if (mode === "gentle") {
+    return gentleHintDelayMs;
+  }
+
+  return null;
+}
+
 export function canShowCoachHintAfterOpening(session: GameSession): boolean {
   return getPlayedMoveCount(session) >= minimumCoachHintMoveCount;
 }
@@ -266,11 +307,7 @@ function canPrepareCoachHint({
     return false;
   }
 
-  if (settings.mode === "active") {
-    return thinkingTimeMs >= activeHintDelayMs;
-  }
-
-  return thinkingTimeMs >= gentleHintDelayMs;
+  return thinkingTimeMs >= (getCoachHintDelayMs(settings.mode) ?? Infinity);
 }
 
 function canTriggerCoachHint({

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { AdvantageBar } from "../components/AdvantageBar";
 import { Board } from "../components/Board";
 import { GameHeader } from "../components/GameHeader";
@@ -9,9 +9,11 @@ import { usePassNoticeVisibility } from "../hooks/usePassNoticeVisibility";
 import { usePlayCoachHintModel } from "../hooks/usePlayCoachHintModel";
 import { usePlayPositionAnalysis } from "../hooks/usePlayPositionAnalysis";
 import {
+  canRequestCoachBestMoveAnalysis,
   canShowCoachBestMoveHint,
   createCoachPlayPositionAnalysisOptions,
   defaultCoachHintSettings,
+  getCoachHintDelayMs,
   type CoachHintSettings,
 } from "../teacher";
 import { CoachHintPanel } from "./game/CoachHintPanel";
@@ -52,17 +54,89 @@ export function GameScreen({
   practiceFeedbackText = null,
   showAdvantageBar = true,
 }: GameScreenProps) {
+  const canAnalyzeCoachHints =
+    mode === "match" &&
+    coachHintSettings.mode !== "off" &&
+    game.canHumanPlay &&
+    !game.isCpuThinking;
+  const coachAnalysisDelayMs = getCoachHintDelayMs(coachHintSettings.mode);
+  const coachAnalysisRequestKey = useMemo(
+    () =>
+      createCoachAnalysisRequestKey({
+        canAnalyzeCoachHints,
+        mode,
+        session: game.session,
+        settings: coachHintSettings,
+      }),
+    [canAnalyzeCoachHints, coachHintSettings, game.session, mode],
+  );
+  const [bestMoveAnalysisRequestKey, setBestMoveAnalysisRequestKey] = useState<
+    string | null
+  >(null);
+  const shouldRequestBestMoveAnalysis =
+    bestMoveAnalysisRequestKey === coachAnalysisRequestKey;
   const playPositionAnalysisOptions = useMemo(
     () =>
-      createCoachPlayPositionAnalysisOptions(coachHintSettings.mode, {
-        includeBestMoveHint: canShowCoachBestMoveHint(game.session),
-      }),
-    [coachHintSettings.mode, game.session],
+      createCoachPlayPositionAnalysisOptions(
+        canAnalyzeCoachHints ? coachHintSettings.mode : "off",
+        {
+          includeBestMoveHint:
+            shouldRequestBestMoveAnalysis &&
+            canShowCoachBestMoveHint(game.session),
+        },
+      ),
+    [
+      canAnalyzeCoachHints,
+      coachHintSettings.mode,
+      game.session,
+      shouldRequestBestMoveAnalysis,
+    ],
   );
   const playPositionAnalysis = usePlayPositionAnalysis(
     game.session,
     playPositionAnalysisOptions,
   );
+  const latestCoachAnalysisRequestRef = useRef({
+    advantage: playPositionAnalysis.advantage,
+    canAnalyzeCoachHints,
+    game,
+  });
+
+  useEffect(() => {
+    latestCoachAnalysisRequestRef.current = {
+      advantage: playPositionAnalysis.advantage,
+      canAnalyzeCoachHints,
+      game,
+    };
+  }, [canAnalyzeCoachHints, game, playPositionAnalysis.advantage]);
+
+  useEffect(() => {
+    if (coachAnalysisDelayMs === null) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      const latestRequest = latestCoachAnalysisRequestRef.current;
+
+      if (
+        canRequestCoachBestMoveAnalysis({
+          advantage: latestRequest.advantage,
+          enabled: latestRequest.canAnalyzeCoachHints,
+          isCpuThinking: latestRequest.game.isCpuThinking,
+          players: latestRequest.game.players,
+          session: latestRequest.game.session,
+          settings: coachHintSettings,
+          thinkingTimeMs: coachAnalysisDelayMs,
+        })
+      ) {
+        setBestMoveAnalysisRequestKey(coachAnalysisRequestKey);
+      }
+    }, coachAnalysisDelayMs);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [coachAnalysisDelayMs, coachAnalysisRequestKey, coachHintSettings]);
   const { isPassNoticeVisible, passNotice } = usePassNoticeVisibility({
     lastMove: game.lastMove,
     moveCount: game.moveHistory.length,
@@ -174,6 +248,29 @@ export function GameScreen({
       )}
     </section>
   );
+}
+
+function createCoachAnalysisRequestKey({
+  canAnalyzeCoachHints,
+  mode,
+  session,
+  settings,
+}: {
+  canAnalyzeCoachHints: boolean;
+  mode: GameScreenProps["mode"];
+  session: OthelloGameController["session"];
+  settings: CoachHintSettings;
+}): string {
+  return [
+    canAnalyzeCoachHints ? "coach-ready" : "coach-idle",
+    mode ?? "match",
+    settings.mode,
+    session.status,
+    session.currentDisc,
+    session.moveHistory.length,
+    session.lastMove ?? "none",
+    session.board.join(","),
+  ].join("|");
 }
 
 function canOpenReview(game: OthelloGameController): boolean {

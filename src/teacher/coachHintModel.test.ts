@@ -14,10 +14,12 @@ import {
 } from "../game/session";
 import { createBoardFixture } from "../test/boardFixtures";
 import {
+  canRequestCoachBestMoveAnalysis,
   canShowCoachHint,
   createCoachPlayPositionAnalysisOptions,
   createCoachHintModel,
   defaultCoachHintSettings,
+  getCoachHintDelayMs,
 } from "./coachHintModel";
 import { createPlayPositionAnalysis } from "./createPlayPositionAnalysis";
 
@@ -33,6 +35,60 @@ describe("teacher coach hint model", () => {
         useTeacherGuidanceMove: true,
       }),
     );
+  });
+
+  it("exposes coach hint delays for deferred heavy guidance analysis", () => {
+    expect(getCoachHintDelayMs("active")).toBe(1500);
+    expect(getCoachHintDelayMs("gentle")).toBe(4500);
+    expect(getCoachHintDelayMs("off")).toBeNull();
+  });
+
+  it("requests best-move analysis only after the hint can actually trigger", () => {
+    const session = withPlayedMoveCount(startNewGame(), 6);
+    const players = createOnePlayerSettings("black");
+
+    expect(
+      canRequestCoachBestMoveAnalysis({
+        advantage: createAdvantage({ blackPercent: 50 }),
+        players,
+        session,
+        settings: { mode: "active" },
+        thinkingTimeMs: 1499,
+      }),
+    ).toBe(false);
+    expect(
+      canRequestCoachBestMoveAnalysis({
+        advantage: createAdvantage({ blackPercent: 50 }),
+        players,
+        session,
+        settings: { mode: "active" },
+        thinkingTimeMs: 1500,
+      }),
+    ).toBe(true);
+  });
+
+  it("does not request gentle best-move analysis unless the player is behind", () => {
+    const session = withPlayedMoveCount(startNewGame(), 6);
+    const players = createOnePlayerSettings("black");
+
+    expect(
+      canRequestCoachBestMoveAnalysis({
+        advantage: createAdvantage({ blackPercent: 50 }),
+        players,
+        session,
+        settings: { mode: "gentle" },
+        thinkingTimeMs: 4500,
+      }),
+    ).toBe(false);
+    expect(
+      canRequestCoachBestMoveAnalysis({
+        advantage: createAdvantage({ blackPercent: 40 }),
+        players,
+        session,
+        settings: { mode: "gentle" },
+        thinkingTimeMs: 4500,
+      }),
+    ).toBe(true);
   });
 
   it("allows gentle hints after a long pause in a difficult position", () => {
