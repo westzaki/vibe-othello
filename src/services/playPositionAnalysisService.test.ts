@@ -52,6 +52,7 @@ describe("play position analysis service", () => {
     expect(response).toEqual({
       analysis,
       requestId: "play-position-opening",
+      source: "worker",
     });
     expect(cancelPlayPositionAnalysisWorkerRequestMock).not.toHaveBeenCalled();
   });
@@ -84,6 +85,7 @@ describe("play position analysis service", () => {
     expect(response).toEqual({
       analysis: expectedAnalysis,
       requestId: "fallback-play-position",
+      source: "fallback",
     });
     expect(response.analysis.coachHints).not.toEqual(
       expect.arrayContaining([
@@ -127,6 +129,7 @@ describe("play position analysis service", () => {
     expect(response).toEqual({
       analysis: expectedAnalysis,
       requestId: "error-response-play-position",
+      source: "fallback",
     });
     expect(response.analysis.coachHints).not.toEqual(
       expect.arrayContaining([
@@ -175,6 +178,7 @@ describe("play position analysis service", () => {
       expect(response).toEqual({
         analysis: expectedAnalysis,
         requestId: "timeout-play-position",
+        source: "fallback",
       });
       expect(response.analysis.coachHints).not.toEqual(
         expect.arrayContaining([
@@ -209,6 +213,7 @@ describe("play position analysis service", () => {
         skipMoveAnalysis: true,
       }),
       requestId: "lightweight-play-position",
+      source: "sync",
     });
   });
 });

@@ -21,9 +21,12 @@ export type PlayPositionAnalysisRequest = {
   requestId: string;
 };
 
+export type PlayPositionAnalysisResponseSource = "fallback" | "sync" | "worker";
+
 export type PlayPositionAnalysisResponse = {
   analysis: PlayPositionAnalysis;
   requestId: string;
+  source: PlayPositionAnalysisResponseSource;
 };
 
 const playPositionAnalysisWorkerTimeoutMs = 5000;
@@ -46,7 +49,7 @@ export async function analyzePlayPositionAsync(
   }
 
   return runPlayPositionAnalysisWorkerRequest({
-    createFallbackResponse: () => analyzePlayPositionSync(request),
+    createFallbackResponse: () => analyzePlayPositionSync(request, "fallback"),
     createWorkerRequest: (workerRequestId) => ({
       board: request.board,
       currentDisc: request.currentDisc,
@@ -59,6 +62,7 @@ export async function analyzePlayPositionAsync(
         ? {
             analysis: response.analysis,
             requestId: request.requestId,
+            source: "worker",
           }
         : null,
   });
@@ -66,6 +70,7 @@ export async function analyzePlayPositionAsync(
 
 function analyzePlayPositionSync(
   request: PlayPositionAnalysisRequest,
+  source: PlayPositionAnalysisResponseSource = "sync",
 ): PlayPositionAnalysisResponse {
   return {
     analysis: createLightweightPlayPositionAnalysis(
@@ -74,5 +79,6 @@ function analyzePlayPositionSync(
       request.options,
     ),
     requestId: request.requestId,
+    source,
   };
 }

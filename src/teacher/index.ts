@@ -65,6 +65,12 @@ export type {
   CoachHintSettings,
   CoachHintVisibilityContext,
 } from "./coachHintModel";
+export { createCoachHintDebugSnapshot } from "./coachHintDiagnostics";
+export type {
+  CoachHintAnalysisDebugStatus,
+  CoachHintDebugReason,
+  CoachHintDebugSnapshot,
+} from "./coachHintDiagnostics";
 export {
   chooseTeacherGuidanceMove,
   selectTeacherGuidanceCandidate,
