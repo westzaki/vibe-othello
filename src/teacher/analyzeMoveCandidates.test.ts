@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { placeDisc } from "../game/othello";
+import { getLegalMoves, getNextDisc, placeDisc } from "../game/othello";
 import { createBoardFixture } from "../test/boardFixtures";
 import {
   analyzeMoveCandidates,
@@ -24,6 +24,13 @@ describe("teacher move candidate analysis", () => {
 
     expect(analysis.evaluationSource).toBe("minimax");
     expect(cornerGivingCandidate?.reasons).toContain("cornerGiven");
+    expect(cornerGivingCandidate?.metrics).toEqual(
+      expect.objectContaining({
+        givesOpponentCorner: true,
+        isDangerSquare: true,
+        scoreGapFromBest: expect.any(Number),
+      }),
+    );
     expect(analysis.candidateMoves[0].square).not.toBe(9);
   });
 
@@ -115,6 +122,7 @@ describe("teacher move candidate analysis", () => {
     );
 
     expect(mobilityCandidate?.reasons).toContain("mobilityGain");
+    expect(mobilityCandidate?.metrics.mobilitySwing).toBeGreaterThanOrEqual(3);
   });
 
   it("marks candidates that reduce current player mobility", () => {
@@ -137,5 +145,49 @@ describe("teacher move candidate analysis", () => {
     );
 
     expect(mobilityCandidate?.reasons).toContain("mobilityLoss");
+    expect(mobilityCandidate?.metrics.mobilitySwing).toBeLessThanOrEqual(-3);
+  });
+
+  it("stores before and after mobility metrics for each candidate", () => {
+    const board = createBoardFixture({
+      18: "white",
+      19: "black",
+      27: "white",
+      28: "black",
+      35: "black",
+      36: "white",
+    });
+    const analysis = analyzeMoveCandidates(board, "black", {
+      searchDepth: 1,
+    });
+    const bestCandidate = analysis.candidateMoves[0];
+    const boardAfter = placeDisc(board, bestCandidate.square, "black");
+    const opponentDisc = getNextDisc("black");
+    const playerMobilityBefore = getLegalMoves(board, "black").length;
+    const playerMobilityAfter = getLegalMoves(boardAfter, "black").length;
+    const opponentMobilityBefore = getLegalMoves(board, opponentDisc).length;
+    const opponentMobilityAfter = getLegalMoves(
+      boardAfter,
+      opponentDisc,
+    ).length;
+
+    expect(bestCandidate.metrics).toEqual({
+      givesOpponentCorner: false,
+      isCorner: false,
+      isDangerSquare: false,
+      mobilityDifferenceAfter: playerMobilityAfter - opponentMobilityAfter,
+      mobilityDifferenceBefore: playerMobilityBefore - opponentMobilityBefore,
+      mobilitySwing:
+        playerMobilityAfter -
+        opponentMobilityAfter -
+        (playerMobilityBefore - opponentMobilityBefore),
+      opponentMobilityAfter,
+      opponentMobilityBefore,
+      opponentMobilityDelta: opponentMobilityAfter - opponentMobilityBefore,
+      playerMobilityAfter,
+      playerMobilityBefore,
+      playerMobilityDelta: playerMobilityAfter - playerMobilityBefore,
+      scoreGapFromBest: 0,
+    });
   });
 });

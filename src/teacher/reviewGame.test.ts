@@ -27,7 +27,7 @@ describe("teacher review", () => {
     expect(review.reviewedMoves[0].candidateMoves.length).toBeGreaterThan(0);
   });
 
-  it("keeps structured candidate scores for later move-by-move analysis", () => {
+  it("keeps structured candidate scores and metrics for later move-by-move analysis", () => {
     const session = placeCurrentDisc(startNewGame(), 19).session;
     const review = reviewGame(session.moveHistory, {
       reviewedDisc: "black",
@@ -37,6 +37,12 @@ describe("teacher review", () => {
 
     expect(reviewedMove.candidateMoves[0]).toEqual(
       expect.objectContaining({
+        metrics: expect.objectContaining({
+          mobilitySwing: expect.any(Number),
+          playerMobilityAfter: expect.any(Number),
+          playerMobilityBefore: expect.any(Number),
+          scoreGapFromBest: 0,
+        }),
         rank: 1,
         score: expect.any(Number),
         square: expect.any(Number),

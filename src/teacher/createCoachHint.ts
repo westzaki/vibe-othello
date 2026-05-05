@@ -151,7 +151,7 @@ function findRiskCandidate(
       return true;
     }
 
-    return bestCandidate.score - candidate.score >= actionableRiskScoreGap;
+    return candidate.metrics.scoreGapFromBest >= actionableRiskScoreGap;
   });
 }
 

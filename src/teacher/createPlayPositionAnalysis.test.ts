@@ -13,6 +13,7 @@ describe("createPlayPositionAnalysis", () => {
       expect.objectContaining({
         advantageSource: "heuristic",
         confidence: "medium",
+        confidenceReason: "searchCandidates",
         currentDisc: "black",
         emptyCount: 60,
         moveEvaluationSource: "search",
@@ -27,6 +28,7 @@ describe("createPlayPositionAnalysis", () => {
         square: expect.any(Number),
       }),
     ]);
+    expect(analysis.shapeSignals).toEqual([]);
   });
 
   it("keeps risk and helpful candidates in the same analysis", () => {
@@ -63,6 +65,19 @@ describe("createPlayPositionAnalysis", () => {
         square: 0,
       }),
     ]);
+    expect(analysis.shapeSignals).toEqual([
+      expect.objectContaining({
+        kind: "cornerOpportunity",
+        square: 0,
+        strength: "high",
+        tone: "helpful",
+      }),
+      expect.objectContaining({
+        kind: "mobilityRisk",
+        square: 9,
+        tone: "risk",
+      }),
+    ]);
   });
 
   it("uses exact endgame confidence for late positions", () => {
@@ -78,6 +93,7 @@ describe("createPlayPositionAnalysis", () => {
       expect.objectContaining({
         advantageSource: "exactEndgame",
         confidence: "high",
+        confidenceReason: "exactEndgame",
         moveEvaluationSource: "exactEndgame",
         phase: "endgame",
       }),
@@ -92,6 +108,14 @@ describe("createPlayPositionAnalysis", () => {
         kind: "endgame",
       }),
     );
+    expect(analysis.shapeSignals).toEqual([
+      expect.objectContaining({
+        kind: "endgame",
+        square: expect.any(Number),
+        strength: "high",
+        tone: "neutral",
+      }),
+    ]);
   });
 
   it("returns no move candidates when the current player cannot move", () => {
@@ -107,8 +131,10 @@ describe("createPlayPositionAnalysis", () => {
         candidateMoves: [],
         coachHints: [],
         confidence: "high",
+        confidenceReason: "finalBoard",
         legalMoves: [],
         moveEvaluationSource: "none",
+        shapeSignals: [],
       }),
     );
   });
