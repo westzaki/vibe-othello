@@ -95,7 +95,7 @@
   }
 
   .start-screen__board-preview {
-    width: min(34vw, 120px);
+    width: min(72vw, 240px);
   }
 
   .start-panel {

@@ -15,7 +15,27 @@
 
 @media (min-width: 860px) {
   .start-screen {
-    width: min(100%, 820px);
+    width: min(100%, 1080px);
+  }
+
+  .start-menu {
+    grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+    align-items: stretch;
+  }
+
+  .start-screen__hero {
+    grid-template-columns: 1fr;
+    align-content: center;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .start-screen__header {
+    justify-items: center;
+  }
+
+  .start-screen__header::after {
+    justify-self: center;
   }
 }
 
