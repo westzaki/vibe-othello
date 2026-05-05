@@ -28,25 +28,40 @@ export type MoveCandidateAnalysis = {
 
 export type AnalyzeMoveCandidatesOptions = {
   searchDepth: number;
+  useSelectiveDeepening?: boolean;
 };
 
 const exactEndgameReviewEmptyThreshold = 10;
 const exactEndgameReviewScoreWeight = 10;
 const cornerGivenScorePenalty = 90;
+const anchoredEdgeScoreBonus = 18;
 const mobilitySwingThreshold = 3;
+const anchoredEdgeGainThreshold = 1;
 const dangerSquaresByCorner = new Map<SquareIndex, SquareIndex[]>([
   [0, [1, 8, 9]],
   [7, [6, 14, 15]],
   [56, [48, 49, 57]],
   [63, [54, 55, 62]],
 ]);
+const edgeRaysByCorner: Array<{
+  corner: SquareIndex;
+  directions: [number, number];
+}> = [
+  { corner: 0, directions: [1, 8] },
+  { corner: 7, directions: [-1, 8] },
+  { corner: 56, directions: [1, -8] },
+  { corner: 63, directions: [-1, -8] },
+];
 
 export function analyzeMoveCandidates(
   board: Board,
   disc: DiscColor,
-  { searchDepth }: AnalyzeMoveCandidatesOptions,
+  { searchDepth, useSelectiveDeepening }: AnalyzeMoveCandidatesOptions,
 ): MoveCandidateAnalysis {
-  const moveScores = getMoveScores(board, disc, searchDepth);
+  const moveScores = getMoveScores(board, disc, {
+    searchDepth,
+    useSelectiveDeepening,
+  });
   const bestScore = moveScores.scores[0]?.score ?? 0;
 
   return {
@@ -78,7 +93,11 @@ export function analyzeMoveCandidates(
 function getMoveScores(
   board: Board,
   disc: DiscColor,
-  searchDepth: number,
+  {
+    searchDepth,
+    useSelectiveDeepening,
+  }: Required<Pick<AnalyzeMoveCandidatesOptions, "searchDepth">> &
+    Pick<AnalyzeMoveCandidatesOptions, "useSelectiveDeepening">,
 ): {
   evaluationSource: ReviewEvaluationSource;
   scores: MinimaxMoveScore[];
@@ -97,6 +116,7 @@ function getMoveScores(
       disc,
       getMinimaxMoveScores(board, disc, {
         searchDepth,
+        useSelectiveDeepening,
       }),
     ),
   };
@@ -113,14 +133,36 @@ function getTeacherAdjustedMoveScores(
 
       return {
         move,
-        score:
-          score -
-          (newlyGivesCorner(board, boardAfter, disc)
-            ? cornerGivenScorePenalty
-            : 0),
+        score: getTeacherAdjustedMoveScore({
+          boardAfter,
+          boardBefore: board,
+          disc,
+          score,
+        }),
       };
     })
     .sort((firstMove, secondMove) => secondMove.score - firstMove.score);
+}
+
+function getTeacherAdjustedMoveScore({
+  boardAfter,
+  boardBefore,
+  disc,
+  score,
+}: {
+  boardAfter: Board;
+  boardBefore: Board;
+  disc: DiscColor;
+  score: number;
+}): number {
+  return (
+    score -
+    (newlyGivesCorner(boardBefore, boardAfter, disc)
+      ? cornerGivenScorePenalty
+      : 0) +
+    getAnchoredEdgeDelta(boardBefore, boardAfter, disc) *
+      anchoredEdgeScoreBonus
+  );
 }
 
 function getWeightedExactEndgameMoveScores(
@@ -173,6 +215,10 @@ function getMoveCandidateReasonsFromMetrics(
     reasons.push("mobilityLoss");
   }
 
+  if (metrics.anchoredEdgeDelta >= anchoredEdgeGainThreshold) {
+    reasons.push("stablePosition");
+  }
+
   return reasons;
 }
 
@@ -198,8 +244,20 @@ function getMoveCandidateMetrics({
   const mobilityDifferenceBefore =
     playerMobilityBefore - opponentMobilityBefore;
   const mobilityDifferenceAfter = playerMobilityAfter - opponentMobilityAfter;
+  const anchoredEdgeDifferenceBefore = getAnchoredEdgeDifference(
+    boardBefore,
+    disc,
+  );
+  const anchoredEdgeDifferenceAfter = getAnchoredEdgeDifference(
+    boardAfter,
+    disc,
+  );
 
   return {
+    anchoredEdgeDelta:
+      anchoredEdgeDifferenceAfter - anchoredEdgeDifferenceBefore,
+    anchoredEdgeDifferenceAfter,
+    anchoredEdgeDifferenceBefore,
     givesOpponentCorner: newlyGivesCorner(boardBefore, boardAfter, disc),
     isCorner: isCorner(square),
     isDangerSquare: isDangerSquare(boardBefore, square),
@@ -214,6 +272,74 @@ function getMoveCandidateMetrics({
     playerMobilityDelta: playerMobilityAfter - playerMobilityBefore,
     scoreGapFromBest: Math.max(0, bestScore - score),
   };
+}
+
+function getAnchoredEdgeDelta(
+  boardBefore: Board,
+  boardAfter: Board,
+  disc: DiscColor,
+): number {
+  return (
+    getAnchoredEdgeDifference(boardAfter, disc) -
+    getAnchoredEdgeDifference(boardBefore, disc)
+  );
+}
+
+function getAnchoredEdgeDifference(board: Board, disc: DiscColor): number {
+  return (
+    getAnchoredEdgeCount(board, disc) -
+    getAnchoredEdgeCount(board, getNextDisc(disc))
+  );
+}
+
+function getAnchoredEdgeCount(board: Board, disc: DiscColor): number {
+  return edgeRaysByCorner.reduce<number>(
+    (count, { corner, directions }) =>
+      count +
+      directions.reduce<number>(
+        (rayCount, direction) =>
+          rayCount + getAnchoredEdgeRayCount(board, disc, corner, direction),
+        0,
+      ),
+    0,
+  );
+}
+
+function getAnchoredEdgeRayCount(
+  board: Board,
+  disc: DiscColor,
+  corner: SquareIndex,
+  direction: number,
+): number {
+  if (board[corner] !== disc) {
+    return 0;
+  }
+
+  let count = 1;
+  let square = corner + direction;
+
+  while (isEdgeRaySquare(corner, direction, square) && board[square] === disc) {
+    count += 1;
+    square += direction;
+  }
+
+  return count;
+}
+
+function isEdgeRaySquare(
+  corner: SquareIndex,
+  direction: number,
+  square: SquareIndex,
+): boolean {
+  if (square < 0 || square >= 64) {
+    return false;
+  }
+
+  if (direction === 1 || direction === -1) {
+    return Math.floor(square / 8) === Math.floor(corner / 8);
+  }
+
+  return square % 8 === corner % 8;
 }
 
 function newlyGivesCorner(

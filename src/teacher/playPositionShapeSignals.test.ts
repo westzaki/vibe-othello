@@ -75,6 +75,9 @@ function createCandidate({
 }): CandidateMoveReview {
   return {
     metrics: {
+      anchoredEdgeDelta: 0,
+      anchoredEdgeDifferenceAfter: 0,
+      anchoredEdgeDifferenceBefore: 0,
       givesOpponentCorner: false,
       isCorner: false,
       isDangerSquare: false,

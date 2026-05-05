@@ -67,4 +67,34 @@ describe("play position analysis state", () => {
       }),
     ).toEqual(createPlayPositionAnalysis(nextBoard, "white"));
   });
+
+  it("keeps stale fallback analysis lightweight while teacher guidance loads", () => {
+    const board = createInitialBoard();
+    const nextBoard = placeDisc(board, 19, "black");
+    const state = createPlayPositionAnalysisState({
+      board,
+      currentDisc: "black",
+      options: {
+        includeBestMoveHint: true,
+        useTeacherGuidanceMove: true,
+      },
+    });
+
+    const analysis = getCurrentPlayPositionAnalysis(state, {
+      board: nextBoard,
+      currentDisc: "white",
+      options: {
+        includeBestMoveHint: true,
+        useTeacherGuidanceMove: true,
+      },
+    });
+
+    expect(analysis.coachHints).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "bestMove",
+        }),
+      ]),
+    );
+  });
 });

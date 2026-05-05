@@ -58,6 +58,11 @@ describe("play position analysis service", () => {
 
   it("falls back to sync analysis when the worker rejects", async () => {
     const board = createInitialBoard();
+    const options = {
+      includeBestMoveHint: true,
+      searchDepth: 1,
+      useTeacherGuidanceMove: true,
+    } as const;
     analyzePlayPositionInWorkerMock.mockRejectedValue(
       new Error("Worker failed"),
     );
@@ -65,13 +70,27 @@ describe("play position analysis service", () => {
     const response = await analyzePlayPositionAsync({
       board,
       currentDisc: "black",
+      options,
       requestId: "fallback-play-position",
     });
 
+    const expectedAnalysis = createPlayPositionAnalysis(board, "black", {
+      ...options,
+      includeBestMoveHint: false,
+      useTeacherGuidanceMove: false,
+    });
+
     expect(response).toEqual({
-      analysis: createPlayPositionAnalysis(board, "black"),
+      analysis: expectedAnalysis,
       requestId: "fallback-play-position",
     });
+    expect(response.analysis.coachHints).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "bestMove",
+        }),
+      ]),
+    );
     expect(cancelPlayPositionAnalysisWorkerRequestMock).toHaveBeenCalledWith(
       expect.any(Number),
     );
@@ -79,6 +98,11 @@ describe("play position analysis service", () => {
 
   it("falls back to sync analysis when the worker returns an error response", async () => {
     const board = createInitialBoard();
+    const options = {
+      includeBestMoveHint: true,
+      searchDepth: 1,
+      useTeacherGuidanceMove: true,
+    } as const;
     analyzePlayPositionInWorkerMock.mockResolvedValue({
       message: "Play position analysis worker error",
       requestId: 101,
@@ -88,18 +112,37 @@ describe("play position analysis service", () => {
     const response = await analyzePlayPositionAsync({
       board,
       currentDisc: "black",
+      options,
       requestId: "error-response-play-position",
     });
 
+    const expectedAnalysis = createPlayPositionAnalysis(board, "black", {
+      ...options,
+      includeBestMoveHint: false,
+      useTeacherGuidanceMove: false,
+    });
+
     expect(response).toEqual({
-      analysis: createPlayPositionAnalysis(board, "black"),
+      analysis: expectedAnalysis,
       requestId: "error-response-play-position",
     });
+    expect(response.analysis.coachHints).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "bestMove",
+        }),
+      ]),
+    );
     expect(cancelPlayPositionAnalysisWorkerRequestMock).not.toHaveBeenCalled();
   });
 
   it("falls back to sync analysis when the worker times out", async () => {
     const board = createInitialBoard();
+    const options = {
+      includeBestMoveHint: true,
+      searchDepth: 1,
+      useTeacherGuidanceMove: true,
+    } as const;
     const setTimeoutSpy = vi
       .spyOn(globalThis, "setTimeout")
       .mockImplementation((handler) => {
@@ -116,13 +159,27 @@ describe("play position analysis service", () => {
       const response = await analyzePlayPositionAsync({
         board,
         currentDisc: "black",
+        options,
         requestId: "timeout-play-position",
       });
 
+      const expectedAnalysis = createPlayPositionAnalysis(board, "black", {
+        ...options,
+        includeBestMoveHint: false,
+        useTeacherGuidanceMove: false,
+      });
+
       expect(response).toEqual({
-        analysis: createPlayPositionAnalysis(board, "black"),
+        analysis: expectedAnalysis,
         requestId: "timeout-play-position",
       });
+      expect(response.analysis.coachHints).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            kind: "bestMove",
+          }),
+        ]),
+      );
       expect(cancelPlayPositionAnalysisWorkerRequestMock).toHaveBeenCalledWith(
         expect.any(Number),
       );

@@ -1,9 +1,9 @@
 import type { Board, DiscColor } from "../game/othello";
-import {
-  createPlayPositionAnalysis,
-  type CreatePlayPositionAnalysisOptions,
-  type PlayPositionAnalysis,
+import type {
+  CreatePlayPositionAnalysisOptions,
+  PlayPositionAnalysis,
 } from "../teacher";
+import { createLightweightPlayPositionAnalysis } from "./playPositionAnalysisFallback";
 
 export type PlayPositionAnalysisSources = {
   board: Board;
@@ -30,11 +30,7 @@ export function createPlayPositionAnalysisKey({
 
 export function createPlayPositionAnalysisState(
   sources: PlayPositionAnalysisSources,
-  analysis = createPlayPositionAnalysis(
-    sources.board,
-    sources.currentDisc,
-    sources.options,
-  ),
+  analysis = createSynchronousPlayPositionAnalysis(sources),
 ): StoredPlayPositionAnalysisState {
   return {
     analysis,
@@ -50,9 +46,13 @@ export function getCurrentPlayPositionAnalysis(
     return analysisState.analysis;
   }
 
-  return createPlayPositionAnalysis(
-    sources.board,
-    sources.currentDisc,
-    sources.options,
-  );
+  return createSynchronousPlayPositionAnalysis(sources);
+}
+
+function createSynchronousPlayPositionAnalysis({
+  board,
+  currentDisc,
+  options,
+}: PlayPositionAnalysisSources): PlayPositionAnalysis {
+  return createLightweightPlayPositionAnalysis(board, currentDisc, options);
 }

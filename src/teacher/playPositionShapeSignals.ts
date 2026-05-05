@@ -59,6 +59,23 @@ export function createShapeSignals({
     });
   }
 
+  const stableEdgeCandidate = candidateMoves.find((candidate) =>
+    candidate.reasons.includes("stablePosition"),
+  );
+
+  if (
+    stableEdgeCandidate !== undefined &&
+    !signals.some((signal) => signal.square === stableEdgeCandidate.square)
+  ) {
+    signals.push({
+      candidate: stableEdgeCandidate,
+      kind: "stableEdge",
+      square: stableEdgeCandidate.square,
+      strength: "medium",
+      tone: "helpful",
+    });
+  }
+
   const mobilityOpportunityCandidate = candidateMoves.find((candidate) =>
     candidate.reasons.includes("mobilityGain"),
   );

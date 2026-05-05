@@ -32,6 +32,21 @@ describe("createPlayPositionAnalysis", () => {
     expect(analysis.shapeSignals).toEqual([]);
   });
 
+  it("can prepare direct teacher guidance from the strongest candidate", () => {
+    const analysis = createPlayPositionAnalysis(createInitialBoard(), "black", {
+      includeBestMoveHint: true,
+      searchDepth: 1,
+      useSelectiveDeepening: true,
+    });
+
+    expect(analysis.coachHints[0]).toEqual(
+      expect.objectContaining({
+        kind: "bestMove",
+        square: analysis.candidateMoves[0].square,
+      }),
+    );
+  });
+
   it("adjusts the play advantage with the best candidate search outlook", () => {
     const board = createBoardFixture({
       1: "white",

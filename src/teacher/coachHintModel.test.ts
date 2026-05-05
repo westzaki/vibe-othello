@@ -15,6 +15,7 @@ import {
   createCoachHintModel,
   defaultCoachHintSettings,
 } from "./coachHintModel";
+import { createPlayPositionAnalysis } from "./createPlayPositionAnalysis";
 
 describe("teacher coach hint model", () => {
   it("allows gentle hints after a long pause in a difficult position", () => {
@@ -165,6 +166,24 @@ describe("teacher coach hint model", () => {
     ).toBe(false);
   });
 
+  it("waits for teacher guidance before showing play hints", () => {
+    const session = startNewGame();
+    const model = createCoachHintModel({
+      advantage: createAdvantage({ blackPercent: 50 }),
+      analysis: createPlayPositionAnalysis(session.board, "black", {
+        includeBestMoveHint: false,
+        includeCandidateFallback: true,
+        searchDepth: 1,
+      }),
+      players: createOnePlayerSettings("black"),
+      session,
+      settings: { mode: "active" },
+      thinkingTimeMs: 1500,
+    });
+
+    expect(model).toBeNull();
+  });
+
   it("creates a vague gentle model after a long pause in a difficult position", () => {
     const session = createPracticeSessionFromBoard(
       createBoardFixture({
@@ -185,7 +204,7 @@ describe("teacher coach hint model", () => {
       expect.objectContaining({
         mode: "gentle",
         hint: expect.objectContaining({
-          kind: "cornerOpportunity",
+          kind: "bestMove",
           square: 0,
         }),
       }),
@@ -210,7 +229,7 @@ describe("teacher coach hint model", () => {
       expect.objectContaining({
         mode: "gentle",
         hint: expect.objectContaining({
-          kind: "mobility",
+          kind: "bestMove",
           square: 26,
         }),
       }),
@@ -235,12 +254,20 @@ describe("teacher coach hint model", () => {
       expect.objectContaining({
         mode: "active",
         hint: expect.objectContaining({
-          kind: "mobilityRisk",
-          square: 11,
+          kind: "bestMove",
+          square: expect.any(Number),
         }),
       }),
     );
-    expect(model?.hint.message).toContain("D2");
+    expect(model?.hint.message).toContain("本命");
+    expect(model?.hints).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "mobilityRisk",
+          square: 11,
+        }),
+      ]),
+    );
   });
 
   it("creates a specific active model after a shorter pause", () => {
@@ -260,7 +287,7 @@ describe("teacher coach hint model", () => {
       expect.objectContaining({
         mode: "active",
         hint: expect.objectContaining({
-          kind: "mobility",
+          kind: "bestMove",
           square: 26,
         }),
       }),
@@ -289,7 +316,7 @@ describe("teacher coach hint model", () => {
         }),
         mode: "active",
         hint: expect.objectContaining({
-          kind: "candidate",
+          kind: "bestMove",
           square: expect.any(Number),
         }),
       }),

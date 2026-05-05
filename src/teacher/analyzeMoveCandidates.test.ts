@@ -125,6 +125,39 @@ describe("teacher move candidate analysis", () => {
     expect(mobilityCandidate?.metrics.mobilitySwing).toBeGreaterThanOrEqual(3);
   });
 
+  it("marks candidates that extend an edge anchored by an owned corner", () => {
+    const board = createBoardFixture({
+      0: "black",
+      2: "white",
+      3: "black",
+    });
+    const analysis = analyzeMoveCandidates(board, "black", {
+      searchDepth: 1,
+    });
+    const anchoredEdgeCandidate = analysis.candidateMoves.find(
+      (candidate) => candidate.square === 1,
+    );
+
+    expect(anchoredEdgeCandidate?.reasons).toContain("stablePosition");
+    expect(anchoredEdgeCandidate?.metrics.anchoredEdgeDelta).toBeGreaterThan(0);
+  });
+
+  it("does not mark open-corner edge moves as anchored edges", () => {
+    const board = createBoardFixture({
+      2: "white",
+      3: "black",
+    });
+    const analysis = analyzeMoveCandidates(board, "black", {
+      searchDepth: 1,
+    });
+    const edgeCandidate = analysis.candidateMoves.find(
+      (candidate) => candidate.square === 1,
+    );
+
+    expect(edgeCandidate?.reasons).not.toContain("stablePosition");
+    expect(edgeCandidate?.metrics.anchoredEdgeDelta).toBe(0);
+  });
+
   it("marks candidates that reduce current player mobility", () => {
     const board = createBoardFixture({
       1: "black",
@@ -172,6 +205,9 @@ describe("teacher move candidate analysis", () => {
     ).length;
 
     expect(bestCandidate.metrics).toEqual({
+      anchoredEdgeDelta: 0,
+      anchoredEdgeDifferenceAfter: 0,
+      anchoredEdgeDifferenceBefore: 0,
       givesOpponentCorner: false,
       isCorner: false,
       isDangerSquare: false,

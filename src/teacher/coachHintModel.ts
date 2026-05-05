@@ -5,6 +5,7 @@ import { getSessionLegalMoves, type GameSession } from "../game/session";
 import type { CoachHint } from "./createCoachHint";
 import {
   createPlayPositionAnalysis,
+  type CreatePlayPositionAnalysisOptions,
   type PlayPositionAnalysis,
 } from "./createPlayPositionAnalysis";
 
@@ -38,6 +39,9 @@ export const defaultCoachHintSettings: CoachHintSettings = {
 const activeHintDelayMs = 1500;
 const gentleHintDelayMs = 4500;
 const gentleDisadvantagePercent = 45;
+const coachGuidanceSearchDepth = 4;
+const teacherGuidanceShallowSearchDepth = 3;
+const teacherGuidanceDeepSearchDepth = 6;
 
 export function canShowCoachHint({
   advantage,
@@ -94,11 +98,7 @@ export function createCoachHintModel(
     createPlayPositionAnalysis(
       context.session.board,
       context.session.currentDisc,
-      {
-        includeCandidateFallback: mode === "active",
-        messageStyle: mode === "gentle" ? "vague" : "specific",
-        riskHintLimit: mode === "active" ? 3 : 2,
-      },
+      createCoachPlayPositionAnalysisOptions(mode),
     );
 
   if (
@@ -113,6 +113,11 @@ export function createCoachHintModel(
   }
 
   const hints = analysis.coachHints;
+
+  if (requiresTeacherGuidanceHint(mode) && !hasBestMoveHint(hints)) {
+    return null;
+  }
+
   const hint = hints[0] ?? null;
 
   if (hint === null) {
@@ -124,6 +129,33 @@ export function createCoachHintModel(
     hint,
     hints,
     mode,
+  };
+}
+
+function requiresTeacherGuidanceHint(
+  mode: Exclude<CoachHintMode, "off">,
+): boolean {
+  return mode === "gentle" || mode === "active";
+}
+
+function hasBestMoveHint(hints: CoachHint[]): boolean {
+  return hints.some((hint) => hint.kind === "bestMove");
+}
+
+export function createCoachPlayPositionAnalysisOptions(
+  mode: CoachHintMode,
+): CreatePlayPositionAnalysisOptions {
+  return {
+    includeBestMoveHint: mode !== "off",
+    includeCandidateFallback: mode !== "off",
+    messageStyle: mode === "gentle" ? "vague" : "specific",
+    riskHintLimit: mode === "active" ? 3 : 2,
+    searchDepth: mode === "off" ? undefined : coachGuidanceSearchDepth,
+    shallowSearchDepth:
+      mode === "off" ? undefined : teacherGuidanceShallowSearchDepth,
+    deepSearchDepth: mode === "off" ? undefined : teacherGuidanceDeepSearchDepth,
+    useSelectiveDeepening: mode !== "off",
+    useTeacherGuidanceMove: mode !== "off",
   };
 }
 
