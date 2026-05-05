@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeAppSettings } from "./useAppSettings";
+import { normalizeAppSettings } from "./appSettingsStorage";
 
 describe("normalizeAppSettings", () => {
   it("keeps stored boolean settings", () => {
