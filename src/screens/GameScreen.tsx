@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import { AdvantageBar } from "../components/AdvantageBar";
 import { Board } from "../components/Board";
 import { GameHeader } from "../components/GameHeader";
@@ -6,16 +6,11 @@ import { GameResultOverlay } from "../components/GameResultOverlay";
 import { MoveHistory } from "../components/MoveHistory";
 import type { OthelloGameController } from "../hooks/useOthelloGame";
 import { usePassNoticeVisibility } from "../hooks/usePassNoticeVisibility";
+import { usePlayCoachAnalysis } from "../hooks/usePlayCoachAnalysis";
 import { usePlayCoachHintModel } from "../hooks/usePlayCoachHintModel";
-import { usePlayPositionAnalysisResult } from "../hooks/usePlayPositionAnalysis";
 import {
-  canRequestCoachAnalysis,
-  canShowCoachHintAfterOpening,
-  canShowCoachBestMoveHint,
   createCoachHintDebugSnapshot,
-  createCoachPlayPositionAnalysisOptions,
   defaultCoachHintSettings,
-  getCoachHintDelayMs,
   type CoachHintSettings,
 } from "../teacher";
 import { CoachHintPanel } from "./game/CoachHintPanel";
@@ -56,95 +51,16 @@ export function GameScreen({
   practiceFeedbackText = null,
   showAdvantageBar = true,
 }: GameScreenProps) {
-  const canAnalyzeCoachHints =
-    mode === "match" &&
-    coachHintSettings.mode !== "off" &&
-    game.canHumanPlay &&
-    !game.isCpuThinking &&
-    canShowCoachHintAfterOpening(game.session);
-  const coachAnalysisDelayMs = getCoachHintDelayMs(coachHintSettings.mode);
-  const coachAnalysisRequestKey = useMemo(
-    () =>
-      createCoachAnalysisRequestKey({
-        canAnalyzeCoachHints,
-        mode,
-        session: game.session,
-        settings: coachHintSettings,
-      }),
-    [canAnalyzeCoachHints, coachHintSettings, game.session, mode],
-  );
-  const [coachAnalysisRequestedKey, setCoachAnalysisRequestedKey] = useState<
-    string | null
-  >(null);
-  const shouldRequestCoachAnalysis =
-    coachAnalysisRequestedKey === coachAnalysisRequestKey;
-  const shouldRequestBestMoveAnalysis = shouldRequestCoachAnalysis;
-  const playPositionAnalysisOptions = useMemo(
-    () =>
-      createCoachPlayPositionAnalysisOptions(
-        canAnalyzeCoachHints && shouldRequestCoachAnalysis
-          ? coachHintSettings.mode
-          : "off",
-        {
-          includeBestMoveHint:
-            shouldRequestBestMoveAnalysis &&
-            canShowCoachBestMoveHint(game.session),
-        },
-      ),
-    [
-      canAnalyzeCoachHints,
-      coachHintSettings.mode,
-      game.session,
-      shouldRequestCoachAnalysis,
-      shouldRequestBestMoveAnalysis,
-    ],
-  );
-  const playPositionAnalysisResult = usePlayPositionAnalysisResult(
-    game.session,
-    playPositionAnalysisOptions,
-  );
-  const playPositionAnalysis = playPositionAnalysisResult.analysis;
-  const latestCoachAnalysisRequestRef = useRef({
-    advantage: playPositionAnalysis.advantage,
-    canAnalyzeCoachHints,
+  const {
+    analysis: playPositionAnalysis,
+    debugStatus: playPositionAnalysisDebugStatus,
+    canRequestAnalysisAtDelay,
+    shouldRequestCoachAnalysis,
+  } = usePlayCoachAnalysis({
     game,
+    mode,
+    settings: coachHintSettings,
   });
-
-  useEffect(() => {
-    latestCoachAnalysisRequestRef.current = {
-      advantage: playPositionAnalysis.advantage,
-      canAnalyzeCoachHints,
-      game,
-    };
-  }, [canAnalyzeCoachHints, game, playPositionAnalysis.advantage]);
-
-  useEffect(() => {
-    if (coachAnalysisDelayMs === null) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      const latestRequest = latestCoachAnalysisRequestRef.current;
-
-      if (
-        canRequestCoachAnalysis({
-          advantage: latestRequest.advantage,
-          enabled: latestRequest.canAnalyzeCoachHints,
-          isCpuThinking: latestRequest.game.isCpuThinking,
-          players: latestRequest.game.players,
-          session: latestRequest.game.session,
-          settings: coachHintSettings,
-          thinkingTimeMs: coachAnalysisDelayMs,
-        })
-      ) {
-        setCoachAnalysisRequestedKey(coachAnalysisRequestKey);
-      }
-    }, coachAnalysisDelayMs);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [coachAnalysisDelayMs, coachAnalysisRequestKey, coachHintSettings]);
   const { isPassNoticeVisible, passNotice } = usePassNoticeVisibility({
     lastMove: game.lastMove,
     moveCount: game.moveHistory.length,
@@ -168,18 +84,8 @@ export function GameScreen({
       import.meta.env.DEV
         ? createCoachHintDebugSnapshot({
             analysis: playPositionAnalysis,
-            analysisStatus: playPositionAnalysisResult.debug.status,
-            canRequestAnalysisAtDelay:
-              coachAnalysisDelayMs !== null &&
-              canRequestCoachAnalysis({
-                advantage: playPositionAnalysis.advantage,
-                enabled: canAnalyzeCoachHints,
-                isCpuThinking: game.isCpuThinking,
-                players: game.players,
-                session: game.session,
-                settings: coachHintSettings,
-                thinkingTimeMs: coachAnalysisDelayMs,
-              }),
+            analysisStatus: playPositionAnalysisDebugStatus,
+            canRequestAnalysisAtDelay,
             enabled: mode === "match",
             isAnalysisRequested: shouldRequestCoachAnalysis,
             isCpuThinking: game.isCpuThinking,
@@ -190,8 +96,7 @@ export function GameScreen({
           })
         : null,
     [
-      canAnalyzeCoachHints,
-      coachAnalysisDelayMs,
+      canRequestAnalysisAtDelay,
       coachHintModel,
       coachHintSettings,
       game.isCpuThinking,
@@ -199,7 +104,7 @@ export function GameScreen({
       game.session,
       mode,
       playPositionAnalysis,
-      playPositionAnalysisResult.debug.status,
+      playPositionAnalysisDebugStatus,
       shouldRequestCoachAnalysis,
     ],
   );
@@ -299,29 +204,6 @@ export function GameScreen({
       )}
     </section>
   );
-}
-
-function createCoachAnalysisRequestKey({
-  canAnalyzeCoachHints,
-  mode,
-  session,
-  settings,
-}: {
-  canAnalyzeCoachHints: boolean;
-  mode: GameScreenProps["mode"];
-  session: OthelloGameController["session"];
-  settings: CoachHintSettings;
-}): string {
-  return [
-    canAnalyzeCoachHints ? "coach-ready" : "coach-idle",
-    mode ?? "match",
-    settings.mode,
-    session.status,
-    session.currentDisc,
-    session.moveHistory.length,
-    session.lastMove ?? "none",
-    session.board.join(","),
-  ].join("|");
 }
 
 function canOpenReview(game: OthelloGameController): boolean {
