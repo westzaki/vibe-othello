@@ -1,4 +1,5 @@
 :root {
+  /* Foundation palette */
   --color-room-top: #fff3dc;
   --color-room-middle: #f5d8a8;
   --color-room-bottom: #dfead4;
@@ -10,7 +11,7 @@
 
   --color-text-main: #3a2417;
   --color-text-soft: #6b4c35;
-  --color-text-muted: #8b715b;
+  --color-text-muted: #8a7059;
 
   --color-bibi-fur: #d99b52;
   --color-bibi-fur-light: #f1c27b;
@@ -54,6 +55,7 @@
   --color-accent-lavender: #b8abe8;
   --color-focus-ring: #2f6f51;
 
+  /* Semantic aliases */
   --color-room-background: var(--color-room-top);
   --color-room-background-warm: var(--color-room-middle);
   --color-paper-surface: var(--color-paper);
@@ -84,6 +86,7 @@
   --color-cta-background-hover: #df922b;
   --color-small-accent: var(--color-accent-lavender);
 
+  /* App surfaces */
   --color-canvas: var(--color-room-top);
   --color-canvas-warm: var(--color-room-middle);
   --color-canvas-mint: var(--color-room-bottom);
@@ -96,8 +99,6 @@
 
   --color-text: #5f422e;
   --color-text-strong: var(--color-text-main);
-  --color-text-soft: #6b4c35;
-  --color-text-muted: #8a7059;
   --color-text-inverse: #ffffff;
 
   --color-accent: var(--color-bibi-caramel);
@@ -127,6 +128,8 @@
   --color-board-green-hover: #65c98d;
   --color-board-edge: var(--color-board-brand-dark);
   --color-board-coordinate: rgba(255, 248, 232, 0.94);
+
+  /* Disc rendering */
   --color-disc-black-a: #4f534b;
   --color-disc-black-b: var(--color-disc-black);
   --color-disc-black-c: #080907;
@@ -134,6 +137,7 @@
   --color-disc-white-b: var(--color-disc-white);
   --color-disc-white-c: #d5c9b5;
 
+  /* Shape */
   --radius-xs: 12px;
   --radius-sm: 16px;
   --radius-md: 18px;
@@ -142,6 +146,7 @@
   --radius-2xl: 32px;
   --radius-round: 999px;
 
+  /* Motion and elevation */
   --shadow-hairline: inset 0 1px 0 rgba(255, 255, 255, 0.9);
   --shadow-soft: 0 8px 18px rgba(118, 86, 55, 0.08);
   --shadow-panel: 0 24px 54px rgba(118, 86, 55, 0.14);
@@ -156,6 +161,7 @@
   --duration-slow: 420ms;
   --ease-soft: cubic-bezier(0.18, 0.74, 0.24, 1);
 
+  /* Global document defaults */
   color: var(--color-text);
   background: var(--color-canvas);
   font-family:
