@@ -1,7 +1,11 @@
 .coach-hint {
   display: grid;
+  align-content: start;
   gap: 8px;
-  min-height: 156px;
+  block-size: clamp(156px, 22vh, 190px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
   border: 1px solid
     color-mix(in srgb, var(--color-border-mint) 70%, var(--color-border));
   border-radius: var(--radius-md);
@@ -12,6 +16,7 @@
   box-shadow:
     var(--shadow-hairline),
     0 10px 20px rgba(101, 158, 143, 0.1);
+  overscroll-behavior: contain;
 }
 
 .coach-hint--empty {
