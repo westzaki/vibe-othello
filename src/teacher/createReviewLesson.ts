@@ -30,8 +30,7 @@ export function createReviewLesson(
   return {
     cards: [
       {
-        bodyText:
-          "よかった判断を一つだけ見つけて、次の対局でも使える形にしてみよう。",
+        bodyText: createNiceMoveBodyText(niceMove),
         emptyText:
           "今回は小さな良い判断が積み重なっていました。次はナイスな場面を一緒に見つけよう。",
         kind: "niceMove",
@@ -39,7 +38,7 @@ export function createReviewLesson(
         title: "今日のナイス",
       },
       {
-        bodyText: createTurningPointBodyText(outcome),
+        bodyText: createTurningPointBodyText(turningPointCandidate, outcome),
         emptyText: createTurningPointEmptyText(outcome),
         kind: "turningPoint",
         move: turningPointCandidate,
@@ -72,8 +71,7 @@ function createWinReviewLesson({
   return {
     cards: [
       {
-        bodyText:
-          "流れを良くできた場面を見て、勝てた理由をつかんでみよう。",
+        bodyText: createWinningPointBodyText(winningPoint),
         emptyText:
           "大きな一手だけではなく、落ち着いて選べた手が勝ちにつながっていました。",
         kind: "turningPoint",
@@ -98,12 +96,79 @@ function createWinReviewLesson({
   };
 }
 
-function createTurningPointBodyText(outcome: ReviewOutcome): string {
+function createNiceMoveBodyText(move: ReviewedMove | null): string {
+  if (move === null) {
+    return "よかった判断を一つだけ見つけて、次の対局でも使える形にしてみよう。";
+  }
+
+  if (move.review.reasons.includes("corner")) {
+    return "角を大事にできた場面を見て、次の対局でも見つけやすい形にしてみよう。";
+  }
+
+  if (move.review.reasons.includes("mobilityGain")) {
+    return "相手の置ける場所を減らせた場面を見て、次の形の作り方をつかんでみよう。";
+  }
+
+  if (move.review.reasons.includes("stablePosition")) {
+    return "角からつながる辺を強くできた場面を見て、安定しやすい形をつかんでみよう。";
+  }
+
+  return "よかった判断を一つだけ見つけて、次の対局でも使える形にしてみよう。";
+}
+
+function createWinningPointBodyText(move: ReviewedMove | null): string {
+  if (move === null) {
+    return "流れを良くできた場面を見て、勝てた理由をつかんでみよう。";
+  }
+
+  if (move.review.reasons.includes("corner")) {
+    return "角を大事にできた場面を見て、勝てた理由をつかんでみよう。";
+  }
+
+  if (move.review.reasons.includes("mobilityGain")) {
+    return "相手の置ける場所を減らせた場面を見て、勝てた理由をつかんでみよう。";
+  }
+
+  if (move.review.reasons.includes("stablePosition")) {
+    return "角からつながる辺を強くできた場面を見て、勝てた理由をつかんでみよう。";
+  }
+
+  return "流れを良くできた場面を見て、勝てた理由をつかんでみよう。";
+}
+
+function createTurningPointBodyText(
+  move: ReviewedMove | null,
+  outcome: ReviewOutcome,
+): string {
+  if (move !== null) {
+    return createTurningPointBodyTextFromMove(move);
+  }
+
   if (outcome === "draw") {
     return "かなり接戦だったね。次に一歩抜け出すポイントを、もう一回だけ見てみよう。";
   }
 
   return "流れが変わりやすかった局面を、次に変えられそうな見方として見てみよう。";
+}
+
+function createTurningPointBodyTextFromMove(move: ReviewedMove): string {
+  if (move.review.evaluationSource === "exactEndgame") {
+    return "終盤で石がどう残るかを比べたい局面だね。最後まで置いた形を見てみよう。";
+  }
+
+  if (move.review.reasons.includes("cornerGiven")) {
+    return "相手の角チャンスが増えたかを見たい局面だね。置いた後の角まわりを見てみよう。";
+  }
+
+  if (move.review.reasons.includes("dangerSquare")) {
+    return "空いている角の近くを見たい局面だね。急がず、角へ行かれない形か比べてみよう。";
+  }
+
+  if (move.review.reasons.includes("mobilityLoss")) {
+    return "置いた後の行き先を見たい局面だね。自分と相手の置ける場所を比べてみよう。";
+  }
+
+  return "流れが変わりやすかった局面だね。相手のチャンスが増えていないか見てみよう。";
 }
 
 function createTurningPointEmptyText(outcome: ReviewOutcome): string {
@@ -129,10 +194,30 @@ function createPracticeBodyText(
   if (move.review.bestSquare !== null) {
     return `${move.moveNumber}手目の局面から、${formatSquare(
       move.review.bestSquare,
-    )} も試してみよう。`;
+    )} も試してみよう。${createPracticeTrialFocusText(move)}`;
   }
 
   return `${move.moveNumber}手目の局面から、もう一回別の形を試してみよう。`;
+}
+
+function createPracticeTrialFocusText(move: ReviewedMove): string {
+  if (move.review.evaluationSource === "exactEndgame") {
+    return "最後に石がどう残るか比べるのがポイントです。";
+  }
+
+  if (move.review.reasons.includes("cornerGiven")) {
+    return "相手の角チャンスが減るか見てみよう。";
+  }
+
+  if (move.review.reasons.includes("dangerSquare")) {
+    return "空いている角と、その近くの形を比べてみよう。";
+  }
+
+  if (move.review.reasons.includes("mobilityLoss")) {
+    return "自分と相手の置ける場所を比べてみよう。";
+  }
+
+  return "置いた後の相手のチャンスを比べてみよう。";
 }
 
 function createPracticeEmptyText(

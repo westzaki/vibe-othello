@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createEmptyBoard, type SquareIndex } from "../game/othello";
-import type { GameReview, MoveReviewKind, ReviewedMove } from "./reviewTypes";
+import type {
+  GameReview,
+  MoveReviewKind,
+  ReviewEvaluationSource,
+  ReviewedMove,
+} from "./reviewTypes";
 import { createReviewLesson } from "./createReviewLesson";
 
 describe("createReviewLesson", () => {
@@ -92,6 +97,25 @@ describe("createReviewLesson", () => {
     expect(lesson.cards[0].move).toBeNull();
   });
 
+  it("describes the nice move by its learning reason", () => {
+    const mobilityMove = createReviewedMove({
+      kind: "good",
+      moveNumber: 14,
+      reasons: ["mobilityGain"],
+      square: 26,
+    });
+
+    const lesson = createReviewLesson(
+      createGameReview({
+        badMoves: [],
+        goodMoves: [mobilityMove],
+      }),
+      "loss",
+    );
+
+    expect(lesson.cards[0].bodyText).toContain("相手の置ける場所");
+  });
+
   it("uses practice copy only when there is a practice target", () => {
     const turningPoint = createReviewedMove({
       bestSquare: 49,
@@ -156,6 +180,48 @@ describe("createReviewLesson", () => {
     expect(lesson.practiceTarget).toBe(turningPoint);
   });
 
+  it("describes corner-risk turning points with matching practice focus", () => {
+    const cornerRisk = createReviewedMove({
+      bestSquare: 45,
+      kind: "bad",
+      moveNumber: 30,
+      reasons: ["cornerGiven"],
+      square: 44,
+    });
+
+    const lesson = createReviewLesson(
+      createGameReview({
+        badMoves: [cornerRisk],
+        goodMoves: [],
+      }),
+      "loss",
+    );
+
+    expect(lesson.cards[1].bodyText).toContain("角チャンス");
+    expect(lesson.cards[2].bodyText).toContain("角チャンス");
+  });
+
+  it("describes mobility-loss practice focus with legal move wording", () => {
+    const mobilityLoss = createReviewedMove({
+      bestSquare: 45,
+      kind: "bad",
+      moveNumber: 30,
+      reasons: ["mobilityLoss"],
+      square: 44,
+    });
+
+    const lesson = createReviewLesson(
+      createGameReview({
+        badMoves: [mobilityLoss],
+        goodMoves: [],
+      }),
+      "loss",
+    );
+
+    expect(lesson.cards[1].bodyText).toContain("置ける場所");
+    expect(lesson.cards[2].bodyText).toContain("置ける場所");
+  });
+
   it("keeps practice target empty when the turning point has no trial move", () => {
     const turningPoint = createReviewedMove({
       bestSquare: null,
@@ -218,6 +284,25 @@ describe("createReviewLesson", () => {
     expect(lesson.cards[1].actionLabel).toBeUndefined();
   });
 
+  it("describes win lessons by the reproducible winning reason", () => {
+    const mobilityMove = createReviewedMove({
+      kind: "good",
+      moveNumber: 18,
+      reasons: ["mobilityGain"],
+      square: 26,
+    });
+
+    const lesson = createReviewLesson(
+      createGameReview({
+        badMoves: [],
+        goodMoves: [mobilityMove],
+      }),
+      "win",
+    );
+
+    expect(lesson.cards[0].bodyText).toContain("相手の置ける場所");
+  });
+
   it("does not use the final reviewed move as the win lesson point", () => {
     const earlierGoodMove = createReviewedMove({
       kind: "good",
@@ -275,7 +360,7 @@ describe("createReviewLesson", () => {
     expect(lesson.cards[0].move).toBe(earlierBestMove);
   });
 
-  it("keeps the learning lesson for draw with gentler one-more-step copy", () => {
+  it("keeps the learning lesson for draw while using selected focus copy", () => {
     const turningPoint = createReviewedMove({
       bestSquare: 45,
       kind: "bad",
@@ -296,7 +381,7 @@ describe("createReviewLesson", () => {
       "ここが分かれ道だったかも",
       "ここから練習",
     ]);
-    expect(lesson.cards[1].bodyText).toContain("一歩抜け出すポイント");
+    expect(lesson.cards[1].bodyText).toContain("相手のチャンス");
     expect(lesson.practiceTarget).toBe(turningPoint);
     expect(lesson.cards[2].actionLabel).toBe("この局面から練習する");
   });
@@ -330,6 +415,7 @@ function createGameReview({
 
 function createReviewedMove({
   bestSquare,
+  evaluationSource = "minimax",
   kind,
   moveNumber,
   playedScore = 0,
@@ -337,6 +423,7 @@ function createReviewedMove({
   square,
 }: {
   bestSquare?: SquareIndex | null;
+  evaluationSource?: ReviewEvaluationSource;
   kind: MoveReviewKind;
   moveNumber: number;
   playedScore?: number;
@@ -358,7 +445,7 @@ function createReviewedMove({
       bestScore: reviewedBestSquare === null ? null : 0,
       bestSquare: reviewedBestSquare,
       disc: "black",
-      evaluationSource: "minimax",
+      evaluationSource,
       kind,
       moveNumber,
       playedScore,
