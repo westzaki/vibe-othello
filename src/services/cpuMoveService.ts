@@ -1,4 +1,4 @@
-import { chooseCpuMove, type CpuLevel } from "../cpu";
+import { chooseCpuMove, type CpuLevel, usesCpuMoveWorker } from "../cpu";
 import type { Board, DiscColor, SquareIndex } from "../game/othello";
 import {
   cancelCpuMoveWorkerRequest,
@@ -25,7 +25,7 @@ let nextWorkerRequestId = 0;
 export async function chooseCpuMoveAsync(
   request: CpuMoveRequest,
 ): Promise<CpuMoveResponse> {
-  if (request.level === "level6") {
+  if (usesCpuMoveWorker(request.level)) {
     const workerRequestId = nextWorkerRequestId;
     nextWorkerRequestId += 1;
 
