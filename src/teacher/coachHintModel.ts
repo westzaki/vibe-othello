@@ -76,7 +76,7 @@ export function canShowCoachHint({
 export function createCoachHintModel(
   context: CoachHintVisibilityContext,
 ): CoachHintModel | null {
-  if (!canShowCoachHint(context)) {
+  if (!canPrepareCoachHint(context)) {
     return null;
   }
 
@@ -94,6 +94,18 @@ export function createCoachHintModel(
       messageStyle: mode === "gentle" ? "vague" : "specific",
     },
   );
+
+  if (
+    !canTriggerCoachHint({
+      advantage: context.advantage ?? analysis.advantage,
+      currentDisc: context.session.currentDisc,
+      mode,
+      thinkingTimeMs: context.thinkingTimeMs ?? 0,
+    })
+  ) {
+    return null;
+  }
+
   const hints = analysis.coachHints;
   const hint = hints[0] ?? null;
 
@@ -107,6 +119,40 @@ export function createCoachHintModel(
     hints,
     mode,
   };
+}
+
+function canPrepareCoachHint({
+  isCpuThinking = false,
+  players,
+  session,
+  settings,
+  thinkingTimeMs = 0,
+}: CoachHintVisibilityContext): boolean {
+  if (settings.mode === "off" || isCpuThinking) {
+    return false;
+  }
+
+  if (session.status !== "playing") {
+    return false;
+  }
+
+  if (!isOnePlayerGame(players)) {
+    return false;
+  }
+
+  if (players[session.currentDisc].type !== "human") {
+    return false;
+  }
+
+  if (getSessionLegalMoves(session).length === 0) {
+    return false;
+  }
+
+  if (settings.mode === "active") {
+    return thinkingTimeMs >= activeHintDelayMs;
+  }
+
+  return thinkingTimeMs >= gentleHintDelayMs;
 }
 
 function canTriggerCoachHint({
