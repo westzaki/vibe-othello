@@ -4,6 +4,7 @@ import type { CandidateMoveReview } from "./reviewTypes";
 import type { CoachHintDraft, CoachHintSeverity } from "./coachHintTypes";
 
 export type CoachHintPolicyOptions = {
+  bestMoveGuidance?: CoachHintDraft["guidance"] | null;
   bestMoveSquare?: SquareIndex | null;
   includeBestMoveHint: boolean;
   includeCandidateFallback: boolean;
@@ -26,6 +27,7 @@ const riskSeverityPriority: Record<CoachHintSeverity, number> = {
 export function selectCoachHintDrafts(
   analysis: MoveCandidateAnalysis,
   {
+    bestMoveGuidance,
     bestMoveSquare,
     includeBestMoveHint,
     includeCandidateFallback,
@@ -48,6 +50,10 @@ export function selectCoachHintDrafts(
 
     drafts.push({
       candidate: bestMoveCandidate ?? bestCandidate,
+      guidance:
+        bestMoveCandidate !== null && bestMoveCandidate.square === bestMoveSquare
+          ? bestMoveGuidance ?? undefined
+          : undefined,
       kind: "bestMove",
       severity: "medium",
     });

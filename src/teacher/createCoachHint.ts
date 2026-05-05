@@ -13,6 +13,7 @@ import type {
 
 export type {
   CoachHint,
+  CoachHintGuidance,
   CoachHintKind,
   CoachHintMessageStyle,
   CoachHintSeverity,
@@ -58,6 +59,7 @@ export function createCoachHints(
 export function createCoachHintsFromAnalysis(
   analysis: MoveCandidateAnalysis,
   {
+    bestMoveGuidance,
     bestMoveSquare,
     includeBestMoveHint = false,
     includeCandidateFallback = false,
@@ -66,6 +68,7 @@ export function createCoachHintsFromAnalysis(
   }: CreateCoachHintsFromAnalysisOptions = {},
 ): CoachHint[] {
   return selectCoachHintDrafts(analysis, {
+    bestMoveGuidance,
     bestMoveSquare,
     includeBestMoveHint,
     includeCandidateFallback,

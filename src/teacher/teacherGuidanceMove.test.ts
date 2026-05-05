@@ -9,6 +9,7 @@ import {
   selectTeacherGuidanceCandidate,
   selectTeacherDeepeningCandidates,
   selectStrongTeacherCandidates,
+  selectTeacherGuidanceSelection,
   shouldUseTeacherExactEndgameByCounts,
 } from "./teacherGuidanceMove";
 
@@ -341,6 +342,33 @@ describe("teacher guidance move", () => {
         square: chooseTeacherGuidanceMove(board, "black", {
           deepSearchDepth: 3,
           shallowSearchDepth: 1,
+        }),
+      }),
+    );
+  });
+
+  it("can return selected guidance details for play hint explanations", () => {
+    const board = createInitialBoard();
+    const analysis = analyzeMoveCandidates(board, "black", {
+      searchDepth: 1,
+    });
+    const selection = selectTeacherGuidanceSelection({
+      analysis,
+      board,
+      deepSearchDepth: 3,
+      disc: "black",
+      guidanceMode: "comeback",
+    });
+
+    expect(selection).toEqual(
+      expect.objectContaining({
+        candidate: expect.objectContaining({
+          square: expect.any(Number),
+        }),
+        guidance: expect.objectContaining({
+          opponentPressureScore: expect.any(Number),
+          refutationPenalty: expect.any(Number),
+          scoreGapFromBest: expect.any(Number),
         }),
       }),
     );

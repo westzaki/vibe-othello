@@ -15,8 +15,16 @@ export type CoachHintKind =
 
 export type CoachHintSeverity = "low" | "medium" | "high";
 
+export type CoachHintGuidance = {
+  opponentPressureScore: number;
+  opponentReplySpread: number | null;
+  refutationSeverity: CoachHintSeverity | null;
+  scoreGapFromBest: number;
+};
+
 export type CoachHint = {
   candidate: CandidateMoveReview | null;
+  guidance?: CoachHintGuidance;
   kind: CoachHintKind;
   message: string;
   reasons: MoveReviewReason[];
@@ -26,6 +34,7 @@ export type CoachHint = {
 
 export type CoachHintDraft = {
   candidate: CandidateMoveReview;
+  guidance?: CoachHintGuidance;
   kind: CoachHintKind;
   severity: CoachHintSeverity;
 };
@@ -40,6 +49,7 @@ export type CreateCoachHintOptions = Partial<AnalyzeMoveCandidatesOptions> & {
 };
 
 export type CreateCoachHintsFromAnalysisOptions = {
+  bestMoveGuidance?: CoachHintGuidance | null;
   bestMoveSquare?: SquareIndex | null;
   includeBestMoveHint?: boolean;
   includeCandidateFallback?: boolean;
