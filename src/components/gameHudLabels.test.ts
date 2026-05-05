@@ -20,6 +20,17 @@ describe("getTurnLabel", () => {
 });
 
 describe("getAdvantageLabel", () => {
+  it("keeps tiny evaluation differences as an even game", () => {
+    const players = createOnePlayerSettings("black");
+
+    expect(
+      getAdvantageLabel(
+        { blackPercent: 53, leadingDisc: "black", whitePercent: 47 },
+        players,
+      ),
+    ).toBe("いい勝負");
+  });
+
   it("uses player perspective labels in 1P mode", () => {
     const players = createOnePlayerSettings("white");
 

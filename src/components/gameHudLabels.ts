@@ -2,6 +2,8 @@ import type { Advantage } from "../cpu";
 import type { DiscColor } from "../game/othello";
 import type { PlayerSettings } from "../game/players";
 
+const advantageLeadPercentThreshold = 56;
+
 export function getTurnLabel(
   currentDisc: DiscColor,
   isCpuThinking: boolean,
@@ -24,7 +26,10 @@ export function getAdvantageLabel(
   advantage: Advantage,
   players: PlayerSettings,
 ): string {
-  if (advantage.leadingDisc === null) {
+  if (
+    advantage.leadingDisc === null ||
+    getLeadingPercent(advantage) < advantageLeadPercentThreshold
+  ) {
     return "いい勝負";
   }
 
@@ -37,6 +42,10 @@ export function getAdvantageLabel(
   return advantage.leadingDisc === humanDisc
     ? "あなたが少しリード"
     : "CPUが少しリード";
+}
+
+function getLeadingPercent(advantage: Advantage): number {
+  return Math.max(advantage.blackPercent, advantage.whitePercent);
 }
 
 function getSingleHumanDisc(players: PlayerSettings): DiscColor | null {
