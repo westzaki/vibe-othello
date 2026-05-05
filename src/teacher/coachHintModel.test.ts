@@ -292,6 +292,49 @@ describe("teacher coach hint model", () => {
     expect(model).toBeNull();
   });
 
+  it("can show structured caution while waiting for the teacher best move", () => {
+    const session = withPlayedMoveCount(
+      createPracticeSessionFromBoard(createMobilityRiskBoard(), "white"),
+      6,
+    );
+    const model = createCoachHintModel({
+      advantage: createAdvantage({ blackPercent: 50 }),
+      analysis: createPlayPositionAnalysis(session.board, "white", {
+        includeBestMoveHint: false,
+        includeCandidateFallback: true,
+        searchDepth: 1,
+      }),
+      players: createOnePlayerSettings("white"),
+      session,
+      settings: { mode: "active" },
+      thinkingTimeMs: 1500,
+    });
+
+    expect(model).toEqual(
+      expect.objectContaining({
+        mode: "active",
+        hint: expect.objectContaining({
+          kind: "mobilityRisk",
+          square: 11,
+        }),
+      }),
+    );
+    expect(model?.hints).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "candidate",
+        }),
+      ]),
+    );
+    expect(model?.hints).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "bestMove",
+        }),
+      ]),
+    );
+  });
+
   it("does not show hints during the opening warmup", () => {
     const session = startNewGame();
 

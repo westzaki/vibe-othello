@@ -155,16 +155,12 @@ export function createCoachHintModel(
     return null;
   }
 
-  const hints = getVisibleCoachHints(analysis.coachHints, {
+  const analyzedHints = getVisibleCoachHints(analysis.coachHints, {
     includeBestMoveHint: shouldIncludeBestMoveHint,
   });
-
-  if (
-    requiresTeacherGuidanceHint(mode, shouldIncludeBestMoveHint) &&
-    !hasBestMoveHint(hints)
-  ) {
-    return null;
-  }
+  const hints = getCoachHintsForCurrentReadiness(analyzedHints, {
+    includeBestMoveHint: shouldIncludeBestMoveHint,
+  });
 
   const hint = hints[0] ?? null;
 
@@ -180,15 +176,25 @@ export function createCoachHintModel(
   };
 }
 
-function requiresTeacherGuidanceHint(
-  mode: Exclude<CoachHintMode, "off">,
-  includeBestMoveHint: boolean,
-): boolean {
-  return includeBestMoveHint && (mode === "gentle" || mode === "active");
-}
-
 function hasBestMoveHint(hints: CoachHint[]): boolean {
   return hints.some((hint) => hint.kind === "bestMove");
+}
+
+function getCoachHintsForCurrentReadiness(
+  hints: CoachHint[],
+  {
+    includeBestMoveHint,
+  }: {
+    includeBestMoveHint: boolean;
+  },
+): CoachHint[] {
+  if (!includeBestMoveHint || hasBestMoveHint(hints)) {
+    return hints;
+  }
+
+  return hints.filter(
+    (hint) => hint.kind !== "bestMove" && hint.kind !== "candidate",
+  );
 }
 
 export function createCoachPlayPositionAnalysisOptions(
