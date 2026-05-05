@@ -11,6 +11,15 @@ export type {
 } from "./analyzeMoveCandidates";
 export { createPositionReview } from "./createPositionReview";
 export type { PositionReview } from "./createPositionReview";
+export { createPlayPositionAnalysis } from "./createPlayPositionAnalysis";
+export type {
+  CreatePlayPositionAnalysisOptions,
+  PlayPositionAdvantageSource,
+  PlayPositionAnalysis,
+  PlayPositionConfidence,
+  PlayPositionMoveEvaluationSource,
+  PlayPositionPhase,
+} from "./createPlayPositionAnalysis";
 export {
   createEvaluationTimeline,
   defaultTurningPointAnalysisConfig,
@@ -20,12 +29,17 @@ export {
   createPracticeFeedback,
   createPracticeFeedbackContext,
 } from "./practiceFeedback";
-export { createCoachHint, createCoachHints } from "./createCoachHint";
+export {
+  createCoachHint,
+  createCoachHints,
+  createCoachHintsFromAnalysis,
+} from "./createCoachHint";
 export type {
   CoachHint,
   CoachHintKind,
   CoachHintMessageStyle,
   CreateCoachHintOptions,
+  CreateCoachHintsFromAnalysisOptions,
 } from "./createCoachHint";
 export {
   canShowCoachHint,

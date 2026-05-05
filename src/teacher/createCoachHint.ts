@@ -2,6 +2,7 @@ import type { Board, DiscColor, SquareIndex } from "../game/othello";
 import {
   analyzeMoveCandidates,
   type AnalyzeMoveCandidatesOptions,
+  type MoveCandidateAnalysis,
 } from "./analyzeMoveCandidates";
 import type { CandidateMoveReview, MoveReviewReason } from "./reviewTypes";
 
@@ -27,6 +28,11 @@ export type CreateCoachHintOptions = Partial<AnalyzeMoveCandidatesOptions> & {
   messageStyle?: CoachHintMessageStyle;
 };
 
+export type CreateCoachHintsFromAnalysisOptions = {
+  includeCandidateFallback?: boolean;
+  messageStyle?: CoachHintMessageStyle;
+};
+
 const defaultCoachHintSearchDepth = 3;
 
 export function createCoachHint(
@@ -47,6 +53,20 @@ export function createCoachHints(
   }: CreateCoachHintOptions = {},
 ): CoachHint[] {
   const analysis = analyzeMoveCandidates(board, disc, { searchDepth });
+
+  return createCoachHintsFromAnalysis(analysis, {
+    includeCandidateFallback,
+    messageStyle,
+  });
+}
+
+export function createCoachHintsFromAnalysis(
+  analysis: MoveCandidateAnalysis,
+  {
+    includeCandidateFallback = false,
+    messageStyle = "specific",
+  }: CreateCoachHintsFromAnalysisOptions = {},
+): CoachHint[] {
   const bestCandidate = analysis.candidateMoves[0] ?? null;
 
   if (bestCandidate === null) {
