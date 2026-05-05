@@ -17,8 +17,13 @@ export type {
   PlayPositionAdvantageSource,
   PlayPositionAnalysis,
   PlayPositionConfidence,
+  PlayPositionConfidenceReason,
   PlayPositionMoveEvaluationSource,
   PlayPositionPhase,
+  PlayPositionShapeSignal,
+  PlayPositionShapeSignalKind,
+  PlayPositionShapeSignalStrength,
+  PlayPositionShapeSignalTone,
 } from "./createPlayPositionAnalysis";
 export {
   createEvaluationTimeline,
