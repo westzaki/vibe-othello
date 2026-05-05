@@ -215,6 +215,80 @@ describe("teacher coach hints", () => {
     ]);
   });
 
+  it("can put the best move first while keeping learning hints", () => {
+    const hints = createCoachHintsFromAnalysis(
+      {
+        candidateMoves: [
+          createCandidateMove({
+            rank: 1,
+            reasons: [],
+            score: 100,
+            square: 19,
+          }),
+          createCandidateMove({
+            metrics: {
+              givesOpponentCorner: true,
+              scoreGapFromBest: 20,
+            },
+            rank: 2,
+            reasons: ["cornerGiven"],
+            score: 80,
+            square: 9,
+          }),
+        ],
+        evaluationSource: "minimax",
+      },
+      {
+        includeBestMoveHint: true,
+      },
+    );
+
+    expect(hints).toEqual([
+      expect.objectContaining({
+        kind: "bestMove",
+        square: 19,
+      }),
+      expect.objectContaining({
+        kind: "cornerRisk",
+        square: 9,
+      }),
+    ]);
+  });
+
+  it("can use a stronger teacher guidance square as the best move hint", () => {
+    const hints = createCoachHintsFromAnalysis(
+      {
+        candidateMoves: [
+          createCandidateMove({
+            rank: 1,
+            reasons: [],
+            score: 100,
+            square: 19,
+          }),
+          createCandidateMove({
+            rank: 2,
+            reasons: [],
+            score: 92,
+            square: 26,
+          }),
+        ],
+        evaluationSource: "minimax",
+      },
+      {
+        bestMoveSquare: 26,
+        includeBestMoveHint: true,
+      },
+    );
+
+    expect(hints[0]).toEqual(
+      expect.objectContaining({
+        kind: "bestMove",
+        square: 26,
+      }),
+    );
+  });
+
+
   it("warns about moves that meaningfully reduce current player mobility", () => {
     const board = createBoardFixture({
       1: "black",
@@ -264,6 +338,26 @@ describe("teacher coach hints", () => {
       }),
     );
     expect(hint?.message).toContain("動きづらく");
+  });
+
+  it("uses a stable edge hint when a move extends from an owned corner", () => {
+    const board = createBoardFixture({
+      0: "black",
+      2: "white",
+      3: "black",
+    });
+    const hint = createCoachHint(board, "black", {
+      searchDepth: 1,
+    });
+
+    expect(hint).toEqual(
+      expect.objectContaining({
+        kind: "stableEdge",
+        reasons: expect.arrayContaining(["stablePosition"]),
+        square: 1,
+      }),
+    );
+    expect(hint?.message).toContain("角からつながる辺");
   });
 
   it("can use a corner candidate even when it is not the top scored move", () => {
@@ -373,6 +467,22 @@ describe("teacher coach hints", () => {
     expect(hint?.message).toContain("後の形");
   });
 
+  it("can use the strongest candidate as direct teacher guidance", () => {
+    const board = createInitialBoard();
+    const hint = createCoachHint(board, "black", {
+      includeBestMoveHint: true,
+      searchDepth: 1,
+    });
+
+    expect(hint).toEqual(
+      expect.objectContaining({
+        kind: "bestMove",
+        square: expect.any(Number),
+      }),
+    );
+    expect(hint?.message).toContain("本命");
+  });
+
   it("uses an endgame hint when the analysis is exact endgame", () => {
     const board = createBoardFromString(
       "wwwwb-b-wbbwbbwwwbwbbbbbwwwbbwbww-bwwbww-wwwbwb-bwwbbbw-ww-w--ww",
@@ -416,6 +526,9 @@ function createCandidateMove({
 }): CandidateMoveReview {
   return {
     metrics: {
+      anchoredEdgeDelta: 0,
+      anchoredEdgeDifferenceAfter: 0,
+      anchoredEdgeDifferenceBefore: 0,
       givesOpponentCorner: false,
       isCorner: false,
       isDangerSquare: false,

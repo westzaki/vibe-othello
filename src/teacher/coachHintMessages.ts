@@ -27,12 +27,24 @@ function createCoachHintMessage(
   messageStyle: CoachHintMessageStyle,
 ): string {
   switch (kind) {
+    case "bestMove":
+      return messageStyle === "vague"
+        ? "勝ちに行くなら、本命になりそうな場所があるよ。光っているマスの後の形を見てみよう。"
+        : `勝ちに行くなら、${formatSquare(
+            candidate.square,
+          )} が本命。相手の返し手も見てみよう。`;
     case "cornerOpportunity":
       return messageStyle === "vague"
         ? "角を取れる場所がありそう。角まわりを見てみよう。"
         : `角を取れる場所がありそう。${formatSquare(
             candidate.square,
           )} を見てみよう。`;
+    case "stableEdge":
+      return messageStyle === "vague"
+        ? "取った角からつながる辺は、強い形になりやすいよ。角につながるマスを見てみよう。"
+        : `取った角からつながる辺は、強い形になりやすいよ。${formatSquare(
+            candidate.square,
+          )} の後の辺を見てみよう。`;
     case "mobility":
       return messageStyle === "vague"
         ? "相手が少し動きづらくなる手がありそう。次の形を見てみよう。"

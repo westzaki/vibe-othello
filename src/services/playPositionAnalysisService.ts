@@ -22,7 +22,7 @@ export type PlayPositionAnalysisResponse = {
   requestId: string;
 };
 
-const playPositionAnalysisWorkerTimeoutMs = 1500;
+const playPositionAnalysisWorkerTimeoutMs = 2500;
 
 let nextWorkerRequestId = 0;
 

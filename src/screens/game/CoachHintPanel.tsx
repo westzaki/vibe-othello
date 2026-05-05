@@ -36,7 +36,7 @@ export function CoachHintPanel({ model }: CoachHintPanelProps) {
             key={`${hint.kind}-${hint.square ?? "none"}`}
           >
             <span className="coach-hint__label">
-              {isRiskHint ? "気をつけて" : "見てみよう"}
+              {getCoachHintLabel(hint.kind, isRiskHint)}
             </span>
             <p>{hint.message}</p>
           </div>
@@ -44,4 +44,15 @@ export function CoachHintPanel({ model }: CoachHintPanelProps) {
       })}
     </div>
   );
+}
+
+function getCoachHintLabel(
+  kind: CoachHintModel["hint"]["kind"],
+  isRiskHint: boolean,
+): string {
+  if (isRiskHint) {
+    return "気をつけて";
+  }
+
+  return kind === "bestMove" ? "ここが本命" : "見てみよう";
 }

@@ -50,6 +50,7 @@ export type {
 export {
   canShowCoachHint,
   createCoachHintModel,
+  createCoachPlayPositionAnalysisOptions,
   defaultCoachHintSettings,
 } from "./coachHintModel";
 export type {
@@ -58,6 +59,8 @@ export type {
   CoachHintSettings,
   CoachHintVisibilityContext,
 } from "./coachHintModel";
+export { chooseTeacherGuidanceMove } from "./teacherGuidanceMove";
+export type { TeacherGuidanceMoveOptions } from "./teacherGuidanceMove";
 export { createReviewLesson } from "./createReviewLesson";
 export { defaultTeacherReviewConfig } from "./reviewConfig";
 export type { TeacherReviewConfig } from "./reviewConfig";

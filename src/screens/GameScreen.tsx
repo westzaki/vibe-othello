@@ -8,7 +8,11 @@ import type { OthelloGameController } from "../hooks/useOthelloGame";
 import { usePassNoticeVisibility } from "../hooks/usePassNoticeVisibility";
 import { usePlayCoachHintModel } from "../hooks/usePlayCoachHintModel";
 import { usePlayPositionAnalysis } from "../hooks/usePlayPositionAnalysis";
-import { defaultCoachHintSettings, type CoachHintSettings } from "../teacher";
+import {
+  createCoachPlayPositionAnalysisOptions,
+  defaultCoachHintSettings,
+  type CoachHintSettings,
+} from "../teacher";
 import { CoachHintPanel } from "./game/CoachHintPanel";
 import { createCoachHintMarkers } from "./game/coachHintMarkers";
 import { PassNoticeOverlay } from "./game/PassNoticeOverlay";
@@ -48,13 +52,7 @@ export function GameScreen({
   showAdvantageBar = true,
 }: GameScreenProps) {
   const playPositionAnalysisOptions = useMemo(
-    () =>
-      ({
-        includeCandidateFallback: coachHintSettings.mode === "active",
-        messageStyle:
-          coachHintSettings.mode === "gentle" ? "vague" : "specific",
-        riskHintLimit: coachHintSettings.mode === "active" ? 3 : 2,
-      }) as const,
+    () => createCoachPlayPositionAnalysisOptions(coachHintSettings.mode),
     [coachHintSettings.mode],
   );
   const playPositionAnalysis = usePlayPositionAnalysis(

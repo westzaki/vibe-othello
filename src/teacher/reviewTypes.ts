@@ -19,6 +19,9 @@ export type MoveReviewReason =
   | "turningPoint";
 
 export type CandidateMoveMetrics = {
+  anchoredEdgeDelta: number;
+  anchoredEdgeDifferenceAfter: number;
+  anchoredEdgeDifferenceBefore: number;
   givesOpponentCorner: boolean;
   isCorner: boolean;
   isDangerSquare: boolean;

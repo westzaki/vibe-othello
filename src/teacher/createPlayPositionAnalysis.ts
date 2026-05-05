@@ -21,6 +21,8 @@ import type {
   ReviewEvaluationSource,
 } from "./reviewTypes";
 import { createShapeSignals } from "./playPositionShapeSignals";
+import { chooseTeacherGuidanceMove } from "./teacherGuidanceMove";
+import type { TeacherGuidanceOptions } from "./coachHintTypes";
 
 export type PlayPositionPhase = "opening" | "midgame" | "endgame";
 export type PlayPositionAdvantageSource =
@@ -43,6 +45,7 @@ export type PlayPositionShapeSignalKind =
   | "cornerRisk"
   | "mobilityOpportunity"
   | "mobilityRisk"
+  | "stableEdge"
   | "endgame";
 export type PlayPositionShapeSignalTone = "helpful" | "risk" | "neutral";
 export type PlayPositionShapeSignalStrength = "low" | "medium" | "high";
@@ -73,10 +76,11 @@ export type PlayPositionAnalysis = {
 
 export type CreatePlayPositionAnalysisOptions =
   Partial<AnalyzeMoveCandidatesOptions> & {
+    includeBestMoveHint?: CreateCoachHintsFromAnalysisOptions["includeBestMoveHint"];
     includeCandidateFallback?: boolean;
     messageStyle?: CoachHintMessageStyle;
     riskHintLimit?: CreateCoachHintsFromAnalysisOptions["riskHintLimit"];
-  };
+  } & TeacherGuidanceOptions;
 
 const defaultPlayPositionSearchDepth = 3;
 const exactEndgameEmptyThreshold = 10;
@@ -92,10 +96,16 @@ export function createPlayPositionAnalysis(
   board: Board,
   currentDisc: DiscColor,
   {
+    includeBestMoveHint = false,
     includeCandidateFallback = true,
     messageStyle = "specific",
     riskHintLimit,
     searchDepth = defaultPlayPositionSearchDepth,
+    deepSearchDepth,
+    shallowSearchDepth,
+    topCandidateLimit,
+    useTeacherGuidanceMove = false,
+    useSelectiveDeepening,
   }: CreatePlayPositionAnalysisOptions = {},
 ): PlayPositionAnalysis {
   const emptyCount = countEmptySquares(board);
@@ -125,6 +135,7 @@ export function createPlayPositionAnalysis(
 
   const candidateAnalysis = analyzeMoveCandidates(board, currentDisc, {
     searchDepth,
+    useSelectiveDeepening,
   });
   const moveEvaluationSource = getMoveEvaluationSource(
     candidateAnalysis.evaluationSource,
@@ -145,7 +156,17 @@ export function createPlayPositionAnalysis(
   const helpfulCandidates = candidateMoves.filter((candidate) =>
     hasHelpfulReason(candidate, candidateAnalysis.evaluationSource),
   );
+  const bestMoveSquare =
+    includeBestMoveHint && useTeacherGuidanceMove
+      ? chooseTeacherGuidanceMove(board, currentDisc, {
+          deepSearchDepth,
+          shallowSearchDepth,
+          topCandidateLimit,
+        })
+      : null;
   const coachHints = createCoachHintsFromAnalysis(candidateAnalysis, {
+    bestMoveSquare,
+    includeBestMoveHint,
     includeCandidateFallback,
     messageStyle,
     riskHintLimit,
@@ -371,7 +392,7 @@ function hasHelpfulReason(
 ): boolean {
   return (
     candidate.reasons.some((reason) =>
-      ["corner", "mobilityGain"].includes(reason),
+      ["corner", "mobilityGain", "stablePosition"].includes(reason),
     ) ||
     (evaluationSource === "exactEndgame" && candidate.rank === 1)
   );

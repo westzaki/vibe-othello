@@ -30,11 +30,7 @@ export function createPlayPositionAnalysisKey({
 
 export function createPlayPositionAnalysisState(
   sources: PlayPositionAnalysisSources,
-  analysis = createPlayPositionAnalysis(
-    sources.board,
-    sources.currentDisc,
-    sources.options,
-  ),
+  analysis = createSynchronousPlayPositionAnalysis(sources),
 ): StoredPlayPositionAnalysisState {
   return {
     analysis,
@@ -50,9 +46,31 @@ export function getCurrentPlayPositionAnalysis(
     return analysisState.analysis;
   }
 
+  return createSynchronousPlayPositionAnalysis(sources);
+}
+
+function createSynchronousPlayPositionAnalysis({
+  board,
+  currentDisc,
+  options,
+}: PlayPositionAnalysisSources): PlayPositionAnalysis {
   return createPlayPositionAnalysis(
-    sources.board,
-    sources.currentDisc,
-    sources.options,
+    board,
+    currentDisc,
+    createSynchronousPlayPositionAnalysisOptions(options),
   );
+}
+
+function createSynchronousPlayPositionAnalysisOptions(
+  options: CreatePlayPositionAnalysisOptions | undefined,
+): CreatePlayPositionAnalysisOptions | undefined {
+  if (!options?.useTeacherGuidanceMove) {
+    return options;
+  }
+
+  return {
+    ...options,
+    includeBestMoveHint: false,
+    useTeacherGuidanceMove: false,
+  };
 }

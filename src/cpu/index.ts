@@ -18,6 +18,7 @@ export {
   countEmptySquares,
   getMobilityDifference,
 } from "./evaluation/evaluationFeatures";
+export { choosePerfectEndgameMove } from "./strategies/grandmasterStrategy";
 export {
   chooseExactEndgameMove,
   getExactEndgameMoveScores,

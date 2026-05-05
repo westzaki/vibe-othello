@@ -34,15 +34,21 @@ export function createCoachHints(
   board: Board,
   disc: DiscColor,
   {
+    includeBestMoveHint = false,
     includeCandidateFallback = false,
     messageStyle = "specific",
     riskHintLimit,
     searchDepth = defaultCoachHintSearchDepth,
+    useSelectiveDeepening,
   }: CreateCoachHintOptions = {},
 ): CoachHint[] {
-  const analysis = analyzeMoveCandidates(board, disc, { searchDepth });
+  const analysis = analyzeMoveCandidates(board, disc, {
+    searchDepth,
+    useSelectiveDeepening,
+  });
 
   return createCoachHintsFromAnalysis(analysis, {
+    includeBestMoveHint,
     includeCandidateFallback,
     messageStyle,
     riskHintLimit,
@@ -52,12 +58,16 @@ export function createCoachHints(
 export function createCoachHintsFromAnalysis(
   analysis: MoveCandidateAnalysis,
   {
+    bestMoveSquare,
+    includeBestMoveHint = false,
     includeCandidateFallback = false,
     messageStyle = "specific",
     riskHintLimit,
   }: CreateCoachHintsFromAnalysisOptions = {},
 ): CoachHint[] {
   return selectCoachHintDrafts(analysis, {
+    bestMoveSquare,
+    includeBestMoveHint,
     includeCandidateFallback,
     riskHintLimit,
   }).map((draft) => createCoachHintFromDraft(draft, messageStyle));

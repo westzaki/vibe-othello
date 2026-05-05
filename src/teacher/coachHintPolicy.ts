@@ -1,8 +1,11 @@
 import type { MoveCandidateAnalysis } from "./analyzeMoveCandidates";
+import type { SquareIndex } from "../game/othello";
 import type { CandidateMoveReview } from "./reviewTypes";
 import type { CoachHintDraft, CoachHintSeverity } from "./coachHintTypes";
 
 export type CoachHintPolicyOptions = {
+  bestMoveSquare?: SquareIndex | null;
+  includeBestMoveHint: boolean;
   includeCandidateFallback: boolean;
   riskHintLimit?: number;
 };
@@ -23,6 +26,8 @@ const riskSeverityPriority: Record<CoachHintSeverity, number> = {
 export function selectCoachHintDrafts(
   analysis: MoveCandidateAnalysis,
   {
+    bestMoveSquare,
+    includeBestMoveHint,
     includeCandidateFallback,
     riskHintLimit = defaultRiskHintLimit,
   }: CoachHintPolicyOptions,
@@ -35,10 +40,30 @@ export function selectCoachHintDrafts(
 
   const drafts: CoachHintDraft[] = [];
 
-  if (analysis.evaluationSource !== "exactEndgame") {
-    drafts.push(
-      ...selectRiskDrafts(analysis).slice(0, Math.max(0, riskHintLimit)),
+  if (includeBestMoveHint) {
+    const bestMoveCandidate = findCandidateBySquare(
+      analysis.candidateMoves,
+      bestMoveSquare,
     );
+
+    drafts.push({
+      candidate: bestMoveCandidate ?? bestCandidate,
+      kind: "bestMove",
+      severity: "medium",
+    });
+  }
+
+  if (analysis.evaluationSource !== "exactEndgame") {
+    for (const riskDraft of selectRiskDrafts(analysis).slice(
+      0,
+      Math.max(0, riskHintLimit),
+    )) {
+      if (drafts.some((draft) => hasSameSquare(draft, riskDraft))) {
+        continue;
+      }
+
+      drafts.push(riskDraft);
+    }
   }
 
   const helpfulCandidate = findHelpfulCandidate(analysis, {
@@ -55,14 +80,27 @@ export function selectCoachHintDrafts(
 
   if (
     helpfulDraft !== null &&
-    !drafts.some(
-      (draft) => draft.candidate.square === helpfulDraft.candidate.square,
-    )
+    !drafts.some((draft) => hasSameSquare(draft, helpfulDraft))
   ) {
     drafts.push(helpfulDraft);
   }
 
   return drafts;
+}
+
+function findCandidateBySquare(
+  candidateMoves: CandidateMoveReview[],
+  square: SquareIndex | null | undefined,
+): CandidateMoveReview | null {
+  if (square === null || square === undefined) {
+    return null;
+  }
+
+  return candidateMoves.find((candidate) => candidate.square === square) ?? null;
+}
+
+function hasSameSquare(firstDraft: CoachHintDraft, secondDraft: CoachHintDraft) {
+  return firstDraft.candidate.square === secondDraft.candidate.square;
 }
 
 function findHelpfulCandidate(
@@ -89,6 +127,14 @@ function findHelpfulCandidate(
 
   if (cornerCandidate !== undefined) {
     return cornerCandidate;
+  }
+
+  const stableEdgeCandidate = analysis.candidateMoves.find((candidate) =>
+    candidate.reasons.includes("stablePosition"),
+  );
+
+  if (stableEdgeCandidate !== undefined) {
+    return stableEdgeCandidate;
   }
 
   const mobilityCandidate = analysis.candidateMoves.find(
@@ -205,6 +251,14 @@ function createHelpfulDraft({
   evaluationSource: "exactEndgame" | "minimax";
   includeCandidateFallback: boolean;
 }): CoachHintDraft | null {
+  if (evaluationSource === "exactEndgame") {
+    return {
+      candidate,
+      kind: "endgame",
+      severity: "medium",
+    };
+  }
+
   if (candidate.reasons.includes("corner")) {
     return {
       candidate,
@@ -213,18 +267,18 @@ function createHelpfulDraft({
     };
   }
 
-  if (candidate.reasons.includes("mobilityGain")) {
+  if (candidate.reasons.includes("stablePosition")) {
     return {
       candidate,
-      kind: "mobility",
+      kind: "stableEdge",
       severity: "medium",
     };
   }
 
-  if (evaluationSource === "exactEndgame") {
+  if (candidate.reasons.includes("mobilityGain")) {
     return {
       candidate,
-      kind: "endgame",
+      kind: "mobility",
       severity: "medium",
     };
   }
