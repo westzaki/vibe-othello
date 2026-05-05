@@ -4,6 +4,7 @@ import type { CoachHintMode } from "../teacher";
 type SettingsScreenProps = {
   settings: AppSettings;
   onBackToStart: () => void;
+  onAdvantageBarEnabledChange: (advantageBarEnabled: boolean) => void;
   onCoachHintModeChange: (mode: CoachHintMode) => void;
   onSoundEnabledChange: (soundEnabled: boolean) => void;
   onUndoEnabledChange: (undoEnabled: boolean) => void;
@@ -12,6 +13,7 @@ type SettingsScreenProps = {
 export function SettingsScreen({
   settings,
   onBackToStart,
+  onAdvantageBarEnabledChange,
   onCoachHintModeChange,
   onSoundEnabledChange,
   onUndoEnabledChange,
@@ -39,6 +41,12 @@ export function SettingsScreen({
             enabled={settings.undoEnabled}
             label="まったを使う"
             onChange={onUndoEnabledChange}
+          />
+          <SettingsToggleItem
+            description="黒と白の今の有利さをバーで見ます"
+            enabled={settings.advantageBarEnabled}
+            label="形勢バーを出す"
+            onChange={onAdvantageBarEnabledChange}
           />
           <SettingsSegmentedItem
             description="1P対局中に、考える場所を短く出します"

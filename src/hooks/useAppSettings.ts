@@ -4,12 +4,14 @@ import type { CoachHintMode } from "../teacher";
 const appSettingsStorageKey = "vibe-othello-settings";
 
 export type AppSettings = {
+  advantageBarEnabled: boolean;
   coachHintMode: CoachHintMode;
   soundEnabled: boolean;
   undoEnabled: boolean;
 };
 
 const defaultAppSettings: AppSettings = {
+  advantageBarEnabled: true,
   coachHintMode: "gentle",
   soundEnabled: true,
   undoEnabled: true,
@@ -29,6 +31,13 @@ export function useAppSettings() {
     }));
   }
 
+  function updateAdvantageBarEnabled(advantageBarEnabled: boolean) {
+    setSettings((currentSettings) => ({
+      ...currentSettings,
+      advantageBarEnabled,
+    }));
+  }
+
   function updateUndoEnabled(undoEnabled: boolean) {
     setSettings((currentSettings) => ({
       ...currentSettings,
@@ -45,6 +54,7 @@ export function useAppSettings() {
 
   return {
     settings,
+    updateAdvantageBarEnabled,
     updateCoachHintMode,
     updateSoundEnabled,
     updateUndoEnabled,
@@ -75,6 +85,10 @@ export function normalizeAppSettings(value: unknown): AppSettings {
   }
 
   return {
+    advantageBarEnabled:
+      typeof value.advantageBarEnabled === "boolean"
+        ? value.advantageBarEnabled
+        : defaultAppSettings.advantageBarEnabled,
     coachHintMode: isCoachHintMode(value.coachHintMode)
       ? value.coachHintMode
       : defaultAppSettings.coachHintMode,
