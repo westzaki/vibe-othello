@@ -5,7 +5,6 @@ import {
   getLegalMoves,
   getNextDisc,
   getWinner,
-  hasLegalMove,
   isGameOver,
   type Board,
   type DiscCounts,
@@ -14,14 +13,15 @@ import {
   type Winner,
 } from "./othello";
 import type { PlayerSettings } from "./players";
+import {
+  createPassNotice,
+  resolvePlayableTurn,
+  type GameSessionNotice,
+} from "./sessionTurn";
 
 export type GameStatus = "notStarted" | "playing" | "ended";
 export type GameEndReason = "completed" | "abandoned";
-export type GameSessionNotice = {
-  nextDisc: DiscColor;
-  skippedDisc: DiscColor;
-  type: "pass";
-};
+export type { GameSessionNotice } from "./sessionTurn";
 
 export type GameSession = {
   board: Board;
@@ -100,17 +100,15 @@ export function startPracticeSession({
     });
   }
 
-  const nextDiscCanMove = hasLegalMove(practiceBoard, nextDisc);
-  const otherDisc = getNextDisc(nextDisc);
-  const currentDisc = nextDiscCanMove ? nextDisc : otherDisc;
+  const nextTurn = resolvePlayableTurn(practiceBoard, nextDisc);
 
   return createSession({
     board: practiceBoard,
-    currentDisc,
+    currentDisc: nextTurn.currentDisc,
     endReason: null,
     lastMove,
     moveHistory: [],
-    notice: nextDiscCanMove ? null : createPassNotice(nextDisc, otherDisc),
+    notice: nextTurn.notice,
     status: "playing",
     winner: null,
   });
@@ -229,21 +227,22 @@ export function placeCurrentDisc(
   }
 
   const nextDisc = getNextDisc(session.currentDisc);
-  const nextDiscCanMove = hasLegalMove(nextBoard, nextDisc);
-  const currentDisc = nextDiscCanMove ? nextDisc : session.currentDisc;
+  const nextTurn = resolvePlayableTurn(
+    nextBoard,
+    nextDisc,
+    session.currentDisc,
+  );
 
   return {
     move,
     session: {
       ...session,
       board: nextBoard,
-      currentDisc,
+      currentDisc: nextTurn.currentDisc,
       discCounts,
       lastMove: square,
       moveHistory: nextMoveHistory,
-      notice: nextDiscCanMove
-        ? null
-        : createPassNotice(nextDisc, session.currentDisc),
+      notice: nextTurn.notice,
     },
   };
 }
@@ -327,16 +326,5 @@ function createSession({
     notice,
     status,
     winner,
-  };
-}
-
-function createPassNotice(
-  skippedDisc: DiscColor,
-  nextDisc: DiscColor,
-): GameSessionNotice {
-  return {
-    nextDisc,
-    skippedDisc,
-    type: "pass",
   };
 }
