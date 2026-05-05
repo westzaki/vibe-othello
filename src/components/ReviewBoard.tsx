@@ -1,8 +1,10 @@
 import type { Board, SquareIndex } from "../game/othello";
+import {
+  boardColumnLabels,
+  boardRowLabels,
+  formatSquare,
+} from "../game/squareLabels";
 import { GameDisc } from "./GameDisc";
-
-const columnLabels = ["A", "B", "C", "D", "E", "F", "G", "H"];
-const rowLabels = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
 type ReviewBoardProps = {
   bestSquare: SquareIndex | null;
@@ -22,14 +24,14 @@ export function ReviewBoard({
       <div className="board-coordinate-shell">
         <div className="board-coordinate-corner" aria-hidden="true" />
         <div className="board-column-labels" aria-hidden="true">
-          {columnLabels.map((label) => (
+          {boardColumnLabels.map((label) => (
             <span className="board-coordinate-label" key={label}>
               {label}
             </span>
           ))}
         </div>
         <div className="board-row-labels" aria-hidden="true">
-          {rowLabels.map((label) => (
+          {boardRowLabels.map((label) => (
             <span className="board-coordinate-label" key={label}>
               {label}
             </span>
@@ -100,11 +102,4 @@ function getReviewSquareLabel(
   const suffix = tags.length > 0 ? `: ${tags.join(", ")}` : "";
 
   return `${formatSquare(square)}${suffix}`;
-}
-
-function formatSquare(square: SquareIndex): string {
-  const column = String.fromCharCode("A".charCodeAt(0) + (square % 8));
-  const row = Math.floor(square / 8) + 1;
-
-  return `${column}${row}`;
 }
