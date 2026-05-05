@@ -15,12 +15,26 @@ import {
 import { createBoardFixture } from "../test/boardFixtures";
 import {
   canShowCoachHint,
+  createCoachPlayPositionAnalysisOptions,
   createCoachHintModel,
   defaultCoachHintSettings,
 } from "./coachHintModel";
 import { createPlayPositionAnalysis } from "./createPlayPositionAnalysis";
 
 describe("teacher coach hint model", () => {
+  it("uses auto teacher guidance for play hint analysis", () => {
+    expect(
+      createCoachPlayPositionAnalysisOptions("active", {
+        includeBestMoveHint: true,
+      }),
+    ).toEqual(
+      expect.objectContaining({
+        guidanceMode: "auto",
+        useTeacherGuidanceMove: true,
+      }),
+    );
+  });
+
   it("allows gentle hints after a long pause in a difficult position", () => {
     const session = playFirstLegalMoves(4);
     const players = createOnePlayerSettings("black");

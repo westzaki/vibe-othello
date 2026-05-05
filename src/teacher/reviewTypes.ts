@@ -1,5 +1,6 @@
 import type { Board, DiscColor, SquareIndex } from "../game/othello";
 import type { MoveRecord } from "../game/session";
+import type { TeacherGuidanceMode } from "./teacherGuidanceMove";
 
 export type MoveReviewKind = "good" | "bad" | "neutral";
 
@@ -133,6 +134,7 @@ export type GameReviewMessages = {
 
 export type ReviewGameOptions = {
   deepSearchDepth?: number;
+  guidanceMode?: TeacherGuidanceMode;
   maxHighlights?: number;
   refutationSearchDepth?: number;
   reviewedDisc: DiscColor;

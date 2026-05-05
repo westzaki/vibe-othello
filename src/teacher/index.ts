@@ -67,6 +67,7 @@ export {
 } from "./teacherGuidanceMove";
 export type {
   TeacherGuidanceCandidate,
+  TeacherGuidanceMode,
   TeacherGuidanceMoveOptions,
   TeacherGuidanceRefutation,
 } from "./teacherGuidanceMove";

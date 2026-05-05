@@ -168,6 +168,7 @@ export function createCoachPlayPositionAnalysisOptions(
   return {
     includeBestMoveHint: mode !== "off" && includeBestMoveHint,
     includeCandidateFallback: mode !== "off" && includeBestMoveHint,
+    guidanceMode: mode === "off" ? undefined : "auto",
     messageStyle: mode === "gentle" ? "vague" : "specific",
     riskHintLimit: mode === "active" ? 3 : 2,
     searchDepth: mode === "off" ? undefined : coachGuidanceSearchDepth,

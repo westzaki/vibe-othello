@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createInitialBoard } from "../game/othello";
+import { createBoardFixture } from "../test/boardFixtures";
 import { analyzeMoveCandidates } from "./analyzeMoveCandidates";
 import type { CandidateMoveReview } from "./reviewTypes";
 import {
@@ -94,6 +95,195 @@ describe("teacher guidance move", () => {
         refutationSearchDepth: 1,
       }).map(({ candidate }) => candidate),
     ).toEqual([strongCandidate]);
+  });
+
+  it("keeps comeback recommendations inside the strong score band", () => {
+    const board = createInitialBoard();
+    const strongCandidate = createCandidateMove({
+      metrics: { opponentMobilityAfter: 5 },
+      rank: 1,
+      score: 100,
+      square: 19,
+    });
+    const weakPressureCandidate = createCandidateMove({
+      metrics: {
+        mobilitySwing: 6,
+        opponentMobilityAfter: 1,
+        opponentMobilityDelta: -4,
+      },
+      rank: 2,
+      score: 60,
+      square: 26,
+    });
+
+    expect(
+      rankTeacherGuidanceCandidates({
+        board,
+        candidates: [strongCandidate, weakPressureCandidate],
+        disc: "black",
+        guidanceMode: "comeback",
+        refutationSearchDepth: 1,
+      }).map(({ candidate }) => candidate),
+    ).toEqual([strongCandidate]);
+  });
+
+  it("prioritizes opponent mobility pressure in comeback mode when search scores are close", () => {
+    const board = createInitialBoard();
+    const searchBestCandidate = createCandidateMove({
+      metrics: {
+        mobilitySwing: 0,
+        opponentMobilityAfter: 6,
+        opponentMobilityDelta: 1,
+      },
+      rank: 1,
+      score: 100,
+      square: 19,
+    });
+    const pressureCandidate = createCandidateMove({
+      metrics: {
+        mobilitySwing: 5,
+        opponentMobilityAfter: 1,
+        opponentMobilityDelta: -4,
+      },
+      rank: 2,
+      score: 96,
+      square: 26,
+    });
+
+    const rankedCandidates = rankTeacherGuidanceCandidates({
+      board,
+      candidates: [searchBestCandidate, pressureCandidate],
+      disc: "black",
+      guidanceMode: "comeback",
+      refutationSearchDepth: 1,
+    });
+
+    expect(rankedCandidates[0]?.candidate).toBe(pressureCandidate);
+    expect(rankedCandidates[0]?.opponentPressureScore).toBeGreaterThan(
+      rankedCandidates[1]?.opponentPressureScore ?? 0,
+    );
+  });
+
+  it("keeps normal mode close to search-score priority", () => {
+    const board = createInitialBoard();
+    const searchBestCandidate = createCandidateMove({
+      metrics: {
+        mobilitySwing: 0,
+        opponentMobilityAfter: 6,
+        opponentMobilityDelta: 1,
+      },
+      rank: 1,
+      score: 100,
+      square: 19,
+    });
+    const pressureCandidate = createCandidateMove({
+      metrics: {
+        mobilitySwing: 5,
+        opponentMobilityAfter: 1,
+        opponentMobilityDelta: -4,
+      },
+      rank: 2,
+      score: 96,
+      square: 26,
+    });
+
+    expect(
+      rankTeacherGuidanceCandidates({
+        board,
+        candidates: [searchBestCandidate, pressureCandidate],
+        disc: "black",
+        guidanceMode: "normal",
+        refutationSearchDepth: 1,
+      })[0]?.candidate,
+    ).toBe(searchBestCandidate);
+  });
+
+  it("avoids high refutation risk in comeback mode even with opponent pressure", () => {
+    const board = createBoardFixture({
+      10: "white",
+      11: "black",
+      18: "white",
+      27: "white",
+      28: "black",
+    });
+    const refutedPressureCandidate = createCandidateMove({
+      metrics: {
+        givesOpponentCorner: true,
+        isDangerSquare: true,
+        mobilitySwing: 6,
+        opponentMobilityAfter: 1,
+        opponentMobilityDelta: -4,
+      },
+      rank: 1,
+      score: 200,
+      square: 9,
+    });
+    const saferCandidate = createCandidateMove({
+      metrics: {
+        mobilitySwing: 0,
+        opponentMobilityAfter: 5,
+        opponentMobilityDelta: 0,
+      },
+      rank: 2,
+      score: 196,
+      square: 26,
+    });
+
+    const rankedCandidates = rankTeacherGuidanceCandidates({
+      board,
+      candidates: [refutedPressureCandidate, saferCandidate],
+      disc: "black",
+      guidanceMode: "comeback",
+      refutationSearchDepth: 1,
+    });
+
+    expect(rankedCandidates[0]?.candidate).toBe(saferCandidate);
+    expect(rankedCandidates[1]?.refutationPenalty).toBeGreaterThan(0);
+  });
+
+  it("switches auto mode to comeback only when the position is disadvantaged", () => {
+    const board = createInitialBoard();
+    const searchBestCandidate = createCandidateMove({
+      metrics: {
+        opponentMobilityAfter: 6,
+        opponentMobilityDelta: 1,
+      },
+      rank: 1,
+      score: 100,
+      square: 19,
+    });
+    const pressureCandidate = createCandidateMove({
+      metrics: {
+        mobilitySwing: 5,
+        opponentMobilityAfter: 1,
+        opponentMobilityDelta: -4,
+      },
+      rank: 2,
+      score: 96,
+      square: 26,
+    });
+    const candidates = [searchBestCandidate, pressureCandidate];
+
+    expect(
+      rankTeacherGuidanceCandidates({
+        board,
+        candidates,
+        disc: "black",
+        guidanceMode: "auto",
+        isDisadvantaged: true,
+        refutationSearchDepth: 1,
+      })[0]?.candidate,
+    ).toBe(pressureCandidate);
+    expect(
+      rankTeacherGuidanceCandidates({
+        board,
+        candidates,
+        disc: "black",
+        guidanceMode: "auto",
+        isDisadvantaged: false,
+        refutationSearchDepth: 1,
+      })[0]?.candidate,
+    ).toBe(searchBestCandidate);
   });
 
   it("records a refutation penalty for a risky candidate when no safer strong candidate exists", () => {

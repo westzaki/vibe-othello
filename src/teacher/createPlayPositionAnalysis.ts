@@ -98,6 +98,7 @@ export function createPlayPositionAnalysis(
   {
     includeBestMoveHint = false,
     includeCandidateFallback = true,
+    guidanceMode,
     messageStyle = "specific",
     riskHintLimit,
     searchDepth = defaultPlayPositionSearchDepth,
@@ -148,6 +149,8 @@ export function createPlayPositionAnalysis(
         board,
         deepSearchDepth,
         disc: currentDisc,
+        guidanceMode,
+        isDisadvantaged: getAdvantagePercent(baseAdvantage, currentDisc) < 45,
         refutationSearchDepth,
         strongCandidateScoreGap,
         topCandidateLimit,
@@ -301,6 +304,13 @@ function getCandidateMetricPercentAdjustment(
     : 0;
 
   return mobilityAdjustment + cornerAdjustment + cornerRiskAdjustment;
+}
+
+function getAdvantagePercent(
+  advantage: Advantage,
+  disc: DiscColor,
+): number {
+  return disc === "black" ? advantage.blackPercent : advantage.whitePercent;
 }
 
 function scoreToPercent(score: number, scale: number): number {

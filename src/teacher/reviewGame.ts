@@ -143,6 +143,7 @@ function getReviewBestCandidate({
       board: move.boardBefore,
       deepSearchDepth: options.deepSearchDepth,
       disc: move.disc,
+      guidanceMode: options.guidanceMode,
       refutationSearchDepth: options.refutationSearchDepth,
       strongCandidateScoreGap: options.strongCandidateScoreGap,
       topCandidateLimit: options.topCandidateLimit,
