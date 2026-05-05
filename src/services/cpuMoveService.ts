@@ -4,7 +4,11 @@ import {
   cancelCpuMoveWorkerRequest,
   chooseCpuMoveInWorker,
 } from "../workers/cpuMove/cpuMoveWorkerClient";
-import { withTimeout } from "./withTimeout";
+import type {
+  CpuMoveWorkerRequest,
+  CpuMoveWorkerResponse,
+} from "../workers/cpuMove/cpuMoveWorkerProtocol";
+import { createWorkerFallbackRunner } from "./workerFallbackRequest";
 
 export type CpuMoveRequest = {
   board: Board;
@@ -20,41 +24,37 @@ export type CpuMoveResponse = {
 
 const cpuWorkerTimeoutMs = 1000;
 
-let nextWorkerRequestId = 0;
+const runCpuMoveWorkerRequest = createWorkerFallbackRunner<
+  CpuMoveWorkerRequest,
+  CpuMoveWorkerResponse
+>({
+  cancelWorkerRequest: cancelCpuMoveWorkerRequest,
+  postWorkerRequest: chooseCpuMoveInWorker,
+  timeoutMessage: "CPU worker timed out",
+  timeoutMs: cpuWorkerTimeoutMs,
+});
 
 export async function chooseCpuMoveAsync(
   request: CpuMoveRequest,
 ): Promise<CpuMoveResponse> {
   if (usesCpuMoveWorker(request.level)) {
-    const workerRequestId = nextWorkerRequestId;
-    nextWorkerRequestId += 1;
-
-    try {
-      const response = await withTimeout(
-        chooseCpuMoveInWorker({
-          board: request.board,
-          disc: request.disc,
-          level: request.level,
-          requestId: workerRequestId,
-          type: "chooseCpuMove",
-        }),
-        {
-          onTimeout: () => cancelCpuMoveWorkerRequest(workerRequestId),
-          timeoutMessage: "CPU worker timed out",
-          timeoutMs: cpuWorkerTimeoutMs,
-        },
-      );
-
-      if (response.type === "cpuMoveChosen") {
-        return {
-          move: response.move,
-          requestId: request.requestId,
-        };
-      }
-    } catch {
-      cancelCpuMoveWorkerRequest(workerRequestId);
-      // Fall back to sync CPU below.
-    }
+    return runCpuMoveWorkerRequest({
+      createFallbackResponse: () => chooseCpuMoveSync(request),
+      createWorkerRequest: (workerRequestId) => ({
+        board: request.board,
+        disc: request.disc,
+        level: request.level,
+        requestId: workerRequestId,
+        type: "chooseCpuMove",
+      }),
+      getWorkerResponse: (response) =>
+        response.type === "cpuMoveChosen"
+          ? {
+              move: response.move,
+              requestId: request.requestId,
+            }
+          : null,
+    });
   }
 
   return chooseCpuMoveSync(request);

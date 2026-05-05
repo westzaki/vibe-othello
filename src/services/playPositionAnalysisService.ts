@@ -7,8 +7,12 @@ import {
   analyzePlayPositionInWorker,
   cancelPlayPositionAnalysisWorkerRequest,
 } from "../workers/playPositionAnalysis/playPositionAnalysisWorkerClient";
+import type {
+  PlayPositionAnalysisWorkerRequest,
+  PlayPositionAnalysisWorkerResponse,
+} from "../workers/playPositionAnalysis/playPositionAnalysisWorkerProtocol";
 import { createLightweightPlayPositionAnalysis } from "./playPositionAnalysisFallback";
-import { withTimeout } from "./withTimeout";
+import { createWorkerFallbackRunner } from "./workerFallbackRequest";
 
 export type PlayPositionAnalysisRequest = {
   board: Board;
@@ -24,43 +28,36 @@ export type PlayPositionAnalysisResponse = {
 
 const playPositionAnalysisWorkerTimeoutMs = 2500;
 
-let nextWorkerRequestId = 0;
+const runPlayPositionAnalysisWorkerRequest = createWorkerFallbackRunner<
+  PlayPositionAnalysisWorkerRequest,
+  PlayPositionAnalysisWorkerResponse
+>({
+  cancelWorkerRequest: cancelPlayPositionAnalysisWorkerRequest,
+  postWorkerRequest: analyzePlayPositionInWorker,
+  timeoutMessage: "Play position analysis worker timed out",
+  timeoutMs: playPositionAnalysisWorkerTimeoutMs,
+});
 
 export async function analyzePlayPositionAsync(
   request: PlayPositionAnalysisRequest,
 ): Promise<PlayPositionAnalysisResponse> {
-  const workerRequestId = nextWorkerRequestId;
-  nextWorkerRequestId += 1;
-
-  try {
-    const response = await withTimeout(
-      analyzePlayPositionInWorker({
-        board: request.board,
-        currentDisc: request.currentDisc,
-        options: request.options,
-        requestId: workerRequestId,
-        type: "analyzePlayPosition",
-      }),
-      {
-        onTimeout: () =>
-          cancelPlayPositionAnalysisWorkerRequest(workerRequestId),
-        timeoutMessage: "Play position analysis worker timed out",
-        timeoutMs: playPositionAnalysisWorkerTimeoutMs,
-      },
-    );
-
-    if (response.type === "playPositionAnalyzed") {
-      return {
-        analysis: response.analysis,
-        requestId: request.requestId,
-      };
-    }
-  } catch {
-    cancelPlayPositionAnalysisWorkerRequest(workerRequestId);
-    // Fall back to sync analysis below.
-  }
-
-  return analyzePlayPositionSync(request);
+  return runPlayPositionAnalysisWorkerRequest({
+    createFallbackResponse: () => analyzePlayPositionSync(request),
+    createWorkerRequest: (workerRequestId) => ({
+      board: request.board,
+      currentDisc: request.currentDisc,
+      options: request.options,
+      requestId: workerRequestId,
+      type: "analyzePlayPosition",
+    }),
+    getWorkerResponse: (response) =>
+      response.type === "playPositionAnalyzed"
+        ? {
+            analysis: response.analysis,
+            requestId: request.requestId,
+          }
+        : null,
+  });
 }
 
 function analyzePlayPositionSync(
