@@ -9,7 +9,7 @@ import { usePassNoticeVisibility } from "../hooks/usePassNoticeVisibility";
 import { usePlayCoachHintModel } from "../hooks/usePlayCoachHintModel";
 import { usePlayPositionAnalysis } from "../hooks/usePlayPositionAnalysis";
 import {
-  canRequestCoachBestMoveAnalysis,
+  canRequestCoachAnalysis,
   canShowCoachBestMoveHint,
   createCoachPlayPositionAnalysisOptions,
   defaultCoachHintSettings,
@@ -70,15 +70,18 @@ export function GameScreen({
       }),
     [canAnalyzeCoachHints, coachHintSettings, game.session, mode],
   );
-  const [bestMoveAnalysisRequestKey, setBestMoveAnalysisRequestKey] = useState<
+  const [coachAnalysisRequestedKey, setCoachAnalysisRequestedKey] = useState<
     string | null
   >(null);
-  const shouldRequestBestMoveAnalysis =
-    bestMoveAnalysisRequestKey === coachAnalysisRequestKey;
+  const shouldRequestCoachAnalysis =
+    coachAnalysisRequestedKey === coachAnalysisRequestKey;
+  const shouldRequestBestMoveAnalysis = shouldRequestCoachAnalysis;
   const playPositionAnalysisOptions = useMemo(
     () =>
       createCoachPlayPositionAnalysisOptions(
-        canAnalyzeCoachHints ? coachHintSettings.mode : "off",
+        canAnalyzeCoachHints && shouldRequestCoachAnalysis
+          ? coachHintSettings.mode
+          : "off",
         {
           includeBestMoveHint:
             shouldRequestBestMoveAnalysis &&
@@ -89,6 +92,7 @@ export function GameScreen({
       canAnalyzeCoachHints,
       coachHintSettings.mode,
       game.session,
+      shouldRequestCoachAnalysis,
       shouldRequestBestMoveAnalysis,
     ],
   );
@@ -119,7 +123,7 @@ export function GameScreen({
       const latestRequest = latestCoachAnalysisRequestRef.current;
 
       if (
-        canRequestCoachBestMoveAnalysis({
+        canRequestCoachAnalysis({
           advantage: latestRequest.advantage,
           enabled: latestRequest.canAnalyzeCoachHints,
           isCpuThinking: latestRequest.game.isCpuThinking,
@@ -129,7 +133,7 @@ export function GameScreen({
           thinkingTimeMs: coachAnalysisDelayMs,
         })
       ) {
-        setBestMoveAnalysisRequestKey(coachAnalysisRequestKey);
+        setCoachAnalysisRequestedKey(coachAnalysisRequestKey);
       }
     }, coachAnalysisDelayMs);
 

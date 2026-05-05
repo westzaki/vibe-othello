@@ -14,6 +14,7 @@ import {
 } from "../game/session";
 import { createBoardFixture } from "../test/boardFixtures";
 import {
+  canRequestCoachAnalysis,
   canRequestCoachBestMoveAnalysis,
   canShowCoachHint,
   createCoachPlayPositionAnalysisOptions,
@@ -32,7 +33,17 @@ describe("teacher coach hint model", () => {
     ).toEqual(
       expect.objectContaining({
         guidanceMode: "auto",
+        skipMoveAnalysis: false,
         useTeacherGuidanceMove: true,
+      }),
+    );
+  });
+
+  it("uses lightweight analysis options when coach hints are off", () => {
+    expect(createCoachPlayPositionAnalysisOptions("off")).toEqual(
+      expect.objectContaining({
+        skipMoveAnalysis: true,
+        useTeacherGuidanceMove: false,
       }),
     );
   });
@@ -65,6 +76,30 @@ describe("teacher coach hint model", () => {
         thinkingTimeMs: 1500,
       }),
     ).toBe(true);
+  });
+
+  it("can request caution analysis before best-move hints are available", () => {
+    const session = withPlayedMoveCount(startNewGame(), 4);
+    const players = createOnePlayerSettings("black");
+
+    expect(
+      canRequestCoachAnalysis({
+        advantage: createAdvantage({ blackPercent: 50 }),
+        players,
+        session,
+        settings: { mode: "active" },
+        thinkingTimeMs: 1500,
+      }),
+    ).toBe(true);
+    expect(
+      canRequestCoachBestMoveAnalysis({
+        advantage: createAdvantage({ blackPercent: 50 }),
+        players,
+        session,
+        settings: { mode: "active" },
+        thinkingTimeMs: 1500,
+      }),
+    ).toBe(false);
   });
 
   it("does not request gentle best-move analysis unless the player is behind", () => {

@@ -34,6 +34,25 @@ describe("createPlayPositionAnalysis", () => {
     expect(analysis.shapeSignals).toEqual([]);
   });
 
+  it("can skip move analysis for lightweight play state", () => {
+    const analysis = createPlayPositionAnalysis(createInitialBoard(), "black", {
+      skipMoveAnalysis: true,
+    });
+
+    expect(analysis).toEqual(
+      expect.objectContaining({
+        advantageSource: "heuristic",
+        candidateMoves: [],
+        coachHints: [],
+        confidence: "low",
+        confidenceReason: "noLegalMoves",
+        moveEvaluationSource: "none",
+        shapeSignals: [],
+      }),
+    );
+    expect(analysis.legalMoves).toHaveLength(4);
+  });
+
   it("can prepare direct teacher guidance from the strongest candidate", () => {
     const analysis = createPlayPositionAnalysis(createInitialBoard(), "black", {
       includeBestMoveHint: true,
