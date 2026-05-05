@@ -3,10 +3,8 @@ import type {
   DiscColor,
   SquareIndex,
 } from "../game/othello";
+import { boardColumnLabels, boardRowLabels } from "../game/squareLabels";
 import { GameDisc, type DiscFlipAxis } from "./GameDisc";
-
-const columnLabels = ["A", "B", "C", "D", "E", "F", "G", "H"];
-const rowLabels = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
 type BoardProps = {
   board: OthelloBoard;
@@ -44,14 +42,14 @@ export function Board({
       <div className="board-coordinate-shell">
         <div className="board-coordinate-corner" aria-hidden="true" />
         <div className="board-column-labels" aria-hidden="true">
-          {columnLabels.map((label) => (
+          {boardColumnLabels.map((label) => (
             <span className="board-coordinate-label" key={label}>
               {label}
             </span>
           ))}
         </div>
         <div className="board-row-labels" aria-hidden="true">
-          {rowLabels.map((label) => (
+          {boardRowLabels.map((label) => (
             <span className="board-coordinate-label" key={label}>
               {label}
             </span>
