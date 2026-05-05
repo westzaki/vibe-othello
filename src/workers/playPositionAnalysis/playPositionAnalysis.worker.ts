@@ -1,10 +1,11 @@
 import { createPlayPositionAnalysis } from "../../teacher";
+import { getWorkerScope } from "../workerScope";
 import type {
   PlayPositionAnalysisWorkerRequest,
   PlayPositionAnalysisWorkerResponse,
 } from "./playPositionAnalysisWorkerProtocol";
 
-const workerScope = self as unknown as Worker;
+const workerScope = getWorkerScope();
 
 workerScope.onmessage = (
   event: MessageEvent<PlayPositionAnalysisWorkerRequest>,

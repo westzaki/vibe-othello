@@ -1,10 +1,11 @@
 import { chooseCpuMove } from "../../cpu";
+import { getWorkerScope } from "../workerScope";
 import type {
   CpuMoveWorkerRequest,
   CpuMoveWorkerResponse,
 } from "./cpuMoveWorkerProtocol";
 
-const workerScope = self as unknown as Worker;
+const workerScope = getWorkerScope();
 
 workerScope.onmessage = (event: MessageEvent<CpuMoveWorkerRequest>) => {
   const request = event.data;
