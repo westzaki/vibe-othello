@@ -7,11 +7,12 @@ import { MoveHistory } from "../components/MoveHistory";
 import type { OthelloGameController } from "../hooks/useOthelloGame";
 import { usePassNoticeVisibility } from "../hooks/usePassNoticeVisibility";
 import { usePlayCoachHintModel } from "../hooks/usePlayCoachHintModel";
-import { usePlayPositionAnalysis } from "../hooks/usePlayPositionAnalysis";
+import { usePlayPositionAnalysisResult } from "../hooks/usePlayPositionAnalysis";
 import {
   canRequestCoachAnalysis,
   canShowCoachHintAfterOpening,
   canShowCoachBestMoveHint,
+  createCoachHintDebugSnapshot,
   createCoachPlayPositionAnalysisOptions,
   defaultCoachHintSettings,
   getCoachHintDelayMs,
@@ -98,10 +99,11 @@ export function GameScreen({
       shouldRequestBestMoveAnalysis,
     ],
   );
-  const playPositionAnalysis = usePlayPositionAnalysis(
+  const playPositionAnalysisResult = usePlayPositionAnalysisResult(
     game.session,
     playPositionAnalysisOptions,
   );
+  const playPositionAnalysis = playPositionAnalysisResult.analysis;
   const latestCoachAnalysisRequestRef = useRef({
     advantage: playPositionAnalysis.advantage,
     canAnalyzeCoachHints,
@@ -160,6 +162,46 @@ export function GameScreen({
   const coachHintMarkers = useMemo(
     () => createCoachHintMarkers(coachHintModel),
     [coachHintModel],
+  );
+  const coachHintDebugSnapshot = useMemo(
+    () =>
+      import.meta.env.DEV
+        ? createCoachHintDebugSnapshot({
+            analysis: playPositionAnalysis,
+            analysisStatus: playPositionAnalysisResult.debug.status,
+            canRequestAnalysisAtDelay:
+              coachAnalysisDelayMs !== null &&
+              canRequestCoachAnalysis({
+                advantage: playPositionAnalysis.advantage,
+                enabled: canAnalyzeCoachHints,
+                isCpuThinking: game.isCpuThinking,
+                players: game.players,
+                session: game.session,
+                settings: coachHintSettings,
+                thinkingTimeMs: coachAnalysisDelayMs,
+              }),
+            enabled: mode === "match",
+            isAnalysisRequested: shouldRequestCoachAnalysis,
+            isCpuThinking: game.isCpuThinking,
+            model: coachHintModel,
+            players: game.players,
+            session: game.session,
+            settings: coachHintSettings,
+          })
+        : null,
+    [
+      canAnalyzeCoachHints,
+      coachAnalysisDelayMs,
+      coachHintModel,
+      coachHintSettings,
+      game.isCpuThinking,
+      game.players,
+      game.session,
+      mode,
+      playPositionAnalysis,
+      playPositionAnalysisResult.debug.status,
+      shouldRequestCoachAnalysis,
+    ],
   );
   const resultWinner =
     game.gameStatus === "ended" &&
@@ -249,7 +291,10 @@ export function GameScreen({
 
       {DevDebugPanel !== null && (
         <Suspense fallback={null}>
-          <DevDebugPanel onReplaceSession={game.replaceSession} />
+          <DevDebugPanel
+            coachHintDebug={coachHintDebugSnapshot}
+            onReplaceSession={game.replaceSession}
+          />
         </Suspense>
       )}
     </section>

@@ -18,6 +18,15 @@
   text-transform: uppercase;
 }
 
+.debug-panel__subtitle {
+  margin: 0;
+  color: #f6e8b2;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .debug-panel__actions {
   display: flex;
   flex-wrap: wrap;
@@ -44,4 +53,48 @@
 .debug-panel__button:focus-visible {
   outline: 3px solid #f0c86b;
   outline-offset: 3px;
+}
+
+.debug-panel__section {
+  display: grid;
+  gap: 8px;
+  border-block-start: 1px dashed rgba(255, 238, 194, 0.24);
+  padding-block-start: 10px;
+}
+
+.debug-panel__metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.debug-panel__metrics div {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 7px 8px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.debug-panel__metrics dt {
+  margin: 0 0 3px;
+  color: rgba(248, 241, 223, 0.68);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.debug-panel__metrics dd {
+  margin: 0;
+  color: #f8f1df;
+  font-size: 0.78rem;
+  font-weight: 750;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.debug-panel__metrics .debug-panel__metric-wide {
+  grid-column: 1 / -1;
 }
