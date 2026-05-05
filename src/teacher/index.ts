@@ -43,6 +43,7 @@ export type {
   CoachHint,
   CoachHintKind,
   CoachHintMessageStyle,
+  CoachHintSeverity,
   CreateCoachHintOptions,
   CreateCoachHintsFromAnalysisOptions,
 } from "./createCoachHint";

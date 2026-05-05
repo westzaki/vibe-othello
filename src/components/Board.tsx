@@ -21,7 +21,9 @@ type BoardProps = {
 };
 
 export type BoardHintTone = "helpful" | "risk";
+export type BoardHintSeverity = "low" | "medium" | "high";
 export type BoardHintMarker = {
+  severity?: BoardHintSeverity;
   square: SquareIndex;
   tone: BoardHintTone;
 };
@@ -87,6 +89,9 @@ export function Board({
                   coachHintMarker !== undefined
                     ? `board-square--coach-hint-${coachHintMarker.tone}`
                     : "",
+                  coachHintMarker?.severity !== undefined
+                    ? `board-square--coach-hint-${coachHintMarker.tone}-${coachHintMarker.severity}`
+                    : "",
                 ].join(" ")}
                 disabled={!isLegal}
                 key={square}
@@ -103,7 +108,7 @@ export function Board({
                         ? `${square}-${flipAnimationId}`
                         : isPlacedSquare
                           ? `${square}-${flipAnimationId}-placed`
-                        : `${square}-stable`
+                          : `${square}-stable`
                     }
                     placeDelay={isPlacedSquare ? 0 : null}
                   />

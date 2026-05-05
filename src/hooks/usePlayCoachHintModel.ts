@@ -133,7 +133,10 @@ function getCurrentTimeMs(): number {
 }
 
 function createRiskHintKey(hint: CoachHint): string | null {
-  if (hint.kind !== "cornerRisk" || hint.square === null) {
+  if (
+    (hint.kind !== "cornerRisk" && hint.kind !== "mobilityRisk") ||
+    hint.square === null
+  ) {
     return null;
   }
 

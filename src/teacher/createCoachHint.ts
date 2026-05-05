@@ -15,6 +15,7 @@ export type {
   CoachHint,
   CoachHintKind,
   CoachHintMessageStyle,
+  CoachHintSeverity,
   CreateCoachHintOptions,
   CreateCoachHintsFromAnalysisOptions,
 } from "./coachHintTypes";
@@ -35,6 +36,7 @@ export function createCoachHints(
   {
     includeCandidateFallback = false,
     messageStyle = "specific",
+    riskHintLimit,
     searchDepth = defaultCoachHintSearchDepth,
   }: CreateCoachHintOptions = {},
 ): CoachHint[] {
@@ -43,6 +45,7 @@ export function createCoachHints(
   return createCoachHintsFromAnalysis(analysis, {
     includeCandidateFallback,
     messageStyle,
+    riskHintLimit,
   });
 }
 
@@ -51,9 +54,11 @@ export function createCoachHintsFromAnalysis(
   {
     includeCandidateFallback = false,
     messageStyle = "specific",
+    riskHintLimit,
   }: CreateCoachHintsFromAnalysisOptions = {},
 ): CoachHint[] {
   return selectCoachHintDrafts(analysis, {
     includeCandidateFallback,
+    riskHintLimit,
   }).map((draft) => createCoachHintFromDraft(draft, messageStyle));
 }

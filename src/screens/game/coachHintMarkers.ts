@@ -1,4 +1,8 @@
-import type { BoardHintMarker, BoardHintTone } from "../../components/Board";
+import type {
+  BoardHintMarker,
+  BoardHintSeverity,
+  BoardHintTone,
+} from "../../components/Board";
 import type { CoachHintModel } from "../../teacher";
 
 export function createCoachHintMarkers(
@@ -15,6 +19,7 @@ export function createCoachHintMarkers(
 
     return [
       {
+        severity: getCoachHintSeverity(hint),
         square: hint.square,
         tone: getCoachHintTone(hint),
       },
@@ -28,4 +33,10 @@ export function isRiskCoachHint(hint: CoachHintModel["hint"]): boolean {
 
 function getCoachHintTone(hint: CoachHintModel["hint"]): BoardHintTone {
   return isRiskCoachHint(hint) ? "risk" : "helpful";
+}
+
+function getCoachHintSeverity(
+  hint: CoachHintModel["hint"],
+): BoardHintSeverity | undefined {
+  return isRiskCoachHint(hint) ? hint.severity : undefined;
 }

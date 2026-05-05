@@ -8,7 +8,7 @@ import type {
 } from "./coachHintTypes";
 
 export function createCoachHintFromDraft(
-  { candidate, kind }: CoachHintDraft,
+  { candidate, kind, severity }: CoachHintDraft,
   messageStyle: CoachHintMessageStyle,
 ): CoachHint {
   return {
@@ -16,6 +16,7 @@ export function createCoachHintFromDraft(
     kind,
     message: createCoachHintMessage(kind, candidate, messageStyle),
     reasons: candidate.reasons,
+    severity,
     square: candidate.square,
   };
 }

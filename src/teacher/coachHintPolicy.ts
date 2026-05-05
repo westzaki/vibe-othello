@@ -1,17 +1,31 @@
 import type { MoveCandidateAnalysis } from "./analyzeMoveCandidates";
 import type { CandidateMoveReview } from "./reviewTypes";
-import type { CoachHintDraft } from "./coachHintTypes";
+import type { CoachHintDraft, CoachHintSeverity } from "./coachHintTypes";
 
 export type CoachHintPolicyOptions = {
   includeCandidateFallback: boolean;
+  riskHintLimit?: number;
 };
 
 const actionableRiskScoreGap = 5;
 const actionableHelpfulScoreGap = 35;
+const defaultRiskHintLimit = 3;
+const highRiskScoreGap = 45;
+const mediumRiskScoreGap = 18;
+const highRiskMobilitySwing = -6;
+const mediumRiskMobilitySwing = -3;
+const riskSeverityPriority: Record<CoachHintSeverity, number> = {
+  high: 3,
+  medium: 2,
+  low: 1,
+};
 
 export function selectCoachHintDrafts(
   analysis: MoveCandidateAnalysis,
-  { includeCandidateFallback }: CoachHintPolicyOptions,
+  {
+    includeCandidateFallback,
+    riskHintLimit = defaultRiskHintLimit,
+  }: CoachHintPolicyOptions,
 ): CoachHintDraft[] {
   const bestCandidate = analysis.candidateMoves[0] ?? null;
 
@@ -21,53 +35,10 @@ export function selectCoachHintDrafts(
 
   const drafts: CoachHintDraft[] = [];
 
-  const shouldShowShapeRisk = analysis.evaluationSource !== "exactEndgame";
-  const cornerGivenRiskCandidate = shouldShowShapeRisk
-    ? findRiskCandidate(analysis, (candidate) =>
-        candidate.reasons.includes("cornerGiven"),
-      )
-    : undefined;
-
-  if (cornerGivenRiskCandidate !== undefined) {
-    drafts.push({
-      candidate: cornerGivenRiskCandidate,
-      kind: "cornerRisk",
-    });
-  }
-
-  const mobilityRiskCandidate =
-    shouldShowShapeRisk && cornerGivenRiskCandidate === undefined
-      ? findRiskCandidate(analysis, (candidate) =>
-          candidate.reasons.includes("mobilityLoss"),
-        )
-      : undefined;
-
-  if (
-    mobilityRiskCandidate !== undefined &&
-    !drafts.some(
-      (draft) => draft.candidate.square === mobilityRiskCandidate.square,
-    )
-  ) {
-    drafts.push({
-      candidate: mobilityRiskCandidate,
-      kind: "mobilityRisk",
-    });
-  }
-
-  const dangerSquareRiskCandidate =
-    shouldShowShapeRisk &&
-    cornerGivenRiskCandidate === undefined &&
-    mobilityRiskCandidate === undefined
-      ? findRiskCandidate(analysis, (candidate) =>
-          candidate.reasons.includes("dangerSquare"),
-        )
-      : undefined;
-
-  if (dangerSquareRiskCandidate !== undefined) {
-    drafts.push({
-      candidate: dangerSquareRiskCandidate,
-      kind: "cornerRisk",
-    });
+  if (analysis.evaluationSource !== "exactEndgame") {
+    drafts.push(
+      ...selectRiskDrafts(analysis).slice(0, Math.max(0, riskHintLimit)),
+    );
   }
 
   const helpfulCandidate = findHelpfulCandidate(analysis, {
@@ -133,27 +104,96 @@ function findHelpfulCandidate(
   return includeCandidateFallback ? bestCandidate : null;
 }
 
-function findRiskCandidate(
-  analysis: MoveCandidateAnalysis,
-  predicate: (candidate: CandidateMoveReview) => boolean,
-): CandidateMoveReview | undefined {
-  const bestCandidate = analysis.candidateMoves[0] ?? null;
+function selectRiskDrafts(analysis: MoveCandidateAnalysis): CoachHintDraft[] {
+  const riskDrafts: CoachHintDraft[] = [];
 
-  if (bestCandidate === null) {
-    return undefined;
+  for (const candidate of analysis.candidateMoves) {
+    const kind = getRiskHintKind(candidate);
+
+    if (kind === null) {
+      continue;
+    }
+
+    if (
+      riskDrafts.some((draft) => draft.candidate.square === candidate.square)
+    ) {
+      continue;
+    }
+
+    riskDrafts.push({
+      candidate,
+      kind,
+      severity: getRiskSeverity(candidate),
+    });
   }
 
-  return analysis.candidateMoves.find((candidate) => {
-    if (!predicate(candidate)) {
-      return false;
-    }
+  return riskDrafts.sort(compareRiskDrafts);
+}
 
-    if (candidate.reasons.includes("cornerGiven")) {
-      return true;
-    }
+function getRiskHintKind(
+  candidate: CandidateMoveReview,
+): CoachHintDraft["kind"] | null {
+  if (candidate.reasons.includes("cornerGiven")) {
+    return "cornerRisk";
+  }
 
-    return candidate.metrics.scoreGapFromBest >= actionableRiskScoreGap;
-  });
+  if (
+    candidate.reasons.includes("mobilityLoss") &&
+    candidate.metrics.scoreGapFromBest >= actionableRiskScoreGap
+  ) {
+    return "mobilityRisk";
+  }
+
+  if (
+    candidate.reasons.includes("dangerSquare") &&
+    candidate.metrics.scoreGapFromBest >= actionableRiskScoreGap
+  ) {
+    return "cornerRisk";
+  }
+
+  return null;
+}
+
+function getRiskSeverity(candidate: CandidateMoveReview): CoachHintSeverity {
+  if (
+    candidate.reasons.includes("cornerGiven") ||
+    candidate.metrics.scoreGapFromBest >= highRiskScoreGap ||
+    candidate.metrics.mobilitySwing <= highRiskMobilitySwing
+  ) {
+    return "high";
+  }
+
+  if (
+    candidate.metrics.scoreGapFromBest >= mediumRiskScoreGap ||
+    candidate.metrics.mobilitySwing <= mediumRiskMobilitySwing
+  ) {
+    return "medium";
+  }
+
+  return "low";
+}
+
+function compareRiskDrafts(
+  firstDraft: CoachHintDraft,
+  secondDraft: CoachHintDraft,
+): number {
+  const severityDifference =
+    riskSeverityPriority[secondDraft.severity] -
+    riskSeverityPriority[firstDraft.severity];
+
+  if (severityDifference !== 0) {
+    return severityDifference;
+  }
+
+  const scoreGapDifference =
+    secondDraft.candidate.metrics.scoreGapFromBest -
+    firstDraft.candidate.metrics.scoreGapFromBest;
+
+  if (scoreGapDifference !== 0) {
+    return scoreGapDifference;
+  }
+
+  return firstDraft.candidate.rank - secondDraft.candidate.rank;
 }
 
 function createHelpfulDraft({
@@ -169,6 +209,7 @@ function createHelpfulDraft({
     return {
       candidate,
       kind: "cornerOpportunity",
+      severity: "medium",
     };
   }
 
@@ -176,6 +217,7 @@ function createHelpfulDraft({
     return {
       candidate,
       kind: "mobility",
+      severity: "medium",
     };
   }
 
@@ -183,6 +225,7 @@ function createHelpfulDraft({
     return {
       candidate,
       kind: "endgame",
+      severity: "medium",
     };
   }
 
@@ -190,6 +233,7 @@ function createHelpfulDraft({
     return {
       candidate,
       kind: "candidate",
+      severity: "medium",
     };
   }
 
