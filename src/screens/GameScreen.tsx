@@ -61,7 +61,6 @@ export function GameScreen({
     notice: game.notice,
   });
   const coachHintModel = usePlayCoachHintModel({
-    advantage,
     enabled: mode === "match",
     isCpuThinking: game.isCpuThinking,
     players: game.players,
