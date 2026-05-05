@@ -39,19 +39,6 @@
   text-transform: none;
 }
 
-.advantage-panel__context {
-  min-height: 1rem;
-  margin: -2px 0 0;
-  color: color-mix(
-    in srgb,
-    var(--color-text-soft) 74%,
-    var(--color-mint-strong)
-  );
-  font-size: 0.72rem;
-  font-weight: 900;
-  line-height: 1.35;
-}
-
 .advantage-bar {
   display: flex;
   overflow: hidden;
