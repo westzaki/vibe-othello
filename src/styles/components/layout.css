@@ -1,56 +1,46 @@
 .app {
   position: relative;
-  overflow: hidden;
+  isolation: isolate;
+  overflow-x: hidden;
   display: grid;
   min-height: 100vh;
   place-items: center;
   padding: clamp(14px, 3vw, 34px);
+  background: var(--color-canvas);
+}
+
+.app::before,
+.app::after {
+  content: "";
+  pointer-events: none;
+}
+
+.app::before {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
   background:
-    radial-gradient(
-      circle at 12% 10%,
-      rgba(178, 169, 232, 0.32),
-      transparent 18rem
-    ),
-    radial-gradient(
-      circle at 88% 12%,
-      rgba(255, 173, 153, 0.22),
-      transparent 20rem
-    ),
-    radial-gradient(
-      circle at 82% 86%,
-      rgba(117, 190, 169, 0.24),
-      transparent 22rem
-    ),
+    linear-gradient(rgba(255, 249, 237, 0.08), rgba(255, 249, 237, 0.08)),
+    url("../../assets/ui/app-background.png"),
     linear-gradient(
       135deg,
       var(--color-canvas) 0%,
       var(--color-canvas-warm) 46%,
       var(--color-canvas-mint) 100%
     );
-}
-
-.app::before,
-.app::after {
-  position: absolute;
-  width: 220px;
-  height: 220px;
-  border: 2px dashed rgba(163, 154, 218, 0.16);
-  border-radius: var(--radius-xl);
-  content: "";
-  pointer-events: none;
-  transform: rotate(12deg);
-}
-
-.app::before {
-  top: -72px;
-  left: -54px;
+  background-position:
+    center,
+    center,
+    center;
+  background-repeat: no-repeat;
+  background-size:
+    100% 100%,
+    100% 100%,
+    cover;
 }
 
 .app::after {
-  right: -70px;
-  bottom: -82px;
-  border-color: rgba(117, 190, 169, 0.18);
-  transform: rotate(-15deg);
+  display: none;
 }
 
 .game-shell {

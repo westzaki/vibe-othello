@@ -14,17 +14,8 @@
   height: 72%;
   border-radius: 48px;
   background:
-    radial-gradient(
-      circle at 22% 20%,
-      color-mix(in srgb, var(--color-bibi-honey) 18%, transparent),
-      transparent 15rem
-    ),
-    radial-gradient(
-      circle at 82% 16%,
-      color-mix(in srgb, var(--color-accent-green) 18%, transparent),
-      transparent 16rem
-    ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.44), rgba(255, 251, 244, 0.2));
+    radial-gradient(circle at 22% 20%, rgba(255, 236, 190, 0.22), transparent 15rem),
+    radial-gradient(circle at 82% 16%, rgba(188, 214, 176, 0.2), transparent 16rem);
   content: "";
   filter: blur(0.2px);
   pointer-events: none;
@@ -70,15 +61,19 @@
   background:
     radial-gradient(
       circle at 16% 18%,
-      color-mix(in srgb, var(--color-bibi-honey) 12%, transparent),
+      color-mix(in srgb, var(--color-bibi-honey) 9%, transparent),
       transparent 17rem
     ),
     radial-gradient(
       circle at 88% 18%,
-      color-mix(in srgb, var(--color-accent-green) 10%, transparent),
+      color-mix(in srgb, var(--color-accent-green) 8%, transparent),
       transparent 16rem
     ),
-    linear-gradient(180deg, var(--color-paper-soft), var(--color-paper-strong)),
+    linear-gradient(
+      180deg,
+      rgba(255, 250, 242, 0.94),
+      rgba(255, 240, 207, 0.9)
+    ),
     var(--color-paper);
   box-shadow:
     var(--shadow-hairline),

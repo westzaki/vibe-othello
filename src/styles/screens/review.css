@@ -19,18 +19,18 @@
   background:
     radial-gradient(
       circle at 14% 8%,
-      color-mix(in srgb, var(--color-bibi-honey) 18%, transparent),
+      color-mix(in srgb, var(--color-bibi-honey) 12%, transparent),
       transparent 16rem
     ),
     radial-gradient(
       circle at 90% 12%,
-      color-mix(in srgb, var(--color-board-green) 14%, transparent),
+      color-mix(in srgb, var(--color-board-green) 10%, transparent),
       transparent 16rem
     ),
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--color-paper-soft) 94%, white),
-      color-mix(in srgb, var(--color-paper-strong) 84%, var(--color-room-bottom))
+      rgba(255, 250, 242, 0.94),
+      color-mix(in srgb, var(--color-paper-strong) 78%, var(--color-room-bottom))
     ),
     var(--color-paper);
   box-shadow:
