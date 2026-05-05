@@ -4,8 +4,6 @@ import { Board } from "../components/Board";
 import { GameHeader } from "../components/GameHeader";
 import { GameResultOverlay } from "../components/GameResultOverlay";
 import { MoveHistory } from "../components/MoveHistory";
-import type { DiscColor } from "../game/othello";
-import type { GameSessionNotice } from "../game/session";
 import type { OthelloGameController } from "../hooks/useOthelloGame";
 import { usePassNoticeVisibility } from "../hooks/usePassNoticeVisibility";
 import { usePlayCoachHintModel } from "../hooks/usePlayCoachHintModel";
@@ -16,6 +14,8 @@ import {
 } from "../teacher";
 import { CoachHintPanel } from "./game/CoachHintPanel";
 import { createCoachHintMarkers } from "./game/coachHintMarkers";
+import { PassNoticeOverlay } from "./game/PassNoticeOverlay";
+import { PracticeBanner } from "./game/PracticeBanner";
 
 const DevDebugPanel = import.meta.env.DEV
   ? lazy(() =>
@@ -107,24 +107,10 @@ export function GameScreen({
       <div className="game-side-rail">
         <aside className="game-sidebar" aria-label="Game controls and status">
           {mode === "practice" && (
-            <div className="practice-banner" aria-label="Practice session">
-              <span>練習モード</span>
-              <strong>ふりかえりから練習中</strong>
-              {practiceFeedbackText !== null && (
-                <p className="practice-banner__feedback" role="status">
-                  {practiceFeedbackText}
-                </p>
-              )}
-              {onBackToReview !== undefined && (
-                <button
-                  className="game-action"
-                  onClick={onBackToReview}
-                  type="button"
-                >
-                  ふりかえりへ
-                </button>
-              )}
-            </div>
+            <PracticeBanner
+              feedbackText={practiceFeedbackText}
+              onBackToReview={onBackToReview}
+            />
           )}
 
           {resultWinner !== null ? (
@@ -190,27 +176,6 @@ export function GameScreen({
   );
 }
 
-function PassNoticeOverlay({ notice }: { notice: GameSessionNotice }) {
-  return (
-    <div className="pass-notice-overlay" role="status" aria-live="polite">
-      <div className="pass-notice-overlay__card">
-        <span
-          className={`pass-notice-overlay__disc pass-notice-overlay__disc--${notice.skippedDisc}`}
-          aria-hidden="true"
-        />
-        <div>
-          <p className="pass-notice-overlay__title">
-            {formatDisc(notice.skippedDisc)}は置ける場所がないみたい
-          </p>
-          <p className="pass-notice-overlay__text">
-            {formatDisc(notice.nextDisc)}がもう一度打つよ
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function canOpenReview(game: OthelloGameController): boolean {
   return (
     game.gameStatus === "ended" &&
@@ -220,8 +185,4 @@ function canOpenReview(game: OthelloGameController): boolean {
       (game.players.white.type === "human" &&
         game.players.black.type === "cpu"))
   );
-}
-
-function formatDisc(disc: DiscColor): string {
-  return disc === "black" ? "黒" : "白";
 }
