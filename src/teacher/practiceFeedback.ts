@@ -22,7 +22,7 @@ export function createPracticeFeedback(
     practicedMove.square === context.bestSquare
   ) {
     return {
-      text: `${formatSquare(practicedMove.square)}を試せたね。さっき見たポイントをちゃんと使えていていい感じ。`,
+      text: `${formatSquare(practicedMove.square)}を試せたね。さっき見たポイントにつながっていていい感じ。`,
     };
   }
 
@@ -40,7 +40,7 @@ export function createPracticeFeedback(
     context.reasons.includes("dangerSquare")
   ) {
     return {
-      text: "角の近くをもう一回見て、別の形を試せたね。かなりいい見直しだと思う。",
+      text: "角の近くをもう一回見て、別の形を試せたね。いい見直しだと思う。",
     };
   }
 
@@ -55,7 +55,7 @@ export function createPracticeFeedback(
 
   if (practicedMove.square !== context.square) {
     return {
-      text: "いいね、さっきと違う形を試せたね。考え直せている感じがするよ。",
+      text: "いいね、さっきと違う形を試せたね。比べ直せていていい感じ。",
     };
   }
 

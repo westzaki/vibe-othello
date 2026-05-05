@@ -40,7 +40,7 @@ function createCoachHintMessage(
           )} を見てみよう。`;
     case "stableEdge":
       return messageStyle === "vague"
-        ? "取った角からつながる辺は、強い形になりやすいよ。角につながるマスを見てみよう。"
+        ? "角からつながる辺は、強い形になりやすいよ。角につながるマスを見てみよう。"
         : `取った角からつながる辺は、強い形になりやすいよ。${formatSquare(
             candidate.square,
           )} の後の辺を見てみよう。`;
@@ -64,10 +64,10 @@ function createCoachHintMessage(
           )} の後の形を少し見てみよう。`;
     case "cornerRisk":
       return messageStyle === "vague"
-        ? "角の近くは少し注意。ここに置く前に、相手が角へ行けないか見てみよう。"
+        ? "角の近くは少し注意。相手が角へ行けないか見てみよう。"
         : `角の近くは少し注意。${formatSquare(
             candidate.square,
-          )} は、置いた後に相手が角へ行けないか見てみよう。`;
+          )} の後に、相手が角へ行けないか見てみよう。`;
     case "mobilityRisk":
       return messageStyle === "vague"
         ? "置いた後に、自分の行き先が少なくなりそうな手もありそう。次の形を見てみよう。"
@@ -86,7 +86,9 @@ function createBestMoveHintMessage(
 
   return messageStyle === "vague"
     ? reason
-    : `勝ちに行くなら、${formatSquare(candidate.square)} が本命。${reason}`;
+    : `まず比べるなら、${formatSquare(
+        candidate.square,
+      )} が本命候補。${reason}`;
 }
 
 function createBestMoveReason(
@@ -99,7 +101,7 @@ function createBestMoveReason(
     guidance?.refutationSeverity === "medium"
   ) {
     return messageStyle === "vague"
-      ? "本命になりそうだけど、相手の返しまで見たい場所があるよ。"
+      ? "本命候補だけど、相手の返しまで見たい場所があるよ。"
       : "相手の強い返しもあるので、置いた後の形まで確認しよう。";
   }
 
@@ -109,37 +111,37 @@ function createBestMoveReason(
       candidate.metrics.opponentMobilityAfter <= 2)
   ) {
     return messageStyle === "vague"
-      ? "相手の行き先を少し絞れる本命がありそう。光っているマスの後の形を見てみよう。"
+      ? "相手の行き先を少し絞れそうな場所があるよ。光っているマスの後の形を見てみよう。"
       : "相手の行き先を絞りやすく、返しも悪くなりにくい手。";
   }
 
   if (candidate.metrics.isCorner) {
     return messageStyle === "vague"
-      ? "角を取りながら形を安定させやすい本命がありそう。"
+      ? "角を取りながら形を安定させやすい場所がありそう。"
       : "角を取りながら、返しで大きく崩れにくい手。";
   }
 
   if (candidate.metrics.anchoredEdgeDelta > 0) {
     return messageStyle === "vague"
-      ? "角からつながる辺を強くしやすい本命がありそう。"
+      ? "角からつながる辺を強くしやすい場所がありそう。"
       : "角からつながる辺を強くしやすい手。";
   }
 
   if (candidate.metrics.mobilitySwing > 0) {
     return messageStyle === "vague"
-      ? "自分の行き先を残しやすい本命がありそう。"
+      ? "自分の行き先を残しやすい場所がありそう。"
       : "自分の行き先を残しながら、相手を少し動きづらくできる手。";
   }
 
   if (guidance?.refutationSeverity === "low") {
     return messageStyle === "vague"
-      ? "少し返しはあるけど、本命になりそうな場所があるよ。"
-      : "少し返しはあるけど、本命としては十分強い手。";
+      ? "少し返しはあるけど、候補に入れて比べたい場所があるよ。"
+      : "少し返しはあるけど、候補に入れて比べたい手。";
   }
 
   return messageStyle === "vague"
-    ? "勝ちに行くなら、本命になりそうな場所があるよ。光っているマスの後の形を見てみよう。"
-    : "相手の返し手も見てみよう。";
+    ? "候補になりそうな場所があるよ。光っているマスの後の形を見てみよう。"
+    : "置いた後の相手の返し手も見てみよう。";
 }
 
 function formatSquare(square: SquareIndex): string {

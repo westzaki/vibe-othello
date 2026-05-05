@@ -85,11 +85,11 @@ function createPlayedMoveExplanation(
   usesExactEndgame: boolean,
 ): string {
   if (usesExactEndgame) {
-    return "終盤なので、最後まで進めたときの石の残り方まで見ると少し苦しい形だったかも。";
+    return "終盤は、最後まで進めたときの石の残り方まで見る局面だったかも。";
   }
 
   if (review.reasons.includes("cornerGiven")) {
-    return "置いた後に、相手が角へ近づける形になりやすかったかも。";
+    return "置いた後に、相手が角へ近づける形になったかも。";
   }
 
   if (review.reasons.includes("dangerSquare")) {
@@ -101,7 +101,7 @@ function createPlayedMoveExplanation(
   }
 
   if (review.reasons.includes("turningPoint")) {
-    return "このあと、相手が少し動きやすい流れになったかも。";
+    return "このあと、相手のチャンスが少し増える流れになったかも。";
   }
 
   return "自然な一手だったね。次は、置いた後の相手の置ける場所も一緒に見てみよう。";
@@ -121,11 +121,11 @@ function createTrialMoveExplanation(
   }
 
   if (trialCandidate?.reasons.includes("dangerSquare")) {
-    return "角の近くだから、ここも形を比べながら試してみたい手だね。";
+    return "角の近くだから、相手の角チャンスと比べながら試してみたい手だね。";
   }
 
   if (review.reasons.includes("cornerGiven")) {
-    return "角まわりのリスクを少し避けながら、相手の置ける場所を比べやすい手かも。";
+    return "角まわりのリスクをおさえながら、相手の置ける場所を比べやすい手かも。";
   }
 
   if (review.reasons.includes("mobilityLoss")) {
@@ -133,7 +133,7 @@ function createTrialMoveExplanation(
   }
 
   if (review.reasons.includes("turningPoint")) {
-    return "相手のチャンスを増やしにくい形か、比べてみたい手かも。";
+    return "相手のチャンスを増やしにくいか、比べてみたい手かも。";
   }
 
   return "返す数だけでなく、相手にいい手をあげにくいか比べてみたい手かも。";
@@ -174,25 +174,25 @@ function createExplanation(
     if (usesExactEndgame) {
       return `${formatSquare(
         review.square,
-      )} は終盤の分かれ道だったかも。最後まで進めると、別の手のほうが石を残しやすい局面でした。`;
+      )} は終盤の分かれ道だったかも。最後まで進めると、別の手も比べたい局面でした。`;
     }
 
     if (review.reasons.includes("cornerGiven")) {
       return `${formatSquare(
         review.square,
-      )} は勝負の分かれ道だったかも。置いた後に、相手が角へ近づけるか見てみるとよさそう。`;
+      )} は勝負の分かれ道だったかも。置いた後に、相手が角へ行けるか見てみるとよさそう。`;
     }
 
     if (review.reasons.includes("dangerSquare")) {
       return `${formatSquare(
         review.square,
-      )} は角の近くだね。ここは急がず、もう一回だけ形を見てみるのもアリかも。`;
+      )} は角の近くだね。ここは急がず、空いている角をもう一回だけ見てもよさそう。`;
     }
 
     if (review.reasons.includes("turningPoint")) {
       return `${formatSquare(
         review.square,
-      )} はここで少し流れが変わったかも。このあと相手が動きやすくなっていないか見てみよう。`;
+      )} はここで少し流れが変わったかも。このあと相手のチャンスが増えていないか見てみよう。`;
     }
 
     return `${formatSquare(
@@ -203,19 +203,19 @@ function createExplanation(
   if (review.reasons.includes("corner")) {
     return `${formatSquare(
       review.square,
-    )} で角を取れたの、すごくいい判断だね。返されにくい場所を大事にできています。`;
+    )} で角を取れたのはいい判断だね。返されにくい場所を大事にできていました。`;
   }
 
   if (review.reasons.includes("mobilityGain")) {
     return `${formatSquare(
       review.square,
-    )} は相手を少し動きづらくできた手だね。次の形まで見られていていい感じ。`;
+    )} は相手の置ける場所を少し減らせた手だね。次の形まで見られていていい感じ。`;
   }
 
   if (review.kind === "good") {
     return `${formatSquare(
       review.square,
-    )} は流れを崩しにくい、落ち着いた一手だったと思う。ちゃんと考えた感じが出ています。`;
+    )} は流れを崩しにくい、落ち着いた一手だったと思う。次の形を見ようとした手に見えます。`;
   }
 
   return `${formatSquare(
@@ -234,27 +234,27 @@ function createSuggestion(
   if (usesExactEndgame) {
     return `この終盤では ${formatSquare(
       review.bestSquare,
-    )} も試してみる？最後まで置いたときに、どちらの石が多く残るか比べると見えやすいかも。`;
+    )} も試してみる？最後まで置いたときに、石がどう残るか比べると見えやすいかも。`;
   }
 
   return `この局面では ${formatSquare(
     review.bestSquare,
-  )} も試してみる？角まわりと、相手の置ける場所を少し比べると見えやすいかも。`;
+  )} も試してみる？角まわりと、相手の置ける場所を比べると見えやすいかも。`;
 }
 
 function createAdvice(reviewedMoves: ReviewedMove[]): string {
   const badMoves = reviewedMoves.filter((move) => move.review.kind === "bad");
 
   if (badMoves.some(usesExactEndgameEvaluation)) {
-    return "終盤は、今たくさん返す手よりも最後に石が残る手を比べてみよう。そこに気づけると、接戦を勝ちに変えやすくなるよ。";
+    return "終盤は、今たくさん返す手よりも最後に石が残る手を比べてみよう。そこに気づけると、接戦でも選びやすくなるよ。";
   }
 
   if (badMoves.some((move) => move.review.reasons.includes("cornerGiven"))) {
-    return "次は、置いた後に相手が角へ行けるかを一回だけ見てみよう。そこに気づけると、次はかなり勝ちやすくなるよ。";
+    return "次は、置いた後に相手が角へ行けるかを一回だけ見てみよう。そこに気づけると、勝ちに近づきやすくなるよ。";
   }
 
   if (badMoves.some((move) => move.review.reasons.includes("dangerSquare"))) {
-    return "次は、角の近くを打つ前に少し立ち止まってみよう。急がず選べたら、かなりいい流れになりそう。";
+    return "次は、角の近くを打つ前に少し立ち止まってみよう。急がず選べたら、いい流れになりそう。";
   }
 
   if (badMoves.some((move) => move.review.reasons.includes("turningPoint"))) {

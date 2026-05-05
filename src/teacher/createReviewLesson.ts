@@ -103,7 +103,7 @@ function createTurningPointBodyText(outcome: ReviewOutcome): string {
     return "かなり接戦だったね。次に一歩抜け出すポイントを、もう一回だけ見てみよう。";
   }
 
-  return "流れが変わりやすかった局面を、責めずにもう一回だけ見てみよう。";
+  return "流れが変わりやすかった局面を、次に変えられそうな見方として見てみよう。";
 }
 
 function createTurningPointEmptyText(outcome: ReviewOutcome): string {
@@ -129,7 +129,7 @@ function createPracticeBodyText(
   if (move.review.bestSquare !== null) {
     return `${move.moveNumber}手目の局面から、${formatSquare(
       move.review.bestSquare,
-    )} を試してみよう。`;
+    )} も試してみよう。`;
   }
 
   return `${move.moveNumber}手目の局面から、もう一回別の形を試してみよう。`;
