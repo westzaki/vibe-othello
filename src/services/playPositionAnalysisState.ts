@@ -1,9 +1,9 @@
 import type { Board, DiscColor } from "../game/othello";
-import {
-  createPlayPositionAnalysis,
-  type CreatePlayPositionAnalysisOptions,
-  type PlayPositionAnalysis,
+import type {
+  CreatePlayPositionAnalysisOptions,
+  PlayPositionAnalysis,
 } from "../teacher";
+import { createLightweightPlayPositionAnalysis } from "./playPositionAnalysisFallback";
 
 export type PlayPositionAnalysisSources = {
   board: Board;
@@ -54,23 +54,5 @@ function createSynchronousPlayPositionAnalysis({
   currentDisc,
   options,
 }: PlayPositionAnalysisSources): PlayPositionAnalysis {
-  return createPlayPositionAnalysis(
-    board,
-    currentDisc,
-    createSynchronousPlayPositionAnalysisOptions(options),
-  );
-}
-
-function createSynchronousPlayPositionAnalysisOptions(
-  options: CreatePlayPositionAnalysisOptions | undefined,
-): CreatePlayPositionAnalysisOptions | undefined {
-  if (!options?.useTeacherGuidanceMove) {
-    return options;
-  }
-
-  return {
-    ...options,
-    includeBestMoveHint: false,
-    useTeacherGuidanceMove: false,
-  };
+  return createLightweightPlayPositionAnalysis(board, currentDisc, options);
 }

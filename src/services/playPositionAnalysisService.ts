@@ -1,6 +1,5 @@
 import type { Board, DiscColor } from "../game/othello";
 import {
-  createPlayPositionAnalysis,
   type CreatePlayPositionAnalysisOptions,
   type PlayPositionAnalysis,
 } from "../teacher";
@@ -8,6 +7,7 @@ import {
   analyzePlayPositionInWorker,
   cancelPlayPositionAnalysisWorkerRequest,
 } from "../workers/playPositionAnalysis/playPositionAnalysisWorkerClient";
+import { createLightweightPlayPositionAnalysis } from "./playPositionAnalysisFallback";
 import { withTimeout } from "./withTimeout";
 
 export type PlayPositionAnalysisRequest = {
@@ -67,7 +67,7 @@ function analyzePlayPositionSync(
   request: PlayPositionAnalysisRequest,
 ): PlayPositionAnalysisResponse {
   return {
-    analysis: createPlayPositionAnalysis(
+    analysis: createLightweightPlayPositionAnalysis(
       request.board,
       request.currentDisc,
       request.options,
