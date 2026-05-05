@@ -249,6 +249,10 @@ describe("teacher coach hint model", () => {
 
     expect(model).toEqual(
       expect.objectContaining({
+        analysis: expect.objectContaining({
+          phase: "opening",
+          moveEvaluationSource: "search",
+        }),
         mode: "active",
         hint: expect.objectContaining({
           kind: "candidate",

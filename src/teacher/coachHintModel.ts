@@ -1,7 +1,11 @@
 import type { Advantage } from "../cpu";
 import type { PlayerSettings } from "../game/players";
 import { getSessionLegalMoves, type GameSession } from "../game/session";
-import { createCoachHints, type CoachHint } from "./createCoachHint";
+import type { CoachHint } from "./createCoachHint";
+import {
+  createPlayPositionAnalysis,
+  type PlayPositionAnalysis,
+} from "./createPlayPositionAnalysis";
 
 export type CoachHintMode = "off" | "gentle" | "active";
 
@@ -10,6 +14,7 @@ export type CoachHintSettings = {
 };
 
 export type CoachHintModel = {
+  analysis: PlayPositionAnalysis;
   hint: CoachHint;
   hints: CoachHint[];
   mode: Exclude<CoachHintMode, "off">;
@@ -81,7 +86,7 @@ export function createCoachHintModel(
     return null;
   }
 
-  const hints = createCoachHints(
+  const analysis = createPlayPositionAnalysis(
     context.session.board,
     context.session.currentDisc,
     {
@@ -89,6 +94,7 @@ export function createCoachHintModel(
       messageStyle: mode === "gentle" ? "vague" : "specific",
     },
   );
+  const hints = analysis.coachHints;
   const hint = hints[0] ?? null;
 
   if (hint === null) {
@@ -96,6 +102,7 @@ export function createCoachHintModel(
   }
 
   return {
+    analysis,
     hint,
     hints,
     mode,
