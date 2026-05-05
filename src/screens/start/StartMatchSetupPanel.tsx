@@ -50,8 +50,10 @@ export function StartMatchSetupPanel({
           onClick={() => onStart(mode, cpuLevel, humanDisc)}
           type="button"
         >
-          <span className="start-panel__start-step">4</span>
-          スタート
+          <span className="start-panel__start-icon" aria-hidden="true">
+            ▶
+          </span>
+          ゲーム開始
         </button>
         <button
           className="start-panel__settings"
