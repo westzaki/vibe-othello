@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { calculateAdvantage } from "../cpu";
 import { createInitialBoard } from "../game/othello";
 import { createBoardFixture } from "../test/boardFixtures";
 import { createPlayPositionAnalysis } from "./createPlayPositionAnalysis";
@@ -11,7 +12,7 @@ describe("createPlayPositionAnalysis", () => {
 
     expect(analysis).toEqual(
       expect.objectContaining({
-        advantageSource: "heuristic",
+        advantageSource: "searchAdjusted",
         confidence: "medium",
         confidenceReason: "searchCandidates",
         currentDisc: "black",
@@ -29,6 +30,33 @@ describe("createPlayPositionAnalysis", () => {
       }),
     ]);
     expect(analysis.shapeSignals).toEqual([]);
+  });
+
+  it("adjusts the play advantage with the best candidate search outlook", () => {
+    const board = createBoardFixture({
+      1: "white",
+      2: "black",
+      10: "white",
+      11: "black",
+    });
+    const baseAdvantage = calculateAdvantage(board, "black");
+    const analysis = createPlayPositionAnalysis(board, "black", {
+      searchDepth: 1,
+    });
+
+    expect(analysis.advantageSource).toBe("searchAdjusted");
+    expect(analysis.candidateMoves[0]).toEqual(
+      expect.objectContaining({
+        metrics: expect.objectContaining({
+          isCorner: true,
+        }),
+        square: 0,
+      }),
+    );
+    expect(analysis.advantage.blackPercent).toBeGreaterThan(
+      baseAdvantage.blackPercent,
+    );
+    expect(analysis.advantage.leadingDisc).toBe("black");
   });
 
   it("keeps risk and helpful candidates in the same analysis", () => {
@@ -81,13 +109,13 @@ describe("createPlayPositionAnalysis", () => {
   });
 
   it("uses exact endgame confidence for late positions", () => {
-    const analysis = createPlayPositionAnalysis(
-      createBoardFromString(
-        "wwwwb-b-wbbwbbwwwbwbbbbbwwwbbwbww-bwwbww-wwwbwb-bwwbbbw-ww-w--ww",
-      ),
-      "white",
-      { searchDepth: 1 },
+    const board = createBoardFromString(
+      "wwwwb-b-wbbwbbwwwbwbbbbbwwwbbwbww-bwwbww-wwwbwb-bwwbbbw-ww-w--ww",
     );
+    const baseAdvantage = calculateAdvantage(board, "white");
+    const analysis = createPlayPositionAnalysis(board, "white", {
+      searchDepth: 1,
+    });
 
     expect(analysis).toEqual(
       expect.objectContaining({
@@ -98,6 +126,7 @@ describe("createPlayPositionAnalysis", () => {
         phase: "endgame",
       }),
     );
+    expect(analysis.advantage).toEqual(baseAdvantage);
     expect(analysis.helpfulCandidates[0]).toEqual(
       expect.objectContaining({
         rank: 1,

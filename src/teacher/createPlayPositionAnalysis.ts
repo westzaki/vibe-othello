@@ -23,6 +23,7 @@ import type {
 export type PlayPositionPhase = "opening" | "midgame" | "endgame";
 export type PlayPositionAdvantageSource =
   | "heuristic"
+  | "searchAdjusted"
   | "exactEndgame"
   | "final";
 export type PlayPositionMoveEvaluationSource =
@@ -77,6 +78,12 @@ export type CreatePlayPositionAnalysisOptions =
 const defaultPlayPositionSearchDepth = 3;
 const exactEndgameEmptyThreshold = 10;
 const openingEmptyThreshold = 44;
+const searchOutlookScale = 260;
+const openingSearchBlend = 0.3;
+const midgameSearchBlend = 0.45;
+const mobilityPercentWeight = 2;
+const cornerOpportunityPercentBonus = 10;
+const cornerRiskPercentPenalty = 14;
 
 export function createPlayPositionAnalysis(
   board: Board,
@@ -90,17 +97,17 @@ export function createPlayPositionAnalysis(
   const emptyCount = countEmptySquares(board);
   const phase = getPlayPositionPhase(emptyCount);
   const legalMoves = getLegalMoves(board, currentDisc);
-  const advantage = calculateAdvantage(board, currentDisc);
-  const advantageSource = getAdvantageSource(board, emptyCount);
+  const baseAdvantage = calculateAdvantage(board, currentDisc);
+  const baseAdvantageSource = getAdvantageSource(board, emptyCount);
 
   if (legalMoves.length === 0) {
     return {
-      advantage,
-      advantageSource,
+      advantage: baseAdvantage,
+      advantageSource: baseAdvantageSource,
       candidateMoves: [],
       coachHints: [],
-      confidence: getConfidence(advantageSource, "none"),
-      confidenceReason: getConfidenceReason(advantageSource, "none"),
+      confidence: getConfidence(baseAdvantageSource, "none"),
+      confidenceReason: getConfidenceReason(baseAdvantageSource, "none"),
       currentDisc,
       emptyCount,
       helpfulCandidates: [],
@@ -119,6 +126,17 @@ export function createPlayPositionAnalysis(
     candidateAnalysis.evaluationSource,
   );
   const candidateMoves = candidateAnalysis.candidateMoves;
+  const advantageSource = getPlayAdvantageSource(
+    baseAdvantageSource,
+    moveEvaluationSource,
+  );
+  const advantage = getPlayPositionAdvantage({
+    baseAdvantage,
+    candidateMoves,
+    currentDisc,
+    phase,
+    source: advantageSource,
+  });
   const riskCandidates = candidateMoves.filter(hasRiskReason);
   const helpfulCandidates = candidateMoves.filter((candidate) =>
     hasHelpfulReason(candidate, candidateAnalysis.evaluationSource),
@@ -151,6 +169,125 @@ export function createPlayPositionAnalysis(
     riskCandidates,
     shapeSignals,
   };
+}
+
+function getPlayAdvantageSource(
+  baseAdvantageSource: PlayPositionAdvantageSource,
+  moveEvaluationSource: PlayPositionMoveEvaluationSource,
+): PlayPositionAdvantageSource {
+  if (
+    baseAdvantageSource === "final" ||
+    baseAdvantageSource === "exactEndgame" ||
+    moveEvaluationSource === "exactEndgame" ||
+    moveEvaluationSource === "none"
+  ) {
+    return baseAdvantageSource;
+  }
+
+  return "searchAdjusted";
+}
+
+function getPlayPositionAdvantage({
+  baseAdvantage,
+  candidateMoves,
+  currentDisc,
+  phase,
+  source,
+}: {
+  baseAdvantage: Advantage;
+  candidateMoves: CandidateMoveReview[];
+  currentDisc: DiscColor;
+  phase: PlayPositionPhase;
+  source: PlayPositionAdvantageSource;
+}): Advantage {
+  if (source !== "searchAdjusted") {
+    return baseAdvantage;
+  }
+
+  const bestCandidate = candidateMoves[0] ?? null;
+
+  if (bestCandidate === null) {
+    return baseAdvantage;
+  }
+
+  const searchBlend = getSearchBlend(phase);
+  const outlookBlackPercent = getCandidateOutlookBlackPercent(
+    bestCandidate,
+    currentDisc,
+  );
+  const blackPercent = clampPercent(
+    Math.round(
+      baseAdvantage.blackPercent * (1 - searchBlend) +
+        outlookBlackPercent * searchBlend,
+    ),
+  );
+  const whitePercent = 100 - blackPercent;
+
+  return {
+    blackPercent,
+    leadingDisc: getLeadingDisc(blackPercent, whitePercent),
+    whitePercent,
+  };
+}
+
+function getSearchBlend(phase: PlayPositionPhase): number {
+  if (phase === "opening") {
+    return openingSearchBlend;
+  }
+
+  if (phase === "midgame") {
+    return midgameSearchBlend;
+  }
+
+  return 0;
+}
+
+function getCandidateOutlookBlackPercent(
+  candidate: CandidateMoveReview,
+  currentDisc: DiscColor,
+): number {
+  const currentDiscPercent = clampPercent(
+    scoreToPercent(candidate.score, searchOutlookScale) +
+      getCandidateMetricPercentAdjustment(candidate),
+  );
+
+  return currentDisc === "black"
+    ? currentDiscPercent
+    : 100 - currentDiscPercent;
+}
+
+function getCandidateMetricPercentAdjustment(
+  candidate: CandidateMoveReview,
+): number {
+  const mobilityAdjustment =
+    candidate.metrics.mobilitySwing * mobilityPercentWeight;
+  const cornerAdjustment = candidate.metrics.isCorner
+    ? cornerOpportunityPercentBonus
+    : 0;
+  const cornerRiskAdjustment = candidate.metrics.givesOpponentCorner
+    ? -cornerRiskPercentPenalty
+    : 0;
+
+  return mobilityAdjustment + cornerAdjustment + cornerRiskAdjustment;
+}
+
+function scoreToPercent(score: number, scale: number): number {
+  return Math.round(50 + Math.tanh(score / scale) * 50);
+}
+
+function clampPercent(percent: number): number {
+  return Math.max(0, Math.min(100, percent));
+}
+
+function getLeadingDisc(
+  blackPercent: number,
+  whitePercent: number,
+): DiscColor | null {
+  if (blackPercent === whitePercent) {
+    return null;
+  }
+
+  return blackPercent > whitePercent ? "black" : "white";
 }
 
 function getPlayPositionPhase(emptyCount: number): PlayPositionPhase {
