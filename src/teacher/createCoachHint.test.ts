@@ -371,6 +371,73 @@ describe("teacher coach hints", () => {
     expect(hints[0]?.message).toContain("強い返し");
   });
 
+  it("uses direct reasons for active best-move hints", () => {
+    const hints = createCoachHintsFromAnalysis(
+      {
+        candidateMoves: [
+          createCandidateMove({
+            metrics: {
+              opponentMobilityAfter: 1,
+            },
+            rank: 1,
+            reasons: [],
+            score: 100,
+            square: 26,
+          }),
+        ],
+        evaluationSource: "minimax",
+      },
+      {
+        bestMoveGuidance: {
+          opponentPressureScore: 8,
+          opponentReplySpread: 12,
+          refutationSeverity: null,
+          scoreGapFromBest: 0,
+        },
+        bestMoveSquare: 26,
+        includeBestMoveHint: true,
+        messageStyle: "direct",
+      },
+    );
+
+    expect(hints[0]?.message).toBe(
+      "C4 が本命候補。理由: 相手の置ける場所を減らしやすく、強い返しを受けにくいからです。",
+    );
+  });
+
+  it("uses direct reasons for active risk hints", () => {
+    const hints = createCoachHintsFromAnalysis(
+      {
+        candidateMoves: [
+          createCandidateMove({
+            rank: 1,
+            reasons: [],
+            score: 100,
+            square: 19,
+          }),
+          createCandidateMove({
+            metrics: {
+              givesOpponentCorner: true,
+              scoreGapFromBest: 20,
+            },
+            rank: 2,
+            reasons: ["cornerGiven"],
+            score: 80,
+            square: 9,
+          }),
+        ],
+        evaluationSource: "minimax",
+      },
+      {
+        messageStyle: "direct",
+      },
+    );
+
+    expect(hints[0]?.message).toBe(
+      "B2 は注意。置いた後に、相手が角を取れる形になりやすい手です。",
+    );
+  });
+
 
   it("warns about moves that meaningfully reduce current player mobility", () => {
     const board = createBoardFixture({

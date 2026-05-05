@@ -39,7 +39,7 @@ export type CoachHintDraft = {
   severity: CoachHintSeverity;
 };
 
-export type CoachHintMessageStyle = "vague" | "specific";
+export type CoachHintMessageStyle = "vague" | "specific" | "direct";
 
 export type CreateCoachHintOptions = Partial<AnalyzeMoveCandidatesOptions> & {
   includeBestMoveHint?: boolean;
