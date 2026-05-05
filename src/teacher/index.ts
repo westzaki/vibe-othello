@@ -48,6 +48,8 @@ export type {
   CreateCoachHintsFromAnalysisOptions,
 } from "./createCoachHint";
 export {
+  canShowCoachBestMoveHint,
+  canShowCoachHintAfterOpening,
   canShowCoachHint,
   createCoachHintModel,
   createCoachPlayPositionAnalysisOptions,
