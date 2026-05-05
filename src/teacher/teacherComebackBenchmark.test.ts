@@ -5,8 +5,6 @@ import {
   createInitialBoard,
   getLegalMoves,
   getNextDisc,
-  getWinner,
-  isGameOver,
   placeDisc,
   type Board,
   type DiscColor,
@@ -18,196 +16,285 @@ export type TeacherComebackBenchmarkPosition = {
   board: Board;
   currentDisc: DiscColor;
   moveCount: number;
+  seed: number;
 };
 
-export type TeacherComebackBenchmarkResult = {
-  averageDiscDiff: number;
+export type TeacherComebackFirstResponseResult = {
+  advantageAfterLevel6Reply: number;
+  advantageAfterTeacherMove: number;
+  advantageBefore: number;
+  discDiffAfterLevel6Reply: number;
+  firstGuidanceTimeMs: number;
+  level6Reply: SquareIndex | null;
+  level6ReplyTimeMs: number;
+  moveCount: number;
+  seed: number;
+  teacherMove: SquareIndex | null;
+};
+
+export type TeacherComebackFirstResponseSummary = {
+  averageAdvantageSwingAfterReply: number;
+  averageDiscDiffAfterReply: number;
   averageFirstGuidanceTimeMs: number;
-  draws: number;
-  losses: number;
-  timeoutCount: number;
-  wins: number;
+  averageLevel6ReplyTimeMs: number;
+  improvedOrHeldCount: number;
+  level6NullReplyCount: number;
+  positionCount: number;
+  teacherNullMoveCount: number;
+  worsenedCount: number;
 };
 
 const benchmark =
   import.meta.env.VITE_TEACHER_COMEBACK_BENCHMARK === "1"
     ? describe
     : describe.skip;
+const fixedBenchmarkPositionCount = 30;
+const fixedBenchmarkSeeds = Array.from({ length: 120 }, (_, seed) => seed);
 
-benchmark("teacher comeback benchmark", () => {
-  it("plays comeback guidance from slightly disadvantaged positions against level6", () => {
-    const positions = generateDisadvantagedPositions(30);
-    const result = summarizeBenchmarkResults(
-      positions.map(playOutTeacherVsLevel6),
-    );
+describe("teacher comeback benchmark fixtures", () => {
+  it("keeps a fixed pack of slightly disadvantaged positions", () => {
+    const positions = getTeacherComebackBenchmarkPositions();
 
-    expect(positions.length).toBeGreaterThan(0);
-    expect(result.wins + result.losses + result.draws).toBe(positions.length);
+    expect(positions).toHaveLength(fixedBenchmarkPositionCount);
+
+    for (const position of positions) {
+      const advantagePercent = getAdvantagePercent(
+        position.board,
+        position.currentDisc,
+      );
+
+      expect(position.moveCount).toBeGreaterThanOrEqual(9);
+      expect(getLegalMoves(position.board, position.currentDisc).length).toBeGreaterThan(
+        0,
+      );
+      expect(advantagePercent).toBeGreaterThanOrEqual(35);
+      expect(advantagePercent).toBeLessThanOrEqual(45);
+    }
   });
 });
 
-export function generateDisadvantagedPositions(
-  seedCount: number,
-): TeacherComebackBenchmarkPosition[] {
+benchmark("teacher comeback benchmark", () => {
+  it(
+    "measures Teacher first response against Level 6 on fixed positions",
+    () => {
+      const limit = getBenchmarkLimit();
+      const positions = getTeacherComebackBenchmarkPositions().slice(0, limit);
+      const results = positions.map(playTeacherFirstResponseAgainstLevel6);
+      const summary = summarizeFirstResponseResults(results);
+
+      console.info(
+        [
+          "Teacher comeback first-response benchmark",
+          JSON.stringify(summary, null, 2),
+        ].join("\n"),
+      );
+
+      expect(summary.positionCount).toBe(positions.length);
+      expect(summary.teacherNullMoveCount).toBe(0);
+    },
+    60_000,
+  );
+});
+
+export function getTeacherComebackBenchmarkPositions(): TeacherComebackBenchmarkPosition[] {
   const positions: TeacherComebackBenchmarkPosition[] = [];
 
-  for (let seed = 0; seed < seedCount; seed += 1) {
-    let board = createInitialBoard();
-    let currentDisc: DiscColor = "black";
-    let passCount = 0;
+  for (const seed of fixedBenchmarkSeeds) {
+    const position = createSeededDisadvantagedPosition(seed);
 
-    for (let moveCount = 0; moveCount < 28; moveCount += 1) {
-      const legalMoves = getLegalMoves(board, currentDisc);
+    if (position === null) {
+      continue;
+    }
 
-      if (legalMoves.length === 0) {
-        passCount += 1;
-        currentDisc = getNextDisc(currentDisc);
+    positions.push(position);
 
-        if (passCount >= 2) {
-          break;
-        }
-
-        continue;
-      }
-
-      passCount = 0;
-      const move =
-        currentDisc === "black"
-          ? chooseSeededWeakerMove(legalMoves, seed + moveCount)
-          : chooseCpuMove(board, currentDisc, "level6");
-
-      if (move === null) {
-        break;
-      }
-
-      board = placeDisc(board, move, currentDisc);
-      currentDisc = getNextDisc(currentDisc);
-
-      if (moveCount >= 8 && isSlightlyDisadvantaged(board, currentDisc)) {
-        positions.push({
-          board,
-          currentDisc,
-          moveCount: moveCount + 1,
-        });
-        break;
-      }
+    if (positions.length >= fixedBenchmarkPositionCount) {
+      break;
     }
   }
 
   return positions;
 }
 
-export function playOutTeacherVsLevel6({
-  board: initialBoard,
-  currentDisc: initialDisc,
-}: TeacherComebackBenchmarkPosition): {
-  discDiff: number;
-  firstGuidanceTimeMs: number;
-  result: "win" | "loss" | "draw";
-  timeoutCount: number;
-} {
-  let board = initialBoard;
-  let currentDisc = initialDisc;
-  let passCount = 0;
-  let firstGuidanceTimeMs = 0;
-
-  while (!isGameOver(board) && passCount < 2) {
-    const legalMoves = getLegalMoves(board, currentDisc);
-
-    if (legalMoves.length === 0) {
-      passCount += 1;
-      currentDisc = getNextDisc(currentDisc);
-      continue;
-    }
-
-    passCount = 0;
-    const move =
-      currentDisc === initialDisc
-        ? chooseTimedTeacherMove(board, currentDisc, (elapsedMs) => {
-            if (firstGuidanceTimeMs === 0) {
-              firstGuidanceTimeMs = elapsedMs;
-            }
-          })
-        : chooseCpuMove(board, currentDisc, "level6");
-
-    if (move === null) {
-      break;
-    }
-
-    board = placeDisc(board, move, currentDisc);
-    currentDisc = getNextDisc(currentDisc);
-  }
-
-  const counts = countDiscs(board);
-  const opponentDisc = getNextDisc(initialDisc);
-  const discDiff = counts[initialDisc] - counts[opponentDisc];
-  const winner = getWinner(board);
+export function playTeacherFirstResponseAgainstLevel6({
+  board,
+  currentDisc,
+  moveCount,
+  seed,
+}: TeacherComebackBenchmarkPosition): TeacherComebackFirstResponseResult {
+  const advantageBefore = getAdvantagePercent(board, currentDisc);
+  const teacherStartedAt = performance.now();
+  const teacherMove = chooseTeacherGuidanceMove(board, currentDisc, {
+    deepSearchDepth: 6,
+    guidanceMode: "comeback",
+    shallowSearchDepth: 3,
+  });
+  const firstGuidanceTimeMs = performance.now() - teacherStartedAt;
+  const boardAfterTeacher =
+    teacherMove === null ? board : placeDisc(board, teacherMove, currentDisc);
+  const advantageAfterTeacherMove = getAdvantagePercent(
+    boardAfterTeacher,
+    currentDisc,
+  );
+  const opponentDisc = getNextDisc(currentDisc);
+  const level6StartedAt = performance.now();
+  const level6Reply =
+    getLegalMoves(boardAfterTeacher, opponentDisc).length === 0
+      ? null
+      : chooseCpuMove(boardAfterTeacher, opponentDisc, "level6");
+  const level6ReplyTimeMs = performance.now() - level6StartedAt;
+  const boardAfterLevel6Reply =
+    level6Reply === null
+      ? boardAfterTeacher
+      : placeDisc(boardAfterTeacher, level6Reply, opponentDisc);
+  const countsAfterReply = countDiscs(boardAfterLevel6Reply);
 
   return {
-    discDiff,
+    advantageAfterLevel6Reply: getAdvantagePercent(
+      boardAfterLevel6Reply,
+      currentDisc,
+    ),
+    advantageAfterTeacherMove,
+    advantageBefore,
+    discDiffAfterLevel6Reply:
+      countsAfterReply[currentDisc] - countsAfterReply[opponentDisc],
     firstGuidanceTimeMs,
-    result:
-      winner === "draw" ? "draw" : winner === initialDisc ? "win" : "loss",
-    timeoutCount: 0,
+    level6Reply,
+    level6ReplyTimeMs,
+    moveCount,
+    seed,
+    teacherMove,
   };
 }
 
-function summarizeBenchmarkResults(
-  results: ReturnType<typeof playOutTeacherVsLevel6>[],
-): TeacherComebackBenchmarkResult {
-  const totalDiscDiff = results.reduce(
-    (total, result) => total + result.discDiff,
+export function summarizeFirstResponseResults(
+  results: TeacherComebackFirstResponseResult[],
+): TeacherComebackFirstResponseSummary {
+  const totalAdvantageSwingAfterReply = results.reduce(
+    (total, result) =>
+      total + result.advantageAfterLevel6Reply - result.advantageBefore,
+    0,
+  );
+  const totalDiscDiffAfterReply = results.reduce(
+    (total, result) => total + result.discDiffAfterLevel6Reply,
     0,
   );
   const totalFirstGuidanceTime = results.reduce(
     (total, result) => total + result.firstGuidanceTimeMs,
     0,
   );
+  const totalLevel6ReplyTime = results.reduce(
+    (total, result) => total + result.level6ReplyTimeMs,
+    0,
+  );
 
   return {
-    averageDiscDiff: totalDiscDiff / results.length,
+    averageAdvantageSwingAfterReply:
+      totalAdvantageSwingAfterReply / results.length,
+    averageDiscDiffAfterReply: totalDiscDiffAfterReply / results.length,
     averageFirstGuidanceTimeMs: totalFirstGuidanceTime / results.length,
-    draws: results.filter((result) => result.result === "draw").length,
-    losses: results.filter((result) => result.result === "loss").length,
-    timeoutCount: results.reduce(
-      (total, result) => total + result.timeoutCount,
-      0,
-    ),
-    wins: results.filter((result) => result.result === "win").length,
+    averageLevel6ReplyTimeMs: totalLevel6ReplyTime / results.length,
+    improvedOrHeldCount: results.filter(
+      (result) => result.advantageAfterLevel6Reply >= result.advantageBefore,
+    ).length,
+    level6NullReplyCount: results.filter((result) => result.level6Reply === null)
+      .length,
+    positionCount: results.length,
+    teacherNullMoveCount: results.filter((result) => result.teacherMove === null)
+      .length,
+    worsenedCount: results.filter(
+      (result) => result.advantageAfterLevel6Reply < result.advantageBefore,
+    ).length,
   };
 }
 
-function chooseSeededWeakerMove(
-  legalMoves: SquareIndex[],
+function createSeededDisadvantagedPosition(
   seed: number,
-): SquareIndex {
-  return legalMoves[seed % legalMoves.length];
+): TeacherComebackBenchmarkPosition | null {
+  let board = createInitialBoard();
+  let currentDisc: DiscColor = "black";
+  let passCount = 0;
+
+  for (let moveIndex = 0; moveIndex < 34; moveIndex += 1) {
+    const legalMoves = getLegalMoves(board, currentDisc);
+
+    if (legalMoves.length === 0) {
+      passCount += 1;
+      currentDisc = getNextDisc(currentDisc);
+
+      if (passCount >= 2) {
+        return null;
+      }
+
+      continue;
+    }
+
+    passCount = 0;
+    board = placeDisc(
+      board,
+      chooseSeededBenchmarkMove(legalMoves, seed, moveIndex, currentDisc),
+      currentDisc,
+    );
+    currentDisc = getNextDisc(currentDisc);
+
+    if (
+      moveIndex >= 8 &&
+      getLegalMoves(board, currentDisc).length > 0 &&
+      isSlightlyDisadvantaged(board, currentDisc)
+    ) {
+      return {
+        board,
+        currentDisc,
+        moveCount: moveIndex + 1,
+        seed,
+      };
+    }
+  }
+
+  return null;
 }
 
-function chooseTimedTeacherMove(
-  board: Board,
-  currentDisc: DiscColor,
-  onElapsed: (elapsedMs: number) => void,
-): SquareIndex | null {
-  const startedAt = performance.now();
-  const move = chooseTeacherGuidanceMove(board, currentDisc, {
-    deepSearchDepth: 6,
-    guidanceMode: "comeback",
-    shallowSearchDepth: 3,
-  });
+function chooseSeededBenchmarkMove(
+  legalMoves: SquareIndex[],
+  seed: number,
+  moveIndex: number,
+  disc: DiscColor,
+): SquareIndex {
+  const offset =
+    disc === "black" ? seed * 3 + moveIndex * 5 : seed * 7 + moveIndex * 2 + 1;
 
-  onElapsed(performance.now() - startedAt);
+  return legalMoves[offset % legalMoves.length] ?? legalMoves[0] ?? 0;
+}
 
-  return move;
+function summarizeLimitedNumber(value: string | undefined, fallback: number) {
+  const parsedValue = value === undefined ? Number.NaN : Number(value);
+
+  return Number.isFinite(parsedValue) && parsedValue > 0
+    ? Math.floor(parsedValue)
+    : fallback;
+}
+
+function getBenchmarkLimit(): number {
+  return Math.min(
+    fixedBenchmarkPositionCount,
+    summarizeLimitedNumber(
+      import.meta.env.VITE_TEACHER_COMEBACK_BENCHMARK_LIMIT,
+      fixedBenchmarkPositionCount,
+    ),
+  );
 }
 
 function isSlightlyDisadvantaged(
   board: Board,
   currentDisc: DiscColor,
 ): boolean {
-  const advantage = calculateAdvantage(board, currentDisc);
-  const currentDiscPercent =
-    currentDisc === "black" ? advantage.blackPercent : advantage.whitePercent;
+  const advantagePercent = getAdvantagePercent(board, currentDisc);
 
-  return currentDiscPercent >= 35 && currentDiscPercent <= 45;
+  return advantagePercent >= 35 && advantagePercent <= 45;
+}
+
+function getAdvantagePercent(board: Board, disc: DiscColor): number {
+  const advantage = calculateAdvantage(board, disc);
+
+  return disc === "black" ? advantage.blackPercent : advantage.whitePercent;
 }
