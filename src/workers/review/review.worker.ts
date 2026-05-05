@@ -1,10 +1,11 @@
 import { reviewGame } from "../../teacher";
+import { getWorkerScope } from "../workerScope";
 import type {
   ReviewWorkerRequest,
   ReviewWorkerResponse,
 } from "./reviewWorkerProtocol";
 
-const workerScope = self as unknown as Worker;
+const workerScope = getWorkerScope();
 
 workerScope.onmessage = (event: MessageEvent<ReviewWorkerRequest>) => {
   const request = event.data;
