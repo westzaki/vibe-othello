@@ -19,7 +19,7 @@
   }
 
   .start-menu {
-    grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+    grid-template-columns: minmax(0, 1fr) minmax(420px, 0.92fr);
     align-items: stretch;
   }
 

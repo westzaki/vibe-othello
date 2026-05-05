@@ -211,6 +211,7 @@
 
 .start-panel {
   position: relative;
+  container-type: inline-size;
   display: grid;
   min-width: 0;
   width: 100%;
@@ -417,4 +418,11 @@
 .start-panel__settings:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
+}
+
+@container (max-width: 390px) {
+  .mode-selector,
+  .start-panel__match-options {
+    grid-template-columns: 1fr;
+  }
 }
