@@ -1,5 +1,4 @@
 import { lazy, Suspense, useMemo } from "react";
-import { calculateAdvantage } from "../cpu";
 import { AdvantageBar } from "../components/AdvantageBar";
 import {
   Board,
@@ -14,6 +13,7 @@ import type { GameSessionNotice } from "../game/session";
 import type { OthelloGameController } from "../hooks/useOthelloGame";
 import { usePassNoticeVisibility } from "../hooks/usePassNoticeVisibility";
 import { usePlayCoachHintModel } from "../hooks/usePlayCoachHintModel";
+import { usePlayPositionAnalysis } from "../hooks/usePlayPositionAnalysis";
 import {
   defaultCoachHintSettings,
   type CoachHintModel,
@@ -51,16 +51,14 @@ export function GameScreen({
   onPlayAgain,
   practiceFeedbackText = null,
 }: GameScreenProps) {
-  const advantage = useMemo(
-    () => calculateAdvantage(game.board, game.currentDisc),
-    [game.board, game.currentDisc],
-  );
+  const playPositionAnalysis = usePlayPositionAnalysis(game.session);
   const { isPassNoticeVisible, passNotice } = usePassNoticeVisibility({
     lastMove: game.lastMove,
     moveCount: game.moveHistory.length,
     notice: game.notice,
   });
   const coachHintModel = usePlayCoachHintModel({
+    advantage: playPositionAnalysis.advantage,
     enabled: mode === "match",
     isCpuThinking: game.isCpuThinking,
     players: game.players,
@@ -71,7 +69,6 @@ export function GameScreen({
     () => createCoachHintMarkers(coachHintModel),
     [coachHintModel],
   );
-  const displayedAdvantage = coachHintModel?.analysis.advantage ?? advantage;
   const resultWinner =
     game.gameStatus === "ended" &&
     game.endReason === "completed" &&
@@ -150,7 +147,7 @@ export function GameScreen({
               />
 
               <AdvantageBar
-                advantage={displayedAdvantage}
+                advantage={playPositionAnalysis.advantage}
                 players={game.players}
               />
 
