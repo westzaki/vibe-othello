@@ -63,9 +63,9 @@ export function ReviewScreen({
     <section className="review-screen" aria-labelledby="review-title">
       <div className="review-panel">
         <div className="review-panel__header">
-          <p className="eyebrow">Teacher Review</p>
+          <p className="eyebrow">対局のあと</p>
           <h1 id="review-title">ふりかえり</h1>
-          <p>先生が選んだ局面だけを見て、次の一手を試してみよう。</p>
+          <p>気になった局面だけを見て、次の一手を試してみよう。</p>
         </div>
 
         {reviewModel.status === "unavailable" ? (

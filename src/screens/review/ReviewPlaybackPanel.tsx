@@ -23,7 +23,7 @@ export function ReviewPlaybackPanel({
   return (
     <section className="review-board-panel">
       <div className="review-board-panel__header">
-        <h2>局面確認</h2>
+        <h2>盤面を見てみよう</h2>
         <p className="review-board-panel__status">
           {mode === "reviewTarget"
             ? `${currentMoveNumber}手目を置く前の局面`
