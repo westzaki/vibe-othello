@@ -158,6 +158,94 @@ describe("teacher coach hints", () => {
     expect(hint?.message).toContain("動きづらく");
   });
 
+  it("can use a corner candidate even when it is not the top scored move", () => {
+    const hints = createCoachHintsFromAnalysis({
+      candidateMoves: [
+        createCandidateMove({
+          rank: 1,
+          reasons: [],
+          score: 100,
+          square: 19,
+        }),
+        createCandidateMove({
+          metrics: {
+            isCorner: true,
+            scoreGapFromBest: 12,
+          },
+          rank: 2,
+          reasons: ["corner"],
+          score: 88,
+          square: 0,
+        }),
+      ],
+      evaluationSource: "minimax",
+    });
+
+    expect(hints).toEqual([
+      expect.objectContaining({
+        kind: "cornerOpportunity",
+        square: 0,
+      }),
+    ]);
+  });
+
+  it("can use a close mobility gain candidate even when the top scored move is plain", () => {
+    const hints = createCoachHintsFromAnalysis({
+      candidateMoves: [
+        createCandidateMove({
+          rank: 1,
+          reasons: [],
+          score: 100,
+          square: 19,
+        }),
+        createCandidateMove({
+          metrics: {
+            mobilitySwing: 4,
+            scoreGapFromBest: 8,
+          },
+          rank: 2,
+          reasons: ["mobilityGain"],
+          score: 92,
+          square: 26,
+        }),
+      ],
+      evaluationSource: "minimax",
+    });
+
+    expect(hints).toEqual([
+      expect.objectContaining({
+        kind: "mobility",
+        square: 26,
+      }),
+    ]);
+  });
+
+  it("does not suggest a distant mobility gain candidate as a helpful hint", () => {
+    const hints = createCoachHintsFromAnalysis({
+      candidateMoves: [
+        createCandidateMove({
+          rank: 1,
+          reasons: [],
+          score: 100,
+          square: 19,
+        }),
+        createCandidateMove({
+          metrics: {
+            mobilitySwing: 4,
+            scoreGapFromBest: 80,
+          },
+          rank: 2,
+          reasons: ["mobilityGain"],
+          score: 20,
+          square: 26,
+        }),
+      ],
+      evaluationSource: "minimax",
+    });
+
+    expect(hints).toEqual([]);
+  });
+
   it("can fall back to a candidate hint for active coaching", () => {
     const board = createInitialBoard();
 

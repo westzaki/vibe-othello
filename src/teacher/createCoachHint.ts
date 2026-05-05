@@ -36,6 +36,7 @@ export type CreateCoachHintsFromAnalysisOptions = {
 
 const defaultCoachHintSearchDepth = 3;
 const actionableRiskScoreGap = 5;
+const actionableHelpfulScoreGap = 35;
 
 export function createCoachHint(
   board: Board,
@@ -115,12 +116,18 @@ export function createCoachHintsFromAnalysis(
     hints.push(createCornerRiskHint(dangerSquareRiskCandidate, messageStyle));
   }
 
-  const helpfulHint = createHelpfulHint({
-    candidate: bestCandidate,
-    evaluationSource: analysis.evaluationSource,
+  const helpfulCandidate = findHelpfulCandidate(analysis, {
     includeCandidateFallback,
-    messageStyle,
   });
+  const helpfulHint =
+    helpfulCandidate === null
+      ? null
+      : createHelpfulHint({
+          candidate: helpfulCandidate,
+          evaluationSource: analysis.evaluationSource,
+          includeCandidateFallback,
+          messageStyle,
+        });
 
   if (
     helpfulHint !== null &&
@@ -130,6 +137,45 @@ export function createCoachHintsFromAnalysis(
   }
 
   return hints;
+}
+
+function findHelpfulCandidate(
+  analysis: MoveCandidateAnalysis,
+  {
+    includeCandidateFallback,
+  }: {
+    includeCandidateFallback: boolean;
+  },
+): CandidateMoveReview | null {
+  const bestCandidate = analysis.candidateMoves[0] ?? null;
+
+  if (bestCandidate === null) {
+    return null;
+  }
+
+  if (analysis.evaluationSource === "exactEndgame") {
+    return bestCandidate;
+  }
+
+  const cornerCandidate = analysis.candidateMoves.find((candidate) =>
+    candidate.reasons.includes("corner"),
+  );
+
+  if (cornerCandidate !== undefined) {
+    return cornerCandidate;
+  }
+
+  const mobilityCandidate = analysis.candidateMoves.find(
+    (candidate) =>
+      candidate.reasons.includes("mobilityGain") &&
+      candidate.metrics.scoreGapFromBest <= actionableHelpfulScoreGap,
+  );
+
+  if (mobilityCandidate !== undefined) {
+    return mobilityCandidate;
+  }
+
+  return includeCandidateFallback ? bestCandidate : null;
 }
 
 function findRiskCandidate(
