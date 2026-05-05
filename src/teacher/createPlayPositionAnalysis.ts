@@ -21,7 +21,7 @@ import type {
   ReviewEvaluationSource,
 } from "./reviewTypes";
 import { createShapeSignals } from "./playPositionShapeSignals";
-import { chooseTeacherGuidanceMove } from "./teacherGuidanceMove";
+import { selectTeacherGuidanceCandidate } from "./teacherGuidanceMove";
 import type { TeacherGuidanceOptions } from "./coachHintTypes";
 
 export type PlayPositionPhase = "opening" | "midgame" | "endgame";
@@ -102,7 +102,8 @@ export function createPlayPositionAnalysis(
     riskHintLimit,
     searchDepth = defaultPlayPositionSearchDepth,
     deepSearchDepth,
-    shallowSearchDepth,
+    refutationSearchDepth,
+    strongCandidateScoreGap,
     topCandidateLimit,
     useTeacherGuidanceMove = false,
     useSelectiveDeepening,
@@ -141,13 +142,24 @@ export function createPlayPositionAnalysis(
     candidateAnalysis.evaluationSource,
   );
   const candidateMoves = candidateAnalysis.candidateMoves;
+  const teacherGuidanceCandidate = useTeacherGuidanceMove
+    ? selectTeacherGuidanceCandidate({
+        analysis: candidateAnalysis,
+        board,
+        deepSearchDepth,
+        disc: currentDisc,
+        refutationSearchDepth,
+        strongCandidateScoreGap,
+        topCandidateLimit,
+      })
+    : null;
   const advantageSource = getPlayAdvantageSource(
     baseAdvantageSource,
     moveEvaluationSource,
   );
   const advantage = getPlayPositionAdvantage({
     baseAdvantage,
-    candidateMoves,
+    bestCandidate: teacherGuidanceCandidate ?? candidateMoves[0] ?? null,
     currentDisc,
     phase,
     source: advantageSource,
@@ -157,12 +169,8 @@ export function createPlayPositionAnalysis(
     hasHelpfulReason(candidate, candidateAnalysis.evaluationSource),
   );
   const bestMoveSquare =
-    includeBestMoveHint && useTeacherGuidanceMove
-      ? chooseTeacherGuidanceMove(board, currentDisc, {
-          deepSearchDepth,
-          shallowSearchDepth,
-          topCandidateLimit,
-        })
+    includeBestMoveHint && teacherGuidanceCandidate !== null
+      ? teacherGuidanceCandidate.square
       : null;
   const coachHints = createCoachHintsFromAnalysis(candidateAnalysis, {
     bestMoveSquare,
@@ -215,13 +223,13 @@ function getPlayAdvantageSource(
 
 function getPlayPositionAdvantage({
   baseAdvantage,
-  candidateMoves,
+  bestCandidate,
   currentDisc,
   phase,
   source,
 }: {
   baseAdvantage: Advantage;
-  candidateMoves: CandidateMoveReview[];
+  bestCandidate: CandidateMoveReview | null;
   currentDisc: DiscColor;
   phase: PlayPositionPhase;
   source: PlayPositionAdvantageSource;
@@ -229,8 +237,6 @@ function getPlayPositionAdvantage({
   if (source !== "searchAdjusted") {
     return baseAdvantage;
   }
-
-  const bestCandidate = candidateMoves[0] ?? null;
 
   if (bestCandidate === null) {
     return baseAdvantage;

@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createInitialBoard } from "../game/othello";
+import { analyzeMoveCandidates } from "./analyzeMoveCandidates";
 import type { CandidateMoveReview } from "./reviewTypes";
 import {
   chooseTeacherGuidanceMove,
   rankTeacherGuidanceCandidates,
+  selectTeacherGuidanceCandidate,
   selectTeacherDeepeningCandidates,
   selectStrongTeacherCandidates,
   shouldUseTeacherExactEndgameByCounts,
@@ -130,6 +132,28 @@ describe("teacher guidance move", () => {
         shallowSearchDepth: 1,
       }),
     ).toEqual(expect.any(Number));
+  });
+
+  it("can return the selected guidance candidate for shared play and review use", () => {
+    const board = createInitialBoard();
+    const analysis = analyzeMoveCandidates(board, "black", {
+      searchDepth: 1,
+    });
+    const candidate = selectTeacherGuidanceCandidate({
+      analysis,
+      board,
+      deepSearchDepth: 3,
+      disc: "black",
+    });
+
+    expect(candidate).toEqual(
+      expect.objectContaining({
+        square: chooseTeacherGuidanceMove(board, "black", {
+          deepSearchDepth: 3,
+          shallowSearchDepth: 1,
+        }),
+      }),
+    );
   });
 });
 

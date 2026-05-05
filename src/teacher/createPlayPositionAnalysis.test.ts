@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { calculateAdvantage } from "../cpu";
 import { createInitialBoard } from "../game/othello";
 import { createBoardFixture } from "../test/boardFixtures";
+import { analyzeMoveCandidates } from "./analyzeMoveCandidates";
 import { createPlayPositionAnalysis } from "./createPlayPositionAnalysis";
+import { selectTeacherGuidanceCandidate } from "./teacherGuidanceMove";
 
 describe("createPlayPositionAnalysis", () => {
   it("summarizes the opening position with search candidates", () => {
@@ -43,6 +45,32 @@ describe("createPlayPositionAnalysis", () => {
       expect.objectContaining({
         kind: "bestMove",
         square: analysis.candidateMoves[0].square,
+      }),
+    );
+  });
+
+  it("uses the shared teacher guidance candidate for best-move hints", () => {
+    const board = createInitialBoard();
+    const candidateAnalysis = analyzeMoveCandidates(board, "black", {
+      searchDepth: 1,
+    });
+    const guidanceCandidate = selectTeacherGuidanceCandidate({
+      analysis: candidateAnalysis,
+      board,
+      deepSearchDepth: 3,
+      disc: "black",
+    });
+    const analysis = createPlayPositionAnalysis(board, "black", {
+      deepSearchDepth: 3,
+      includeBestMoveHint: true,
+      searchDepth: 1,
+      useTeacherGuidanceMove: true,
+    });
+
+    expect(analysis.coachHints[0]).toEqual(
+      expect.objectContaining({
+        kind: "bestMove",
+        square: guidanceCandidate?.square,
       }),
     );
   });

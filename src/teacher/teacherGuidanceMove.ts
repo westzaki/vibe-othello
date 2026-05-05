@@ -73,6 +73,36 @@ export function chooseTeacherGuidanceMove(
     topCandidateLimit = defaultTeacherGuidanceTopCandidateLimit,
   }: TeacherGuidanceMoveOptions = {},
 ): SquareIndex | null {
+  const shallowAnalysis = analyzeMoveCandidates(board, disc, {
+    searchDepth: shallowSearchDepth,
+  });
+
+  return (
+    selectTeacherGuidanceCandidate({
+      analysis: shallowAnalysis,
+      board,
+      deepSearchDepth,
+      disc,
+      refutationSearchDepth,
+      strongCandidateScoreGap,
+      topCandidateLimit,
+    })?.square ?? null
+  );
+}
+
+export function selectTeacherGuidanceCandidate({
+  analysis,
+  board,
+  deepSearchDepth = defaultTeacherGuidanceDeepSearchDepth,
+  disc,
+  refutationSearchDepth = defaultTeacherGuidanceRefutationSearchDepth,
+  strongCandidateScoreGap = defaultTeacherGuidanceStrongCandidateScoreGap,
+  topCandidateLimit = defaultTeacherGuidanceTopCandidateLimit,
+}: {
+  analysis: MoveCandidateAnalysis;
+  board: Board;
+  disc: DiscColor;
+} & TeacherGuidanceMoveOptions): CandidateMoveReview | null {
   const legalMoves = getLegalMoves(board, disc);
 
   if (legalMoves.length === 0) {
@@ -80,14 +110,13 @@ export function chooseTeacherGuidanceMove(
   }
 
   if (shouldUseTeacherExactEndgame(board, disc)) {
-    return choosePerfectEndgameMove(board, disc);
+    const exactSquare = choosePerfectEndgameMove(board, disc);
+
+    return findCandidateBySquare(analysis.candidateMoves, exactSquare);
   }
 
-  const shallowAnalysis = analyzeMoveCandidates(board, disc, {
-    searchDepth: shallowSearchDepth,
-  });
   const deepenedScores = getDeepenedTeacherMoveScores({
-    analysis: shallowAnalysis,
+    analysis,
     board,
     deepSearchDepth,
     disc,
@@ -102,11 +131,22 @@ export function chooseTeacherGuidanceMove(
   });
 
   return (
-    recommendationCandidates[0]?.candidate.square ??
-    deepenedScores[0]?.square ??
-    shallowAnalysis.candidateMoves[0]?.square ??
+    recommendationCandidates[0]?.candidate ??
+    deepenedScores[0] ??
+    analysis.candidateMoves[0] ??
     null
   );
+}
+
+function findCandidateBySquare(
+  candidates: CandidateMoveReview[],
+  square: SquareIndex | null,
+): CandidateMoveReview | null {
+  if (square === null) {
+    return null;
+  }
+
+  return candidates.find((candidate) => candidate.square === square) ?? null;
 }
 
 export function shouldUseTeacherExactEndgame(

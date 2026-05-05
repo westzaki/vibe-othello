@@ -1,4 +1,3 @@
-import { getMinimaxMoveScores } from "../cpu";
 import {
   getLegalMoves,
   getNextDisc,
@@ -8,6 +7,7 @@ import {
   type SquareIndex,
 } from "../game/othello";
 import { defaultTeacherReviewConfig } from "./reviewConfig";
+import { chooseTeacherGuidanceMove } from "./teacherGuidanceMove";
 
 export type PositionReview = {
   bestSquare: SquareIndex | null;
@@ -33,10 +33,13 @@ export function createPositionReview(
     nextDiscLegalMoves.length > 0
       ? nextDiscLegalMoves
       : getLegalMoves(board, disc);
-  const bestSquare =
-    getMinimaxMoveScores(board, disc, {
-      searchDepth: defaultTeacherReviewConfig.searchDepth,
-    })[0]?.move ?? null;
+  const bestSquare = chooseTeacherGuidanceMove(board, disc, {
+    deepSearchDepth: defaultTeacherReviewConfig.deepSearchDepth,
+    refutationSearchDepth: defaultTeacherReviewConfig.refutationSearchDepth,
+    shallowSearchDepth: defaultTeacherReviewConfig.searchDepth,
+    strongCandidateScoreGap: defaultTeacherReviewConfig.strongCandidateScoreGap,
+    topCandidateLimit: defaultTeacherReviewConfig.topCandidateLimit,
+  });
 
   return {
     bestSquare,

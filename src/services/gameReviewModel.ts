@@ -18,6 +18,7 @@ import {
   type ReviewedMove,
   type ReviewLesson,
 } from "../teacher";
+import { createLightweightReviewGameOptions } from "./reviewFallback";
 
 export type GameReviewModelOptions = {
   currentMoveNumber: number;
@@ -90,10 +91,13 @@ export function createGameReviewModel({
     return createUnavailableGameReviewModelFromBase(base);
   }
 
-  const review = reviewGame(moveHistory, {
-    reviewedDisc: base.reviewedDisc,
-    ...defaultTeacherReviewConfig,
-  });
+  const review = reviewGame(
+    moveHistory,
+    createLightweightReviewGameOptions({
+      reviewedDisc: base.reviewedDisc,
+      ...defaultTeacherReviewConfig,
+    }),
+  );
 
   return createGameReviewModelFromReview({
     currentMoveNumber,
