@@ -55,7 +55,7 @@ describe("createPlayPositionAnalysis", () => {
     ]);
     expect(analysis.coachHints).toEqual([
       expect.objectContaining({
-        kind: "cornerRisk",
+        kind: "mobilityRisk",
         square: 9,
       }),
       expect.objectContaining({

@@ -199,7 +199,7 @@ function CoachHintPanel({ model }: { model: CoachHintModel | null }) {
       className={[
         "coach-hint",
         `coach-hint--${model.mode}`,
-        model.hints.some((hint) => hint.kind === "cornerRisk")
+        model.hints.some(isRiskCoachHint)
           ? "coach-hint--has-risk"
           : "coach-hint--helpful",
       ].join(" ")}
@@ -207,7 +207,7 @@ function CoachHintPanel({ model }: { model: CoachHintModel | null }) {
       aria-live="polite"
     >
       {model.hints.map((hint) => {
-        const isRiskHint = hint.kind === "cornerRisk";
+        const isRiskHint = isRiskCoachHint(hint);
 
         return (
           <div
@@ -252,7 +252,11 @@ function createCoachHintMarkers(
 }
 
 function getCoachHintTone(hint: CoachHintModel["hint"]): BoardHintTone {
-  return hint.kind === "cornerRisk" ? "risk" : "helpful";
+  return isRiskCoachHint(hint) ? "risk" : "helpful";
+}
+
+function isRiskCoachHint(hint: CoachHintModel["hint"]): boolean {
+  return hint.kind === "cornerRisk" || hint.kind === "mobilityRisk";
 }
 
 function PassNoticeOverlay({ notice }: { notice: GameSessionNotice }) {
