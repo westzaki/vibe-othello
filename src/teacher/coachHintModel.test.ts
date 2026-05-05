@@ -194,7 +194,10 @@ describe("teacher coach hint model", () => {
   });
 
   it("includes mobility hints in gentle mode when timing and advantage allow it", () => {
-    const session = createPracticeSessionFromBoard(createMobilityBoard(), "black");
+    const session = createPracticeSessionFromBoard(
+      createMobilityBoard(),
+      "black",
+    );
     const model = createCoachHintModel({
       advantage: createAdvantage({ blackPercent: 40 }),
       players: createOnePlayerSettings("black"),
@@ -215,8 +218,36 @@ describe("teacher coach hint model", () => {
     expect(model?.hint.message).not.toContain("C4");
   });
 
+  it("includes mobility risk hints as caution in active mode", () => {
+    const session = createPracticeSessionFromBoard(
+      createMobilityRiskBoard(),
+      "white",
+    );
+    const model = createCoachHintModel({
+      advantage: createAdvantage({ blackPercent: 50 }),
+      players: createOnePlayerSettings("white"),
+      session,
+      settings: { mode: "active" },
+      thinkingTimeMs: 1500,
+    });
+
+    expect(model).toEqual(
+      expect.objectContaining({
+        mode: "active",
+        hint: expect.objectContaining({
+          kind: "mobilityRisk",
+          square: 11,
+        }),
+      }),
+    );
+    expect(model?.hint.message).toContain("D2");
+  });
+
   it("creates a specific active model after a shorter pause", () => {
-    const session = createPracticeSessionFromBoard(createMobilityBoard(), "black");
+    const session = createPracticeSessionFromBoard(
+      createMobilityBoard(),
+      "black",
+    );
     const model = createCoachHintModel({
       advantage: createAdvantage({ blackPercent: 70 }),
       players: createOnePlayerSettings("black"),
@@ -238,7 +269,10 @@ describe("teacher coach hint model", () => {
   });
 
   it("uses a candidate fallback in active mode when no specific hint is found", () => {
-    const session = createPracticeSessionFromBoard(createInitialBoard(), "black");
+    const session = createPracticeSessionFromBoard(
+      createInitialBoard(),
+      "black",
+    );
     const model = createCoachHintModel({
       advantage: createAdvantage({ blackPercent: 70 }),
       players: createOnePlayerSettings("black"),
@@ -293,6 +327,20 @@ function createPracticeSessionFromBoard(
 
 function createMobilityBoard(): GameSession["board"] {
   return createBoardFixture({
+    18: "white",
+    19: "black",
+    27: "white",
+    28: "black",
+    35: "black",
+    36: "white",
+  });
+}
+
+function createMobilityRiskBoard(): GameSession["board"] {
+  return createBoardFixture({
+    1: "black",
+    9: "black",
+    17: "black",
     18: "white",
     19: "black",
     27: "white",

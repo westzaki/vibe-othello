@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createInitialBoard } from "../game/othello";
 import { createBoardFixture } from "../test/boardFixtures";
-import { createCoachHint, createCoachHints } from "./createCoachHint";
+import {
+  createCoachHint,
+  createCoachHints,
+  createCoachHintsFromAnalysis,
+} from "./createCoachHint";
 
 describe("teacher coach hints", () => {
   it("returns null when there are no candidate moves", () => {
@@ -53,6 +57,28 @@ describe("teacher coach hints", () => {
     expect(hint?.message).toContain("角の近く");
   });
 
+  it("does not warn about a danger square when its score is near the best candidate", () => {
+    const hints = createCoachHintsFromAnalysis({
+      candidateMoves: [
+        {
+          rank: 1,
+          reasons: [],
+          score: 100,
+          square: 19,
+        },
+        {
+          rank: 2,
+          reasons: ["dangerSquare"],
+          score: 98,
+          square: 9,
+        },
+      ],
+      evaluationSource: "minimax",
+    });
+
+    expect(hints).toEqual([]);
+  });
+
   it("can include a warning and a helpful hint together", () => {
     const board = createBoardFixture({
       1: "white",
@@ -66,7 +92,7 @@ describe("teacher coach hints", () => {
 
     expect(hints).toEqual([
       expect.objectContaining({
-        kind: "cornerRisk",
+        kind: "mobilityRisk",
         square: 9,
       }),
       expect.objectContaining({
@@ -74,6 +100,34 @@ describe("teacher coach hints", () => {
         square: 0,
       }),
     ]);
+  });
+
+  it("warns about moves that meaningfully reduce current player mobility", () => {
+    const board = createBoardFixture({
+      1: "black",
+      9: "black",
+      17: "black",
+      18: "white",
+      19: "black",
+      27: "white",
+      28: "black",
+      35: "black",
+      36: "white",
+    });
+    const hints = createCoachHints(board, "white", {
+      includeCandidateFallback: true,
+      searchDepth: 1,
+    });
+
+    expect(hints).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "mobilityRisk",
+          reasons: expect.arrayContaining(["mobilityLoss"]),
+          square: 11,
+        }),
+      ]),
+    );
   });
 
   it("uses mobility gain when no corner hint is more important", () => {

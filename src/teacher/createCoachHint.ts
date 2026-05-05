@@ -9,6 +9,7 @@ import type { CandidateMoveReview, MoveReviewReason } from "./reviewTypes";
 export type CoachHintKind =
   | "cornerOpportunity"
   | "cornerRisk"
+  | "mobilityRisk"
   | "mobility"
   | "endgame"
   | "candidate";
@@ -34,6 +35,7 @@ export type CreateCoachHintsFromAnalysisOptions = {
 };
 
 const defaultCoachHintSearchDepth = 3;
+const actionableRiskScoreGap = 5;
 
 export function createCoachHint(
   board: Board,
@@ -75,14 +77,42 @@ export function createCoachHintsFromAnalysis(
 
   const hints: CoachHint[] = [];
 
-  const cornerRiskCandidate = analysis.candidateMoves.find((candidate) =>
-    candidate.reasons.some((reason) =>
-      ["cornerGiven", "dangerSquare"].includes(reason),
-    ),
-  );
+  const shouldShowShapeRisk = analysis.evaluationSource !== "exactEndgame";
+  const cornerGivenRiskCandidate = shouldShowShapeRisk
+    ? findRiskCandidate(analysis, (candidate) =>
+        candidate.reasons.includes("cornerGiven"),
+      )
+    : undefined;
 
-  if (cornerRiskCandidate !== undefined) {
-    hints.push(createCornerRiskHint(cornerRiskCandidate, messageStyle));
+  if (cornerGivenRiskCandidate !== undefined) {
+    hints.push(createCornerRiskHint(cornerGivenRiskCandidate, messageStyle));
+  }
+
+  const mobilityRiskCandidate =
+    shouldShowShapeRisk && cornerGivenRiskCandidate === undefined
+      ? findRiskCandidate(analysis, (candidate) =>
+          candidate.reasons.includes("mobilityLoss"),
+        )
+      : undefined;
+
+  if (
+    mobilityRiskCandidate !== undefined &&
+    !hints.some((hint) => hint.square === mobilityRiskCandidate.square)
+  ) {
+    hints.push(createMobilityRiskHint(mobilityRiskCandidate, messageStyle));
+  }
+
+  const dangerSquareRiskCandidate =
+    shouldShowShapeRisk &&
+    cornerGivenRiskCandidate === undefined &&
+    mobilityRiskCandidate === undefined
+      ? findRiskCandidate(analysis, (candidate) =>
+          candidate.reasons.includes("dangerSquare"),
+        )
+      : undefined;
+
+  if (dangerSquareRiskCandidate !== undefined) {
+    hints.push(createCornerRiskHint(dangerSquareRiskCandidate, messageStyle));
   }
 
   const helpfulHint = createHelpfulHint({
@@ -100,6 +130,29 @@ export function createCoachHintsFromAnalysis(
   }
 
   return hints;
+}
+
+function findRiskCandidate(
+  analysis: MoveCandidateAnalysis,
+  predicate: (candidate: CandidateMoveReview) => boolean,
+): CandidateMoveReview | undefined {
+  const bestCandidate = analysis.candidateMoves[0] ?? null;
+
+  if (bestCandidate === null) {
+    return undefined;
+  }
+
+  return analysis.candidateMoves.find((candidate) => {
+    if (!predicate(candidate)) {
+      return false;
+    }
+
+    if (candidate.reasons.includes("cornerGiven")) {
+      return true;
+    }
+
+    return bestCandidate.score - candidate.score >= actionableRiskScoreGap;
+  });
 }
 
 function createHelpfulHint({
@@ -181,6 +234,22 @@ function createCornerRiskHint(
         : `角の近くは少し注意。${formatSquare(
             candidate.square,
           )} は、置いた後に相手が角へ行けないか見てみよう。`,
+  });
+}
+
+function createMobilityRiskHint(
+  candidate: CandidateMoveReview,
+  messageStyle: CoachHintMessageStyle,
+): CoachHint {
+  return createHint({
+    candidate,
+    kind: "mobilityRisk",
+    message:
+      messageStyle === "vague"
+        ? "置いた後に、自分の行き先が少なくなりそうな手もありそう。次の形を見てみよう。"
+        : `${formatSquare(
+            candidate.square,
+          )} は、置いた後に自分の行き先が少なくならないか見てみよう。`,
   });
 }
 
