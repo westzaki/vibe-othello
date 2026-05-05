@@ -90,15 +90,11 @@ export function canShowCoachHint({
   });
 }
 
-export function canRequestCoachBestMoveAnalysis({
+export function canRequestCoachAnalysis({
   enabled = true,
   ...context
 }: CoachBestMoveAnalysisRequestContext): boolean {
   if (!enabled) {
-    return false;
-  }
-
-  if (!canShowCoachBestMoveHint(context.session)) {
     return false;
   }
 
@@ -112,6 +108,15 @@ export function canRequestCoachBestMoveAnalysis({
     mode: context.settings.mode,
     thinkingTimeMs: context.thinkingTimeMs ?? 0,
   });
+}
+
+export function canRequestCoachBestMoveAnalysis(
+  context: CoachBestMoveAnalysisRequestContext,
+): boolean {
+  return (
+    canShowCoachBestMoveHint(context.session) &&
+    canRequestCoachAnalysis(context)
+  );
 }
 
 export function createCoachHintModel(
@@ -204,6 +209,7 @@ export function createCoachPlayPositionAnalysisOptions(
     shallowSearchDepth:
       mode === "off" ? undefined : teacherGuidanceShallowSearchDepth,
     deepSearchDepth: mode === "off" ? undefined : teacherGuidanceDeepSearchDepth,
+    skipMoveAnalysis: mode === "off",
     useSelectiveDeepening: mode !== "off",
     useTeacherGuidanceMove: mode !== "off" && includeBestMoveHint,
   };

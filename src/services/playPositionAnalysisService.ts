@@ -41,6 +41,10 @@ const runPlayPositionAnalysisWorkerRequest = createWorkerFallbackRunner<
 export async function analyzePlayPositionAsync(
   request: PlayPositionAnalysisRequest,
 ): Promise<PlayPositionAnalysisResponse> {
+  if (request.options?.skipMoveAnalysis === true) {
+    return analyzePlayPositionSync(request);
+  }
+
   return runPlayPositionAnalysisWorkerRequest({
     createFallbackResponse: () => analyzePlayPositionSync(request),
     createWorkerRequest: (workerRequestId) => ({

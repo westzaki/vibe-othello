@@ -65,7 +65,11 @@ describe("play position analysis state", () => {
         board: nextBoard,
         currentDisc: "white",
       }),
-    ).toEqual(createPlayPositionAnalysis(nextBoard, "white"));
+    ).toEqual(
+      createPlayPositionAnalysis(nextBoard, "white", {
+        skipMoveAnalysis: true,
+      }),
+    );
   });
 
   it("keeps stale fallback analysis lightweight while teacher guidance loads", () => {
@@ -96,5 +100,6 @@ describe("play position analysis state", () => {
         }),
       ]),
     );
+    expect(analysis.candidateMoves).toEqual([]);
   });
 });

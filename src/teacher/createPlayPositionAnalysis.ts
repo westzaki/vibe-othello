@@ -80,6 +80,7 @@ export type CreatePlayPositionAnalysisOptions =
     includeCandidateFallback?: boolean;
     messageStyle?: CoachHintMessageStyle;
     riskHintLimit?: CreateCoachHintsFromAnalysisOptions["riskHintLimit"];
+    skipMoveAnalysis?: boolean;
   } & TeacherGuidanceOptions;
 
 const defaultPlayPositionSearchDepth = 3;
@@ -106,6 +107,7 @@ export function createPlayPositionAnalysis(
     refutationSearchDepth,
     strongCandidateScoreGap,
     topCandidateLimit,
+    skipMoveAnalysis = false,
     useTeacherGuidanceMove = false,
     useSelectiveDeepening,
   }: CreatePlayPositionAnalysisOptions = {},
@@ -116,23 +118,15 @@ export function createPlayPositionAnalysis(
   const baseAdvantage = calculateAdvantage(board, currentDisc);
   const baseAdvantageSource = getAdvantageSource(board, emptyCount);
 
-  if (legalMoves.length === 0) {
-    return {
+  if (legalMoves.length === 0 || skipMoveAnalysis) {
+    return createBasePlayPositionAnalysis({
       advantage: baseAdvantage,
       advantageSource: baseAdvantageSource,
-      candidateMoves: [],
-      coachHints: [],
-      confidence: getConfidence(baseAdvantageSource, "none"),
-      confidenceReason: getConfidenceReason(baseAdvantageSource, "none"),
       currentDisc,
       emptyCount,
-      helpfulCandidates: [],
       legalMoves,
-      moveEvaluationSource: "none",
       phase,
-      riskCandidates: [],
-      shapeSignals: [],
-    };
+    });
   }
 
   const candidateAnalysis = analyzeMoveCandidates(board, currentDisc, {
@@ -205,6 +199,39 @@ export function createPlayPositionAnalysis(
     phase,
     riskCandidates,
     shapeSignals,
+  };
+}
+
+function createBasePlayPositionAnalysis({
+  advantage,
+  advantageSource,
+  currentDisc,
+  emptyCount,
+  legalMoves,
+  phase,
+}: {
+  advantage: Advantage;
+  advantageSource: PlayPositionAdvantageSource;
+  currentDisc: DiscColor;
+  emptyCount: number;
+  legalMoves: SquareIndex[];
+  phase: PlayPositionPhase;
+}): PlayPositionAnalysis {
+  return {
+    advantage,
+    advantageSource,
+    candidateMoves: [],
+    coachHints: [],
+    confidence: getConfidence(advantageSource, "none"),
+    confidenceReason: getConfidenceReason(advantageSource, "none"),
+    currentDisc,
+    emptyCount,
+    helpfulCandidates: [],
+    legalMoves,
+    moveEvaluationSource: "none",
+    phase,
+    riskCandidates: [],
+    shapeSignals: [],
   };
 }
 
