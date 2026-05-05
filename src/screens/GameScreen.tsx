@@ -8,6 +8,7 @@ import {
 import { GameHeader } from "../components/GameHeader";
 import { GameResultOverlay } from "../components/GameResultOverlay";
 import { MoveHistory } from "../components/MoveHistory";
+import { getAdvantageContextLabel } from "../components/gameHudLabels";
 import type { DiscColor } from "../game/othello";
 import type { GameSessionNotice } from "../game/session";
 import type { OthelloGameController } from "../hooks/useOthelloGame";
@@ -161,6 +162,7 @@ export function GameScreen({
 
               <AdvantageBar
                 advantage={playPositionAnalysis.advantage}
+                contextLabel={getAdvantageContextLabel(playPositionAnalysis)}
                 players={game.players}
               />
 

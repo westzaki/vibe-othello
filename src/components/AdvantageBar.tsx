@@ -5,10 +5,15 @@ import { getAdvantageLabel } from "./gameHudLabels";
 
 type AdvantageBarProps = {
   advantage: Advantage;
+  contextLabel: string;
   players: PlayerSettings;
 };
 
-export function AdvantageBar({ advantage, players }: AdvantageBarProps) {
+export function AdvantageBar({
+  advantage,
+  contextLabel,
+  players,
+}: AdvantageBarProps) {
   const barStyle = {
     "--black-advantage": `${advantage.blackPercent}%`,
   } as CSSProperties;
@@ -16,19 +21,24 @@ export function AdvantageBar({ advantage, players }: AdvantageBarProps) {
   return (
     <section
       className="advantage-panel"
-      aria-label={`今の流れ: 黒 ${advantage.blackPercent} パーセント, 白 ${advantage.whitePercent} パーセント`}
+      aria-label={`今の流れ: ${contextLabel}, 黒 ${advantage.blackPercent} パーセント, 白 ${advantage.whitePercent} パーセント`}
     >
       <div className="advantage-panel__header">
         <span>今の流れ</span>
         <strong>{getAdvantageLabel(advantage, players)}</strong>
       </div>
+      <p className="advantage-panel__context">{contextLabel}</p>
       <div className="advantage-bar" style={barStyle} aria-hidden="true">
         <span className="advantage-bar__segment advantage-bar__segment--black" />
         <span className="advantage-bar__segment advantage-bar__segment--white" />
       </div>
       <div className="advantage-panel__scores">
-        <span className="advantage-panel__score advantage-panel__score--black">黒</span>
-        <span className="advantage-panel__score advantage-panel__score--white">白</span>
+        <span className="advantage-panel__score advantage-panel__score--black">
+          黒
+        </span>
+        <span className="advantage-panel__score advantage-panel__score--white">
+          白
+        </span>
       </div>
     </section>
   );
