@@ -2,7 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import type { GameSession } from "../game/session";
 import { analyzePlayPositionAsync } from "../services/playPositionAnalysisService";
 import {
-  createPlayPositionAnalysis,
+  createPlayPositionAnalysisKey,
+  createPlayPositionAnalysisState,
+  getCurrentPlayPositionAnalysis,
+  type PlayPositionAnalysisSources,
+} from "../services/playPositionAnalysisState";
+import {
   type CreatePlayPositionAnalysisOptions,
   type PlayPositionAnalysis,
 } from "../teacher";
@@ -13,22 +18,25 @@ export function usePlayPositionAnalysis(
   session: GameSession,
   options?: CreatePlayPositionAnalysisOptions,
 ): PlayPositionAnalysis {
-  const optionsKey = useMemo(() => JSON.stringify(options ?? {}), [options]);
-  const positionKey = useMemo(
-    () => [session.currentDisc, session.board.join(","), optionsKey].join("|"),
-    [optionsKey, session.board, session.currentDisc],
-  );
-  const [analysisState, setAnalysisState] = useState<{
-    analysis: PlayPositionAnalysis;
-    key: string;
-  }>(() => ({
-    analysis: createPlayPositionAnalysis(
-      session.board,
-      session.currentDisc,
+  const sources = useMemo<PlayPositionAnalysisSources>(
+    () => ({
+      board: session.board,
+      currentDisc: session.currentDisc,
       options,
-    ),
-    key: positionKey,
-  }));
+    }),
+    [options, session.board, session.currentDisc],
+  );
+  const positionKey = useMemo(
+    () => createPlayPositionAnalysisKey(sources),
+    [sources],
+  );
+  const [analysisState, setAnalysisState] = useState(() =>
+    createPlayPositionAnalysisState(sources),
+  );
+  const currentAnalysis = getCurrentPlayPositionAnalysis(
+    analysisState,
+    sources,
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -36,9 +44,9 @@ export function usePlayPositionAnalysis(
     nextPlayPositionAnalysisRequestId += 1;
 
     void analyzePlayPositionAsync({
-      board: session.board,
-      currentDisc: session.currentDisc,
-      options,
+      board: sources.board,
+      currentDisc: sources.currentDisc,
+      options: sources.options,
       requestId,
     }).then(
       (response) => {
@@ -46,10 +54,9 @@ export function usePlayPositionAnalysis(
           return;
         }
 
-        setAnalysisState({
-          analysis: response.analysis,
-          key: positionKey,
-        });
+        setAnalysisState(
+          createPlayPositionAnalysisState(sources, response.analysis),
+        );
       },
       () => {
         // Keep the previous analysis if both worker and fallback fail.
@@ -59,7 +66,7 @@ export function usePlayPositionAnalysis(
     return () => {
       cancelled = true;
     };
-  }, [options, positionKey, session.board, session.currentDisc]);
+  }, [positionKey, sources]);
 
-  return analysisState.analysis;
+  return currentAnalysis;
 }
