@@ -10,17 +10,21 @@ export type CoachHintKind =
   | "endgame"
   | "candidate";
 
+export type CoachHintSeverity = "low" | "medium" | "high";
+
 export type CoachHint = {
   candidate: CandidateMoveReview | null;
   kind: CoachHintKind;
   message: string;
   reasons: MoveReviewReason[];
+  severity: CoachHintSeverity;
   square: SquareIndex | null;
 };
 
 export type CoachHintDraft = {
   candidate: CandidateMoveReview;
   kind: CoachHintKind;
+  severity: CoachHintSeverity;
 };
 
 export type CoachHintMessageStyle = "vague" | "specific";
@@ -28,9 +32,11 @@ export type CoachHintMessageStyle = "vague" | "specific";
 export type CreateCoachHintOptions = Partial<AnalyzeMoveCandidatesOptions> & {
   includeCandidateFallback?: boolean;
   messageStyle?: CoachHintMessageStyle;
+  riskHintLimit?: number;
 };
 
 export type CreateCoachHintsFromAnalysisOptions = {
   includeCandidateFallback?: boolean;
   messageStyle?: CoachHintMessageStyle;
+  riskHintLimit?: number;
 };

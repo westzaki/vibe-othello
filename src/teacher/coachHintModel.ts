@@ -97,6 +97,7 @@ export function createCoachHintModel(
       {
         includeCandidateFallback: mode === "active",
         messageStyle: mode === "gentle" ? "vague" : "specific",
+        riskHintLimit: mode === "active" ? 3 : 2,
       },
     );
 

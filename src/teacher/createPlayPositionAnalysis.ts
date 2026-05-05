@@ -14,6 +14,7 @@ import {
   createCoachHintsFromAnalysis,
   type CoachHint,
   type CoachHintMessageStyle,
+  type CreateCoachHintsFromAnalysisOptions,
 } from "./createCoachHint";
 import type {
   CandidateMoveReview,
@@ -74,6 +75,7 @@ export type CreatePlayPositionAnalysisOptions =
   Partial<AnalyzeMoveCandidatesOptions> & {
     includeCandidateFallback?: boolean;
     messageStyle?: CoachHintMessageStyle;
+    riskHintLimit?: CreateCoachHintsFromAnalysisOptions["riskHintLimit"];
   };
 
 const defaultPlayPositionSearchDepth = 3;
@@ -92,6 +94,7 @@ export function createPlayPositionAnalysis(
   {
     includeCandidateFallback = true,
     messageStyle = "specific",
+    riskHintLimit,
     searchDepth = defaultPlayPositionSearchDepth,
   }: CreatePlayPositionAnalysisOptions = {},
 ): PlayPositionAnalysis {
@@ -145,6 +148,7 @@ export function createPlayPositionAnalysis(
   const coachHints = createCoachHintsFromAnalysis(candidateAnalysis, {
     includeCandidateFallback,
     messageStyle,
+    riskHintLimit,
   });
   const shapeSignals = createShapeSignals({
     candidateMoves,

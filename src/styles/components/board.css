@@ -156,26 +156,60 @@
 }
 
 .board-square--coach-hint-risk::before {
-  inset: 20%;
+  inset: var(--coach-risk-inset, 20%);
   border: 0;
   border-radius: 0;
   background:
     linear-gradient(
       45deg,
-      transparent calc(50% - 4px),
-      rgba(244, 147, 131, 0.96) calc(50% - 4px),
-      rgba(244, 147, 131, 0.96) calc(50% + 4px),
-      transparent calc(50% + 4px)
+      transparent calc(50% - var(--coach-risk-line-width, 4px)),
+      var(--coach-risk-color, rgba(244, 147, 131, 0.96))
+        calc(50% - var(--coach-risk-line-width, 4px)),
+      var(--coach-risk-color, rgba(244, 147, 131, 0.96))
+        calc(50% + var(--coach-risk-line-width, 4px)),
+      transparent calc(50% + var(--coach-risk-line-width, 4px))
     ),
     linear-gradient(
       -45deg,
-      transparent calc(50% - 4px),
-      rgba(244, 147, 131, 0.96) calc(50% - 4px),
-      rgba(244, 147, 131, 0.96) calc(50% + 4px),
-      transparent calc(50% + 4px)
+      transparent calc(50% - var(--coach-risk-line-width, 4px)),
+      var(--coach-risk-color, rgba(244, 147, 131, 0.96))
+        calc(50% - var(--coach-risk-line-width, 4px)),
+      var(--coach-risk-color, rgba(244, 147, 131, 0.96))
+        calc(50% + var(--coach-risk-line-width, 4px)),
+      transparent calc(50% + var(--coach-risk-line-width, 4px))
     );
   box-shadow: none;
-  filter: drop-shadow(0 0 8px rgba(244, 147, 131, 0.62));
+  filter: drop-shadow(
+    0 0 var(--coach-risk-glow-size, 8px)
+      var(--coach-risk-glow-color, rgba(244, 147, 131, 0.62))
+  );
+}
+
+.board-square--coach-hint-risk-low::before {
+  --coach-hint-pulse-min-opacity: 0.28;
+  --coach-risk-color: rgba(244, 147, 131, 0.58);
+  --coach-risk-glow-color: rgba(244, 147, 131, 0.32);
+  --coach-risk-glow-size: 5px;
+  --coach-risk-inset: 24%;
+  --coach-risk-line-width: 3px;
+}
+
+.board-square--coach-hint-risk-medium::before {
+  --coach-hint-pulse-min-opacity: 0.42;
+  --coach-risk-color: rgba(244, 147, 131, 0.82);
+  --coach-risk-glow-color: rgba(244, 147, 131, 0.48);
+  --coach-risk-glow-size: 7px;
+  --coach-risk-inset: 21%;
+  --coach-risk-line-width: 4px;
+}
+
+.board-square--coach-hint-risk-high::before {
+  --coach-hint-pulse-min-opacity: 0.58;
+  --coach-risk-color: rgba(226, 87, 83, 0.98);
+  --coach-risk-glow-color: rgba(226, 87, 83, 0.68);
+  --coach-risk-glow-size: 10px;
+  --coach-risk-inset: 18%;
+  --coach-risk-line-width: 5px;
 }
 
 .board-square--coach-hint .disc {
@@ -197,7 +231,7 @@
 @keyframes board-coach-hint-pulse {
   0%,
   100% {
-    opacity: 0.42;
+    opacity: var(--coach-hint-pulse-min-opacity, 0.42);
     transform: scale(0.86);
   }
 

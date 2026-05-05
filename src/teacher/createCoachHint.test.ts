@@ -84,6 +84,114 @@ describe("teacher coach hints", () => {
     expect(hints).toEqual([]);
   });
 
+  it("can return multiple risk hints with severity", () => {
+    const hints = createCoachHintsFromAnalysis({
+      candidateMoves: [
+        createCandidateMove({
+          rank: 1,
+          reasons: [],
+          score: 100,
+          square: 19,
+        }),
+        createCandidateMove({
+          metrics: {
+            givesOpponentCorner: true,
+            scoreGapFromBest: 10,
+          },
+          rank: 2,
+          reasons: ["cornerGiven"],
+          score: 90,
+          square: 9,
+        }),
+        createCandidateMove({
+          metrics: {
+            mobilitySwing: -4,
+            scoreGapFromBest: 24,
+          },
+          rank: 3,
+          reasons: ["mobilityLoss"],
+          score: 76,
+          square: 11,
+        }),
+        createCandidateMove({
+          metrics: {
+            isDangerSquare: true,
+            scoreGapFromBest: 7,
+          },
+          rank: 4,
+          reasons: ["dangerSquare"],
+          score: 93,
+          square: 14,
+        }),
+      ],
+      evaluationSource: "minimax",
+    });
+
+    expect(hints).toEqual([
+      expect.objectContaining({
+        kind: "cornerRisk",
+        severity: "high",
+        square: 9,
+      }),
+      expect.objectContaining({
+        kind: "mobilityRisk",
+        severity: "medium",
+        square: 11,
+      }),
+      expect.objectContaining({
+        kind: "cornerRisk",
+        severity: "low",
+        square: 14,
+      }),
+    ]);
+  });
+
+  it("limits risk hints when requested", () => {
+    const hints = createCoachHintsFromAnalysis(
+      {
+        candidateMoves: [
+          createCandidateMove({
+            rank: 1,
+            reasons: [],
+            score: 100,
+            square: 19,
+          }),
+          createCandidateMove({
+            metrics: {
+              givesOpponentCorner: true,
+              scoreGapFromBest: 10,
+            },
+            rank: 2,
+            reasons: ["cornerGiven"],
+            score: 90,
+            square: 9,
+          }),
+          createCandidateMove({
+            metrics: {
+              mobilitySwing: -4,
+              scoreGapFromBest: 24,
+            },
+            rank: 3,
+            reasons: ["mobilityLoss"],
+            score: 76,
+            square: 11,
+          }),
+        ],
+        evaluationSource: "minimax",
+      },
+      {
+        riskHintLimit: 1,
+      },
+    );
+
+    expect(hints).toEqual([
+      expect.objectContaining({
+        severity: "high",
+        square: 9,
+      }),
+    ]);
+  });
+
   it("can include a warning and a helpful hint together", () => {
     const board = createBoardFixture({
       1: "white",
