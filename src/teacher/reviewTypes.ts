@@ -18,11 +18,28 @@ export type MoveReviewReason =
   | "scoreDrop"
   | "turningPoint";
 
+export type CandidateMoveMetrics = {
+  givesOpponentCorner: boolean;
+  isCorner: boolean;
+  isDangerSquare: boolean;
+  mobilityDifferenceAfter: number;
+  mobilityDifferenceBefore: number;
+  mobilitySwing: number;
+  opponentMobilityAfter: number;
+  opponentMobilityBefore: number;
+  opponentMobilityDelta: number;
+  playerMobilityAfter: number;
+  playerMobilityBefore: number;
+  playerMobilityDelta: number;
+  scoreGapFromBest: number;
+};
+
 export type CandidateMoveReview = {
-  square: SquareIndex;
-  score: number;
+  metrics: CandidateMoveMetrics;
   rank: number;
   reasons: MoveReviewReason[];
+  score: number;
+  square: SquareIndex;
 };
 
 export type MoveReview = {

@@ -6,6 +6,7 @@ import {
   createCoachHints,
   createCoachHintsFromAnalysis,
 } from "./createCoachHint";
+import type { CandidateMoveReview } from "./reviewTypes";
 
 describe("teacher coach hints", () => {
   it("returns null when there are no candidate moves", () => {
@@ -60,18 +61,22 @@ describe("teacher coach hints", () => {
   it("does not warn about a danger square when its score is near the best candidate", () => {
     const hints = createCoachHintsFromAnalysis({
       candidateMoves: [
-        {
+        createCandidateMove({
           rank: 1,
           reasons: [],
           score: 100,
           square: 19,
-        },
-        {
+        }),
+        createCandidateMove({
+          metrics: {
+            isDangerSquare: true,
+            scoreGapFromBest: 2,
+          },
           rank: 2,
           reasons: ["dangerSquare"],
           score: 98,
           square: 9,
-        },
+        }),
       ],
       evaluationSource: "minimax",
     });
@@ -202,4 +207,37 @@ function createBoardFromString(source: string) {
 
     return null;
   });
+}
+
+function createCandidateMove({
+  metrics = {},
+  rank,
+  reasons,
+  score,
+  square,
+}: Pick<CandidateMoveReview, "rank" | "reasons" | "score" | "square"> & {
+  metrics?: Partial<CandidateMoveReview["metrics"]>;
+}): CandidateMoveReview {
+  return {
+    metrics: {
+      givesOpponentCorner: false,
+      isCorner: false,
+      isDangerSquare: false,
+      mobilityDifferenceAfter: 0,
+      mobilityDifferenceBefore: 0,
+      mobilitySwing: 0,
+      opponentMobilityAfter: 0,
+      opponentMobilityBefore: 0,
+      opponentMobilityDelta: 0,
+      playerMobilityAfter: 0,
+      playerMobilityBefore: 0,
+      playerMobilityDelta: 0,
+      scoreGapFromBest: 0,
+      ...metrics,
+    },
+    rank,
+    reasons,
+    score,
+    square,
+  };
 }
