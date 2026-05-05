@@ -12,15 +12,9 @@
   border-radius: var(--radius-sm);
   color: var(--color-control-text);
   background:
-    linear-gradient(
-      180deg,
-      var(--color-paper-soft),
-      var(--color-control-bg)
-    ),
+    linear-gradient(180deg, var(--color-paper-soft), var(--color-control-bg)),
     var(--color-control-bg);
-  box-shadow:
-    var(--shadow-hairline),
-    var(--shadow-soft);
+  box-shadow: var(--shadow-hairline), var(--shadow-soft);
   cursor: pointer;
   font: inherit;
   font-weight: 900;
@@ -113,7 +107,8 @@
   min-width: 0;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: clamp(1px, 0.5vw, 4px);
-  border: 1px solid color-mix(in srgb, var(--color-control-border) 62%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--color-control-border) 62%, transparent);
   border-radius: var(--radius-md);
   padding: 4px;
   background: var(--color-star-bg);
@@ -140,6 +135,8 @@
   line-height: 1;
   overflow: hidden;
   text-shadow: 0 2px 0 rgba(255, 255, 255, 0.78);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   transition:
     color 160ms ease,
     background 160ms ease,
@@ -150,13 +147,6 @@
 .cpu-star-selector__button--filled {
   color: var(--color-star-active);
   background: transparent;
-}
-
-.cpu-star-selector__button:hover:not(:disabled) {
-  color: var(--color-bibi-caramel);
-  background: color-mix(in srgb, var(--color-star-bg) 76%, white);
-  box-shadow: inset 0 0 0 1px var(--color-selected-border);
-  transform: translateY(-1px);
 }
 
 .cpu-star-selector__button:active:not(:disabled),
@@ -174,6 +164,15 @@
 .cpu-star-selector__button:disabled {
   cursor: default;
   opacity: 0.46;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cpu-star-selector__button:hover:not(:disabled) {
+    color: var(--color-bibi-caramel);
+    background: color-mix(in srgb, var(--color-star-bg) 76%, white);
+    box-shadow: inset 0 0 0 1px var(--color-selected-border);
+    transform: translateY(-1px);
+  }
 }
 
 .mode-selector__button:hover,
@@ -204,7 +203,11 @@
       color-mix(in srgb, var(--color-board-green) 10%, transparent),
       transparent 9rem
     ),
-    linear-gradient(180deg, var(--color-selected-bg), var(--color-bibi-honey-soft)),
+    linear-gradient(
+      180deg,
+      var(--color-selected-bg),
+      var(--color-bibi-honey-soft)
+    ),
     var(--color-selected-bg);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.66),
@@ -226,5 +229,9 @@
       color-mix(in srgb, var(--color-bibi-honey) 22%, transparent),
       transparent 9rem
     ),
-    linear-gradient(180deg, var(--color-selected-bg), var(--color-bibi-honey-soft));
+    linear-gradient(
+      180deg,
+      var(--color-selected-bg),
+      var(--color-bibi-honey-soft)
+    );
 }
