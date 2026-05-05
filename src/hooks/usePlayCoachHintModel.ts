@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { Advantage } from "../cpu";
 import type { PlayerSettings } from "../game/players";
 import type { GameSession } from "../game/session";
 import {
@@ -11,6 +12,7 @@ import {
 const coachHintPollMs = 250;
 
 type UsePlayCoachHintModelParams = {
+  advantage?: Advantage;
   enabled: boolean;
   isCpuThinking: boolean;
   players: PlayerSettings;
@@ -19,6 +21,7 @@ type UsePlayCoachHintModelParams = {
 };
 
 export function usePlayCoachHintModel({
+  advantage,
   enabled,
   isCpuThinking,
   players,
@@ -60,6 +63,7 @@ export function usePlayCoachHintModel({
     const startedAt = getCurrentTimeMs();
     const intervalId = window.setInterval(() => {
       const nextModel = createCoachHintModel({
+        advantage,
         isCpuThinking,
         players,
         session,
@@ -108,6 +112,7 @@ export function usePlayCoachHintModel({
       window.clearInterval(intervalId);
     };
   }, [
+    advantage,
     enabled,
     hintKey,
     isCpuThinking,
