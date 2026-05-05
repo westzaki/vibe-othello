@@ -3,6 +3,7 @@ import type { ReviewGameOptions } from "./reviewTypes";
 export type TeacherReviewConfig = Pick<
   ReviewGameOptions,
   | "deepSearchDepth"
+  | "guidanceMode"
   | "maxHighlights"
   | "refutationSearchDepth"
   | "searchDepth"
@@ -14,6 +15,7 @@ export type TeacherReviewConfig = Pick<
 
 export const defaultTeacherReviewConfig: TeacherReviewConfig = {
   maxHighlights: 2,
+  guidanceMode: "auto",
   searchDepth: 3,
   turningPointAnalysis: {
     dropThreshold: 30,

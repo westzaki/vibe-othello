@@ -32,6 +32,15 @@ export function usePlayCoachHintModel({
   settings,
 }: UsePlayCoachHintModelParams): CoachHintModel | null {
   const shownRiskHintKeysRef = useRef(new Set<string>());
+  const latestContextRef = useRef({
+    advantage,
+    analysis,
+    enabled,
+    isCpuThinking,
+    players,
+    session,
+    settings,
+  });
   const hintKey = createHintKey({
     enabled,
     isCpuThinking,
@@ -42,6 +51,18 @@ export function usePlayCoachHintModel({
     key: string;
     model: CoachHintModel;
   } | null>(null);
+
+  useEffect(() => {
+    latestContextRef.current = {
+      advantage,
+      analysis,
+      enabled,
+      isCpuThinking,
+      players,
+      session,
+      settings,
+    };
+  }, [advantage, analysis, enabled, isCpuThinking, players, session, settings]);
 
   useEffect(() => {
     if (
@@ -65,13 +86,14 @@ export function usePlayCoachHintModel({
 
     const startedAt = getCurrentTimeMs();
     const intervalId = window.setInterval(() => {
+      const latestContext = latestContextRef.current;
       const nextModel = createCoachHintModel({
-        advantage,
-        analysis,
-        isCpuThinking,
-        players,
-        session,
-        settings,
+        advantage: latestContext.advantage,
+        analysis: latestContext.analysis,
+        isCpuThinking: latestContext.isCpuThinking,
+        players: latestContext.players,
+        session: latestContext.session,
+        settings: latestContext.settings,
         thinkingTimeMs: getCurrentTimeMs() - startedAt,
       });
 
@@ -115,12 +137,9 @@ export function usePlayCoachHintModel({
       window.clearInterval(intervalId);
     };
   }, [
-    advantage,
-    analysis,
     enabled,
     hintKey,
     isCpuThinking,
-    players,
     session,
     settings,
   ]);

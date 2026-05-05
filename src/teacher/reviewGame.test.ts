@@ -9,9 +9,19 @@ import type { MoveRecord } from "../game/session";
 import { placeCurrentDisc, startNewGame } from "../game/session";
 import { createBoardFixture } from "../test/boardFixtures";
 import { chooseTeacherGuidanceMove } from "./teacherGuidanceMove";
+import { defaultTeacherReviewConfig } from "./reviewConfig";
 import { reviewGame } from "./reviewGame";
 
 describe("teacher review", () => {
+  it("uses auto guidance in the default teacher review config", () => {
+    expect(defaultTeacherReviewConfig).toEqual(
+      expect.objectContaining({
+        guidanceMode: "auto",
+        useTeacherGuidanceMove: true,
+      }),
+    );
+  });
+
   it("reviews only the requested disc", () => {
     const afterBlack = placeCurrentDisc(startNewGame(), 19).session;
     const afterWhite = placeCurrentDisc(afterBlack, 18).session;

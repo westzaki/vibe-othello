@@ -20,8 +20,12 @@ import {
 } from "./analyzeMoveCandidates";
 import type { CandidateMoveReview } from "./reviewTypes";
 
+export type TeacherGuidanceMode = "normal" | "comeback" | "auto";
+
 export type TeacherGuidanceMoveOptions = {
   deepSearchDepth?: number;
+  guidanceMode?: TeacherGuidanceMode;
+  isDisadvantaged?: boolean;
   refutationSearchDepth?: number;
   shallowSearchDepth?: number;
   strongCandidateScoreGap?: number;
@@ -36,7 +40,10 @@ export type TeacherGuidanceRefutation = {
 
 export type TeacherGuidanceCandidate = {
   candidate: CandidateMoveReview;
+  comebackBonus: number;
   learningBonus: number;
+  opponentPressureScore: number;
+  opponentReplySpread: number | null;
   refutation: TeacherGuidanceRefutation | null;
   refutationPenalty: number;
   scoreGapFromBest: number;
@@ -54,6 +61,16 @@ const deepeningMobilitySwing = 4;
 const cornerLearningBonus = 4;
 const mobilityLearningBonus = 2;
 const stableEdgeLearningBonus = 3;
+const comebackForcePassBonus = 10;
+const comebackForceMoveBonus = 8;
+const comebackNarrowMoveBonus = 4;
+const comebackReplySpreadScale = 16;
+const comebackReplySpreadMaxBonus = 5;
+const comebackPressureMaxBonus = 18;
+const comebackCornerGivenPenalty = 24;
+const comebackDangerSquarePenalty = 8;
+const comebackHighRefutationExtraPenalty = 28;
+const autoDisadvantageSearchScore = -20;
 const refutationLowPenalty = 3;
 const refutationMediumPenalty = 8;
 const refutationHighPenalty = 20;
@@ -67,6 +84,8 @@ export function chooseTeacherGuidanceMove(
   disc: DiscColor,
   {
     deepSearchDepth = defaultTeacherGuidanceDeepSearchDepth,
+    guidanceMode = "normal",
+    isDisadvantaged,
     refutationSearchDepth = defaultTeacherGuidanceRefutationSearchDepth,
     shallowSearchDepth = defaultTeacherGuidanceShallowSearchDepth,
     strongCandidateScoreGap = defaultTeacherGuidanceStrongCandidateScoreGap,
@@ -83,6 +102,8 @@ export function chooseTeacherGuidanceMove(
       board,
       deepSearchDepth,
       disc,
+      guidanceMode,
+      isDisadvantaged,
       refutationSearchDepth,
       strongCandidateScoreGap,
       topCandidateLimit,
@@ -95,6 +116,8 @@ export function selectTeacherGuidanceCandidate({
   board,
   deepSearchDepth = defaultTeacherGuidanceDeepSearchDepth,
   disc,
+  guidanceMode = "normal",
+  isDisadvantaged,
   refutationSearchDepth = defaultTeacherGuidanceRefutationSearchDepth,
   strongCandidateScoreGap = defaultTeacherGuidanceStrongCandidateScoreGap,
   topCandidateLimit = defaultTeacherGuidanceTopCandidateLimit,
@@ -126,6 +149,8 @@ export function selectTeacherGuidanceCandidate({
     board,
     candidates: deepenedScores,
     disc,
+    guidanceMode,
+    isDisadvantaged,
     refutationSearchDepth,
     strongCandidateScoreGap,
   });
@@ -226,12 +251,16 @@ export function rankTeacherGuidanceCandidates({
   board,
   candidates,
   disc,
+  guidanceMode = "normal",
+  isDisadvantaged,
   refutationSearchDepth = defaultTeacherGuidanceRefutationSearchDepth,
   strongCandidateScoreGap = defaultTeacherGuidanceStrongCandidateScoreGap,
 }: {
   board: Board;
   candidates: CandidateMoveReview[];
   disc: DiscColor;
+  guidanceMode?: TeacherGuidanceMode;
+  isDisadvantaged?: boolean;
   refutationSearchDepth?: number;
   strongCandidateScoreGap?: number;
 }): TeacherGuidanceCandidate[] {
@@ -242,6 +271,12 @@ export function rankTeacherGuidanceCandidates({
   const bestSearchScore = getBestCandidateScore(candidates) ?? 0;
   const candidatePool =
     strongCandidates.length > 0 ? strongCandidates : candidates.slice(0, 1);
+  const resolvedGuidanceMode = resolveTeacherGuidanceMode({
+    candidates,
+    guidanceMode,
+    isDisadvantaged,
+  });
+
   return candidatePool
     .map((candidate) =>
       createTeacherGuidanceCandidate({
@@ -249,10 +284,17 @@ export function rankTeacherGuidanceCandidates({
         board,
         candidate,
         disc,
+        guidanceMode: resolvedGuidanceMode,
         refutationSearchDepth,
       }),
     )
-    .sort(compareTeacherGuidanceCandidates);
+    .sort((firstCandidate, secondCandidate) =>
+      compareTeacherGuidanceCandidates(
+        firstCandidate,
+        secondCandidate,
+        resolvedGuidanceMode,
+      ),
+    );
 }
 
 export function selectStrongTeacherCandidates(
@@ -285,54 +327,88 @@ function createTeacherGuidanceCandidate({
   board,
   candidate,
   disc,
+  guidanceMode,
   refutationSearchDepth,
 }: {
   bestSearchScore: number;
   board: Board;
   candidate: CandidateMoveReview;
   disc: DiscColor;
+  guidanceMode: Exclude<TeacherGuidanceMode, "auto">;
   refutationSearchDepth: number;
 }): TeacherGuidanceCandidate {
-  const refutation = findTeacherRefutation({
-    bestSearchScore,
-    boardAfterCandidate: placeDisc(board, candidate.square, disc),
-    candidate,
+  const boardAfterCandidate = placeDisc(board, candidate.square, disc);
+  const replyProfile = getTeacherReplyProfile({
+    boardAfterCandidate,
     disc,
     refutationSearchDepth,
   });
+  const refutation = findTeacherRefutation({
+    bestSearchScore,
+    candidate,
+    replyProfile,
+  });
   const refutationPenalty = getRefutationPenalty(refutation);
   const learningBonus = getLearningBonus(candidate);
+  const opponentPressureScore = getOpponentPressureScore(candidate);
+  const opponentReplySpread = replyProfile.opponentReplySpread;
+  const comebackBonus = getComebackBonus({
+    opponentPressureScore,
+    opponentReplySpread,
+  });
   const scoreGapFromBest = bestSearchScore - candidate.score;
+  const teacherScore =
+    guidanceMode === "comeback"
+      ? getComebackTeacherScore({
+          candidate,
+          comebackBonus,
+          learningBonus,
+          refutation,
+          refutationPenalty,
+        })
+      : candidate.score - refutationPenalty + learningBonus;
 
   return {
     candidate,
+    comebackBonus,
     learningBonus,
+    opponentPressureScore,
+    opponentReplySpread,
     refutation,
     refutationPenalty,
     scoreGapFromBest,
     searchScore: candidate.score,
-    teacherScore: candidate.score - refutationPenalty + learningBonus,
+    teacherScore,
   };
 }
 
-function findTeacherRefutation({
-  bestSearchScore,
+type TeacherReplyScore = {
+  opponentSquare: SquareIndex;
+  scoreAfterReply: number;
+};
+
+type TeacherReplyProfile = {
+  opponentReplySpread: number | null;
+  strongestReply: TeacherReplyScore | null;
+};
+
+function getTeacherReplyProfile({
   boardAfterCandidate,
-  candidate,
   disc,
   refutationSearchDepth,
 }: {
-  bestSearchScore: number;
   boardAfterCandidate: Board;
-  candidate: CandidateMoveReview;
   disc: DiscColor;
   refutationSearchDepth: number;
-}): TeacherGuidanceRefutation | null {
+}): TeacherReplyProfile {
   const opponentDisc = getNextDisc(disc);
   const opponentMoves = getLegalMoves(boardAfterCandidate, opponentDisc);
 
   if (opponentMoves.length === 0) {
-    return null;
+    return {
+      opponentReplySpread: null,
+      strongestReply: null,
+    };
   }
 
   const replyScores = opponentMoves
@@ -362,6 +438,30 @@ function findTeacherRefutation({
   const strongestReply = replyScores[0];
 
   if (strongestReply === undefined) {
+    return {
+      opponentReplySpread: null,
+      strongestReply: null,
+    };
+  }
+
+  return {
+    opponentReplySpread: getOpponentReplySpread(replyScores),
+    strongestReply,
+  };
+}
+
+function findTeacherRefutation({
+  bestSearchScore,
+  candidate,
+  replyProfile,
+}: {
+  bestSearchScore: number;
+  candidate: CandidateMoveReview;
+  replyProfile: TeacherReplyProfile;
+}): TeacherGuidanceRefutation | null {
+  const strongestReply = replyProfile.strongestReply;
+
+  if (strongestReply === null) {
     return null;
   }
 
@@ -381,6 +481,14 @@ function findTeacherRefutation({
     scoreAfterReply: strongestReply.scoreAfterReply,
     severity,
   };
+}
+
+function getOpponentReplySpread(replyScores: TeacherReplyScore[]): number | null {
+  if (replyScores.length < 2) {
+    return null;
+  }
+
+  return replyScores[1].scoreAfterReply - replyScores[0].scoreAfterReply;
 }
 
 function getRefutationSeverity({
@@ -450,6 +558,132 @@ function getLearningBonus(candidate: CandidateMoveReview): number {
       : 0) +
     (candidate.metrics.anchoredEdgeDelta > 0 ? stableEdgeLearningBonus : 0)
   );
+}
+
+function getOpponentPressureScore(candidate: CandidateMoveReview): number {
+  const forcedMoveBonus = getForcedMoveBonus(
+    candidate.metrics.opponentMobilityAfter,
+  );
+  const mobilityAfterBonus = Math.max(
+    0,
+    4 - candidate.metrics.opponentMobilityAfter,
+  );
+  const mobilityDeltaBonus =
+    candidate.metrics.opponentMobilityDelta < 0
+      ? Math.min(5, -candidate.metrics.opponentMobilityDelta * 1.5)
+      : 0;
+  const mobilitySwingBonus =
+    candidate.metrics.mobilitySwing > 0
+      ? Math.min(4, candidate.metrics.mobilitySwing)
+      : 0;
+
+  return (
+    forcedMoveBonus +
+    mobilityAfterBonus +
+    mobilityDeltaBonus +
+    mobilitySwingBonus
+  );
+}
+
+function getForcedMoveBonus(opponentMovesAfter: number): number {
+  if (opponentMovesAfter === 0) {
+    return comebackForcePassBonus;
+  }
+
+  if (opponentMovesAfter === 1) {
+    return comebackForceMoveBonus;
+  }
+
+  if (opponentMovesAfter === 2) {
+    return comebackNarrowMoveBonus;
+  }
+
+  return 0;
+}
+
+function getComebackBonus({
+  opponentPressureScore,
+  opponentReplySpread,
+}: {
+  opponentPressureScore: number;
+  opponentReplySpread: number | null;
+}): number {
+  const replySpreadBonus =
+    opponentReplySpread === null
+      ? 0
+      : Math.min(
+          comebackReplySpreadMaxBonus,
+          opponentReplySpread / comebackReplySpreadScale,
+        );
+
+  return Math.min(
+    comebackPressureMaxBonus,
+    opponentPressureScore + replySpreadBonus,
+  );
+}
+
+function getComebackTeacherScore({
+  candidate,
+  comebackBonus,
+  learningBonus,
+  refutation,
+  refutationPenalty,
+}: {
+  candidate: CandidateMoveReview;
+  comebackBonus: number;
+  learningBonus: number;
+  refutation: TeacherGuidanceRefutation | null;
+  refutationPenalty: number;
+}): number {
+  return (
+    candidate.score +
+    comebackBonus +
+    learningBonus * 0.5 -
+    getComebackRiskPenalty(candidate, refutation, refutationPenalty)
+  );
+}
+
+function getComebackRiskPenalty(
+  candidate: CandidateMoveReview,
+  refutation: TeacherGuidanceRefutation | null,
+  refutationPenalty: number,
+): number {
+  return (
+    refutationPenalty +
+    (candidate.metrics.givesOpponentCorner ? comebackCornerGivenPenalty : 0) +
+    (candidate.metrics.isDangerSquare ? comebackDangerSquarePenalty : 0) +
+    (refutation?.severity === "high" ? comebackHighRefutationExtraPenalty : 0)
+  );
+}
+
+function resolveTeacherGuidanceMode({
+  candidates,
+  guidanceMode,
+  isDisadvantaged,
+}: {
+  candidates: CandidateMoveReview[];
+  guidanceMode: TeacherGuidanceMode;
+  isDisadvantaged: boolean | undefined;
+}): Exclude<TeacherGuidanceMode, "auto"> {
+  if (guidanceMode !== "auto") {
+    return guidanceMode;
+  }
+
+  if (isDisadvantaged !== undefined) {
+    return isDisadvantaged ? "comeback" : "normal";
+  }
+
+  return isLikelyDisadvantagedFromCandidates(candidates)
+    ? "comeback"
+    : "normal";
+}
+
+function isLikelyDisadvantagedFromCandidates(
+  candidates: CandidateMoveReview[],
+): boolean {
+  const bestScore = getBestCandidateScore(candidates);
+
+  return bestScore !== null && bestScore < autoDisadvantageSearchScore;
 }
 
 function scoreDeepeningCandidates({
@@ -651,7 +885,15 @@ function compareCandidateScores(
 function compareTeacherGuidanceCandidates(
   firstCandidate: TeacherGuidanceCandidate,
   secondCandidate: TeacherGuidanceCandidate,
+  guidanceMode: Exclude<TeacherGuidanceMode, "auto">,
 ): number {
+  if (guidanceMode === "comeback") {
+    return compareComebackTeacherGuidanceCandidates(
+      firstCandidate,
+      secondCandidate,
+    );
+  }
+
   const searchScoreDifference =
     secondCandidate.searchScore - firstCandidate.searchScore;
 
@@ -671,6 +913,41 @@ function compareTeacherGuidanceCandidates(
 
   if (learningBonusDifference !== 0) {
     return learningBonusDifference;
+  }
+
+  return firstCandidate.scoreGapFromBest - secondCandidate.scoreGapFromBest;
+}
+
+function compareComebackTeacherGuidanceCandidates(
+  firstCandidate: TeacherGuidanceCandidate,
+  secondCandidate: TeacherGuidanceCandidate,
+): number {
+  const teacherScoreDifference =
+    secondCandidate.teacherScore - firstCandidate.teacherScore;
+
+  if (teacherScoreDifference !== 0) {
+    return teacherScoreDifference;
+  }
+
+  const searchScoreDifference =
+    secondCandidate.searchScore - firstCandidate.searchScore;
+
+  if (searchScoreDifference !== 0) {
+    return searchScoreDifference;
+  }
+
+  const refutationPenaltyDifference =
+    firstCandidate.refutationPenalty - secondCandidate.refutationPenalty;
+
+  if (refutationPenaltyDifference !== 0) {
+    return refutationPenaltyDifference;
+  }
+
+  const pressureDifference =
+    secondCandidate.opponentPressureScore - firstCandidate.opponentPressureScore;
+
+  if (pressureDifference !== 0) {
+    return pressureDifference;
   }
 
   return firstCandidate.scoreGapFromBest - secondCandidate.scoreGapFromBest;

@@ -48,14 +48,17 @@ export type {
   CreateCoachHintsFromAnalysisOptions,
 } from "./createCoachHint";
 export {
+  canRequestCoachBestMoveAnalysis,
   canShowCoachBestMoveHint,
   canShowCoachHintAfterOpening,
   canShowCoachHint,
   createCoachHintModel,
   createCoachPlayPositionAnalysisOptions,
   defaultCoachHintSettings,
+  getCoachHintDelayMs,
 } from "./coachHintModel";
 export type {
+  CoachBestMoveAnalysisRequestContext,
   CoachHintMode,
   CoachHintModel,
   CoachHintSettings,
@@ -67,6 +70,7 @@ export {
 } from "./teacherGuidanceMove";
 export type {
   TeacherGuidanceCandidate,
+  TeacherGuidanceMode,
   TeacherGuidanceMoveOptions,
   TeacherGuidanceRefutation,
 } from "./teacherGuidanceMove";
