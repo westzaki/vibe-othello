@@ -82,6 +82,7 @@ export type {
   TeacherGuidanceMode,
   TeacherGuidanceMoveOptions,
   TeacherGuidanceRefutation,
+  TeacherGuidanceSearchStats,
   TeacherGuidanceSelection,
 } from "./teacherGuidanceMove";
 export { createReviewLesson } from "./createReviewLesson";

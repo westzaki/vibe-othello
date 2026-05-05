@@ -241,6 +241,14 @@ function getMoveCandidateMetrics({
     opponentDisc,
   ).length;
   const opponentMobilityAfter = getLegalMoves(boardAfter, opponentDisc).length;
+  const opponentCornerMovesBefore = getCornerMoveCount(
+    boardBefore,
+    opponentDisc,
+  );
+  const opponentCornerMovesAfter = getCornerMoveCount(
+    boardAfter,
+    opponentDisc,
+  );
   const mobilityDifferenceBefore =
     playerMobilityBefore - opponentMobilityBefore;
   const mobilityDifferenceAfter = playerMobilityAfter - opponentMobilityAfter;
@@ -264,6 +272,10 @@ function getMoveCandidateMetrics({
     mobilityDifferenceAfter,
     mobilityDifferenceBefore,
     mobilitySwing: mobilityDifferenceAfter - mobilityDifferenceBefore,
+    opponentCornerMoveDelta:
+      opponentCornerMovesAfter - opponentCornerMovesBefore,
+    opponentCornerMovesAfter,
+    opponentCornerMovesBefore,
     opponentMobilityAfter,
     opponentMobilityBefore,
     opponentMobilityDelta: opponentMobilityAfter - opponentMobilityBefore,
@@ -358,6 +370,10 @@ function newlyGivesCorner(
   return cornerMovesAfter.some(
     (cornerMove) => !cornerMovesBefore.includes(cornerMove),
   );
+}
+
+function getCornerMoveCount(board: Board, disc: DiscColor): number {
+  return getLegalMoves(board, disc).filter(isCorner).length;
 }
 
 function isCorner(square: SquareIndex): boolean {

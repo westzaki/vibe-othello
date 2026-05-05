@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { createInitialBoard } from "../game/othello";
+import { createInitialBoard, getLegalMoves } from "../game/othello";
 import { createBoardFixture } from "../test/boardFixtures";
 import { analyzeMoveCandidates } from "./analyzeMoveCandidates";
 import type { CandidateMoveReview } from "./reviewTypes";
 import {
   chooseTeacherGuidanceMove,
+  createTeacherSearchContext,
+  evaluateTeacherSearchPosition,
+  getTeacherDeepSearchDepth,
+  orderTeacherSearchMoves,
   rankTeacherGuidanceCandidates,
   selectTeacherGuidanceCandidate,
   selectTeacherDeepeningCandidates,
@@ -199,6 +203,49 @@ describe("teacher guidance move", () => {
     ).toBe(searchBestCandidate);
   });
 
+  it("penalizes opponent corner access in normal and comeback ranking", () => {
+    const board = createBoardFixture({});
+    const cornerAccessCandidate = createCandidateMove({
+      metrics: {
+        givesOpponentCorner: true,
+        mobilitySwing: 6,
+        opponentCornerMoveDelta: 1,
+        opponentCornerMovesAfter: 1,
+        opponentMobilityAfter: 1,
+        opponentMobilityDelta: -4,
+      },
+      rank: 1,
+      score: 100,
+      square: 19,
+    });
+    const saferCandidate = createCandidateMove({
+      metrics: {
+        opponentCornerMoveDelta: 0,
+        opponentCornerMovesAfter: 0,
+        opponentMobilityAfter: 5,
+        opponentMobilityDelta: 0,
+      },
+      rank: 2,
+      score: 96,
+      square: 26,
+    });
+
+    for (const guidanceMode of ["normal", "comeback"] as const) {
+      const rankedCandidates = rankTeacherGuidanceCandidates({
+        board,
+        candidates: [cornerAccessCandidate, saferCandidate],
+        disc: "black",
+        guidanceMode,
+        refutationSearchDepth: 1,
+      });
+
+      expect(rankedCandidates[0]?.candidate).toBe(saferCandidate);
+      expect(rankedCandidates[1]?.opponentCornerAccessPenalty).toBeGreaterThan(
+        0,
+      );
+    }
+  });
+
   it("avoids high refutation risk in comeback mode even with opponent pressure", () => {
     const board = createBoardFixture({
       10: "white",
@@ -325,6 +372,98 @@ describe("teacher guidance move", () => {
     ).toEqual(expect.any(Number));
   });
 
+  it("keeps teacher search cache request-local and reuses exact scores", () => {
+    const board = createInitialBoard();
+    const searchContext = createTeacherSearchContext();
+    const firstScore = evaluateTeacherSearchPosition({
+      board,
+      currentDisc: "black",
+      depth: 1,
+      maximizingDisc: "black",
+      searchContext,
+    });
+    const searchedNodeCountAfterFirstRun = searchContext.searchedNodeCount;
+
+    const secondScore = evaluateTeacherSearchPosition({
+      board,
+      currentDisc: "black",
+      depth: 1,
+      maximizingDisc: "black",
+      searchContext,
+    });
+
+    expect(secondScore).toBe(firstScore);
+    expect(searchContext.cacheHitCount).toBeGreaterThan(0);
+    expect(searchContext.searchedNodeCount).toBe(
+      searchedNodeCountAfterFirstRun,
+    );
+
+    const separateContext = createTeacherSearchContext();
+
+    evaluateTeacherSearchPosition({
+      board,
+      currentDisc: "black",
+      depth: 1,
+      maximizingDisc: "black",
+      searchContext: separateContext,
+    });
+
+    expect(separateContext.cacheHitCount).toBe(0);
+  });
+
+  it("orders teacher search moves with corners before ordinary moves", () => {
+    const board = createBoardFixture({
+      1: "white",
+      2: "black",
+      27: "white",
+      28: "black",
+      35: "black",
+      36: "white",
+    });
+    const orderedMoves = orderTeacherSearchMoves({
+      board,
+      currentDisc: "black",
+      isMaximizing: true,
+      legalMoves: getLegalMoves(board, "black"),
+      maximizingDisc: "black",
+    });
+
+    expect(orderedMoves[0]).toBe(0);
+  });
+
+  it("orders corner-giving danger squares behind safer teacher search moves", () => {
+    const board = createBoardFixture({
+      10: "white",
+      11: "black",
+      18: "white",
+      27: "white",
+      28: "black",
+    });
+    const orderedMoves = orderTeacherSearchMoves({
+      board,
+      currentDisc: "black",
+      isMaximizing: true,
+      legalMoves: getLegalMoves(board, "black"),
+      maximizingDisc: "black",
+    });
+
+    expect(orderedMoves.indexOf(9)).toBeGreaterThan(orderedMoves.indexOf(26));
+  });
+
+  it("keeps adaptive depth preparation neutral for now", () => {
+    expect(
+      getTeacherDeepSearchDepth({
+        baseDepth: 6,
+        candidates: [
+          createCandidateMove({ rank: 1, score: 100, square: 19 }),
+          createCandidateMove({ rank: 2, score: 96, square: 26 }),
+        ],
+        emptyCount: 28,
+        guidanceMode: "comeback",
+      }),
+    ).toBe(6);
+  });
+
   it("can return the selected guidance candidate for shared play and review use", () => {
     const board = createInitialBoard();
     const analysis = analyzeMoveCandidates(board, "black", {
@@ -397,6 +536,9 @@ function createCandidateMove({
       opponentMobilityAfter: 0,
       opponentMobilityBefore: 0,
       opponentMobilityDelta: 0,
+      opponentCornerMoveDelta: 0,
+      opponentCornerMovesAfter: 0,
+      opponentCornerMovesBefore: 0,
       playerMobilityAfter: 0,
       playerMobilityBefore: 0,
       playerMobilityDelta: 0,

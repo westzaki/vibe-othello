@@ -29,6 +29,9 @@ export type CandidateMoveMetrics = {
   mobilityDifferenceAfter: number;
   mobilityDifferenceBefore: number;
   mobilitySwing: number;
+  opponentCornerMoveDelta: number;
+  opponentCornerMovesAfter: number;
+  opponentCornerMovesBefore: number;
   opponentMobilityAfter: number;
   opponentMobilityBefore: number;
   opponentMobilityDelta: number;
