@@ -71,6 +71,7 @@ export function GameScreen({
     () => createCoachHintMarkers(coachHintModel),
     [coachHintModel],
   );
+  const displayedAdvantage = coachHintModel?.analysis.advantage ?? advantage;
   const resultWinner =
     game.gameStatus === "ended" &&
     game.endReason === "completed" &&
@@ -148,7 +149,10 @@ export function GameScreen({
                 winner={game.winner}
               />
 
-              <AdvantageBar advantage={advantage} players={game.players} />
+              <AdvantageBar
+                advantage={displayedAdvantage}
+                players={game.players}
+              />
 
               {mode === "match" && coachHintSettings.mode !== "off" && (
                 <CoachHintPanel model={coachHintModel} />
