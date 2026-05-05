@@ -132,10 +132,15 @@ export type GameReviewMessages = {
 };
 
 export type ReviewGameOptions = {
+  deepSearchDepth?: number;
   maxHighlights?: number;
+  refutationSearchDepth?: number;
   reviewedDisc: DiscColor;
   searchDepth?: number;
+  strongCandidateScoreGap?: number;
+  topCandidateLimit?: number;
   turningPointAnalysis?: Partial<TurningPointAnalysisConfig>;
+  useTeacherGuidanceMove?: boolean;
 };
 
 export type ReviewContext = {

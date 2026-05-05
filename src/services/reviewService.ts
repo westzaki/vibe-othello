@@ -5,6 +5,7 @@ import {
   cancelReviewWorkerRequest,
   reviewGameInWorker,
 } from "../workers/review/reviewWorkerClient";
+import { createLightweightReviewGameOptions } from "./reviewFallback";
 import { withTimeout } from "./withTimeout";
 
 export type ReviewGameRequest = {
@@ -60,6 +61,9 @@ export async function reviewGameAsync(
 function reviewGameSync(request: ReviewGameRequest): ReviewGameResponse {
   return {
     requestId: request.requestId,
-    review: reviewGame(request.moveHistory, request.options),
+    review: reviewGame(
+      request.moveHistory,
+      createLightweightReviewGameOptions(request.options),
+    ),
   };
 }

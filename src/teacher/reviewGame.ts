@@ -11,12 +11,14 @@ import type {
 import {
   analyzeMoveCandidates,
   getMoveCandidateReasons,
+  type MoveCandidateAnalysis,
 } from "./analyzeMoveCandidates";
 import {
   createEvaluationTimeline,
   findTurningPointMoveNumbers,
 } from "./evaluationTimeline";
 import { compareLearningIssueMoves } from "./reviewLessonSelection";
+import { selectTeacherGuidanceCandidate } from "./teacherGuidanceMove";
 
 const defaultSearchDepth = 3;
 const defaultMaxHighlights = 2;
@@ -43,11 +45,12 @@ export function reviewGame(
   const reviewedMoves = moveHistory
     .filter((move) => move.disc === options.reviewedDisc)
     .map((move) =>
-      reviewMove(
+      reviewMove({
         move,
+        options,
         searchDepth,
-        turningPointMoveNumbers.has(move.moveNumber),
-      ),
+        isTurningPoint: turningPointMoveNumbers.has(move.moveNumber),
+      }),
     );
 
   return {
@@ -61,16 +64,26 @@ export function reviewGame(
   };
 }
 
-function reviewMove(
-  move: MoveRecord,
-  searchDepth: number,
-  isTurningPoint: boolean,
-): ReviewedMove {
+function reviewMove({
+  isTurningPoint,
+  move,
+  options,
+  searchDepth,
+}: {
+  isTurningPoint: boolean;
+  move: MoveRecord;
+  options: ReviewGameOptions;
+  searchDepth: number;
+}): ReviewedMove {
   const candidateAnalysis = analyzeMoveCandidates(move.boardBefore, move.disc, {
     searchDepth,
   });
   const candidateMoves = candidateAnalysis.candidateMoves;
-  const bestCandidate = candidateMoves[0] ?? null;
+  const bestCandidate = getReviewBestCandidate({
+    analysis: candidateAnalysis,
+    move,
+    options,
+  });
   const playedCandidate =
     candidateMoves.find((candidate) => candidate.square === move.square) ??
     null;
@@ -109,6 +122,34 @@ function reviewMove(
       playedScore,
     },
   };
+}
+
+function getReviewBestCandidate({
+  analysis,
+  move,
+  options,
+}: {
+  analysis: MoveCandidateAnalysis;
+  move: MoveRecord;
+  options: ReviewGameOptions;
+}): ReviewedMove["candidateMoves"][number] | null {
+  if (!options.useTeacherGuidanceMove) {
+    return analysis.candidateMoves[0] ?? null;
+  }
+
+  return (
+    selectTeacherGuidanceCandidate({
+      analysis,
+      board: move.boardBefore,
+      deepSearchDepth: options.deepSearchDepth,
+      disc: move.disc,
+      refutationSearchDepth: options.refutationSearchDepth,
+      strongCandidateScoreGap: options.strongCandidateScoreGap,
+      topCandidateLimit: options.topCandidateLimit,
+    }) ??
+    analysis.candidateMoves[0] ??
+    null
+  );
 }
 
 function getMoveReasons(

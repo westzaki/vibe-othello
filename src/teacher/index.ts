@@ -59,8 +59,15 @@ export type {
   CoachHintSettings,
   CoachHintVisibilityContext,
 } from "./coachHintModel";
-export { chooseTeacherGuidanceMove } from "./teacherGuidanceMove";
-export type { TeacherGuidanceMoveOptions } from "./teacherGuidanceMove";
+export {
+  chooseTeacherGuidanceMove,
+  selectTeacherGuidanceCandidate,
+} from "./teacherGuidanceMove";
+export type {
+  TeacherGuidanceCandidate,
+  TeacherGuidanceMoveOptions,
+  TeacherGuidanceRefutation,
+} from "./teacherGuidanceMove";
 export { createReviewLesson } from "./createReviewLesson";
 export { defaultTeacherReviewConfig } from "./reviewConfig";
 export type { TeacherReviewConfig } from "./reviewConfig";

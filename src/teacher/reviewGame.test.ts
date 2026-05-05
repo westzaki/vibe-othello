@@ -8,6 +8,7 @@ import {
 import type { MoveRecord } from "../game/session";
 import { placeCurrentDisc, startNewGame } from "../game/session";
 import { createBoardFixture } from "../test/boardFixtures";
+import { chooseTeacherGuidanceMove } from "./teacherGuidanceMove";
 import { reviewGame } from "./reviewGame";
 
 describe("teacher review", () => {
@@ -51,6 +52,24 @@ describe("teacher review", () => {
     expect(reviewedMove.review.evaluationSource).toBe("minimax");
     expect(reviewedMove.review.reasons.length).toBeGreaterThan(0);
     expect(review).not.toHaveProperty("advice");
+  });
+
+  it("can use the shared teacher guidance move as the reviewed best move", () => {
+    const session = placeCurrentDisc(startNewGame(), 19).session;
+    const move = session.moveHistory[0];
+    const review = reviewGame(session.moveHistory, {
+      deepSearchDepth: 3,
+      reviewedDisc: "black",
+      searchDepth: 1,
+      useTeacherGuidanceMove: true,
+    });
+
+    expect(review.reviewedMoves[0].review.bestSquare).toBe(
+      chooseTeacherGuidanceMove(move.boardBefore, "black", {
+        deepSearchDepth: 3,
+        shallowSearchDepth: 1,
+      }),
+    );
   });
 
   it("does not blame a move for a corner the opponent already had", () => {

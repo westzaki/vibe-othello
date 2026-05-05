@@ -77,6 +77,34 @@ describe("review service", () => {
     );
   });
 
+  it("keeps worker failure fallback lightweight when teacher guidance is enabled", async () => {
+    const session = placeCurrentDisc(startNewGame(), 19).session;
+    const options = {
+      reviewedDisc: "black",
+      searchDepth: 1,
+      useTeacherGuidanceMove: true,
+    } as const;
+    reviewGameInWorkerMock.mockRejectedValue(new Error("Worker failed"));
+
+    const response = await reviewGameAsync({
+      moveHistory: session.moveHistory,
+      options,
+      requestId: "lightweight-fallback-review",
+    });
+
+    expect(response).toEqual({
+      requestId: "lightweight-fallback-review",
+      review: reviewGame(session.moveHistory, {
+        ...options,
+        useTeacherGuidanceMove: false,
+      }),
+    });
+    expect(cancelReviewWorkerRequestMock).toHaveBeenCalledWith(
+      expect.any(Number),
+    );
+  });
+
+
   it("falls back to sync review when the worker returns an error response", async () => {
     const session = placeCurrentDisc(startNewGame(), 19).session;
     const options = {

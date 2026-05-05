@@ -2,7 +2,14 @@ import type { ReviewGameOptions } from "./reviewTypes";
 
 export type TeacherReviewConfig = Pick<
   ReviewGameOptions,
-  "maxHighlights" | "searchDepth" | "turningPointAnalysis"
+  | "deepSearchDepth"
+  | "maxHighlights"
+  | "refutationSearchDepth"
+  | "searchDepth"
+  | "strongCandidateScoreGap"
+  | "topCandidateLimit"
+  | "turningPointAnalysis"
+  | "useTeacherGuidanceMove"
 >;
 
 export const defaultTeacherReviewConfig: TeacherReviewConfig = {
@@ -13,4 +20,5 @@ export const defaultTeacherReviewConfig: TeacherReviewConfig = {
     lookaheadMoves: 4,
     recoveryMargin: 10,
   },
+  useTeacherGuidanceMove: true,
 };
