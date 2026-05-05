@@ -33,7 +33,9 @@
 .start-screen__hero {
   position: relative;
   display: grid;
+  min-width: 0;
   width: 100%;
+  max-width: 100%;
   align-items: center;
   justify-items: center;
   gap: clamp(12px, 3vw, 24px);
@@ -144,6 +146,7 @@
   position: relative;
   display: grid;
   width: clamp(190px, 30vw, 320px);
+  max-width: 100%;
   aspect-ratio: 1;
   grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 0;
@@ -271,7 +274,7 @@
 .start-panel__match-options {
   display: grid;
   min-width: 0;
-  grid-template-columns: minmax(0, 1.08fr) minmax(170px, 0.92fr);
+  grid-template-columns: minmax(0, 1fr) minmax(148px, 0.82fr);
   gap: 10px;
   align-items: stretch;
 }
@@ -292,6 +295,12 @@
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 8px 12px;
+}
+
+.start-panel__section--difficulty .start-panel__section-header {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .start-panel__title {
