@@ -3,7 +3,9 @@ import { createInitialBoard } from "../game/othello";
 import type { CandidateMoveReview } from "./reviewTypes";
 import {
   chooseTeacherGuidanceMove,
+  rankTeacherGuidanceCandidates,
   selectTeacherDeepeningCandidates,
+  selectStrongTeacherCandidates,
   shouldUseTeacherExactEndgameByCounts,
 } from "./teacherGuidanceMove";
 
@@ -40,6 +42,85 @@ describe("teacher guidance move", () => {
       candidates[2],
       candidates[3],
     ]);
+  });
+
+  it("keeps teacher recommendations inside a strong score band", () => {
+    const candidates = [
+      createCandidateMove({ rank: 1, score: 100, square: 19 }),
+      createCandidateMove({
+        metrics: {
+          anchoredEdgeDelta: 1,
+          isCorner: true,
+          mobilitySwing: 6,
+        },
+        rank: 2,
+        score: 69,
+        square: 26,
+      }),
+      createCandidateMove({ rank: 3, score: 75, square: 37 }),
+    ];
+
+    expect(selectStrongTeacherCandidates(candidates, 30)).toEqual([
+      candidates[0],
+      candidates[2],
+    ]);
+  });
+
+  it("does not let learning themes widen the recommendation score band", () => {
+    const board = createInitialBoard();
+    const strongCandidate = createCandidateMove({
+      rank: 1,
+      score: 100,
+      square: 19,
+    });
+    const weakLearningCandidate = createCandidateMove({
+      metrics: {
+        anchoredEdgeDelta: 1,
+        isCorner: true,
+        mobilitySwing: 6,
+      },
+      rank: 2,
+      score: 60,
+      square: 26,
+    });
+
+    expect(
+      rankTeacherGuidanceCandidates({
+        board,
+        candidates: [strongCandidate, weakLearningCandidate],
+        disc: "black",
+        refutationSearchDepth: 1,
+      }).map(({ candidate }) => candidate),
+    ).toEqual([strongCandidate]);
+  });
+
+  it("records a refutation penalty for a risky candidate when no safer strong candidate exists", () => {
+    const board = createInitialBoard();
+    const cornerGivingCandidate = createCandidateMove({
+      metrics: { givesOpponentCorner: true },
+      rank: 1,
+      score: 100,
+      square: 19,
+    });
+
+    const rankedCandidates = rankTeacherGuidanceCandidates({
+      board,
+      candidates: [cornerGivingCandidate],
+      disc: "black",
+      refutationSearchDepth: 1,
+    });
+
+    expect(rankedCandidates[0]).toEqual(
+      expect.objectContaining({
+        candidate: cornerGivingCandidate,
+        refutation: expect.objectContaining({
+          opponentSquare: expect.any(Number),
+          severity: expect.stringMatching(/^(medium|high)$/),
+        }),
+        refutationPenalty: expect.any(Number),
+      }),
+    );
+    expect(rankedCandidates[0]?.refutationPenalty).toBeGreaterThan(0);
   });
 
   it("returns a legal teacher guidance move", () => {
