@@ -77,6 +77,7 @@ describe("play position analysis service", () => {
     const expectedAnalysis = createPlayPositionAnalysis(board, "black", {
       ...options,
       includeBestMoveHint: false,
+      skipMoveAnalysis: true,
       useTeacherGuidanceMove: false,
     });
 
@@ -119,6 +120,7 @@ describe("play position analysis service", () => {
     const expectedAnalysis = createPlayPositionAnalysis(board, "black", {
       ...options,
       includeBestMoveHint: false,
+      skipMoveAnalysis: true,
       useTeacherGuidanceMove: false,
     });
 
@@ -166,6 +168,7 @@ describe("play position analysis service", () => {
       const expectedAnalysis = createPlayPositionAnalysis(board, "black", {
         ...options,
         includeBestMoveHint: false,
+        skipMoveAnalysis: true,
         useTeacherGuidanceMove: false,
       });
 
@@ -186,5 +189,26 @@ describe("play position analysis service", () => {
     } finally {
       setTimeoutSpy.mockRestore();
     }
+  });
+
+  it("keeps skipMoveAnalysis requests on the sync lightweight path", async () => {
+    const board = createInitialBoard();
+
+    const response = await analyzePlayPositionAsync({
+      board,
+      currentDisc: "black",
+      options: {
+        skipMoveAnalysis: true,
+      },
+      requestId: "lightweight-play-position",
+    });
+
+    expect(analyzePlayPositionInWorkerMock).not.toHaveBeenCalled();
+    expect(response).toEqual({
+      analysis: createPlayPositionAnalysis(board, "black", {
+        skipMoveAnalysis: true,
+      }),
+      requestId: "lightweight-play-position",
+    });
   });
 });

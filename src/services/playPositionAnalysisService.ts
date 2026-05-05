@@ -29,6 +29,10 @@ let nextWorkerRequestId = 0;
 export async function analyzePlayPositionAsync(
   request: PlayPositionAnalysisRequest,
 ): Promise<PlayPositionAnalysisResponse> {
+  if (request.options?.skipMoveAnalysis === true) {
+    return analyzePlayPositionSync(request);
+  }
+
   const workerRequestId = nextWorkerRequestId;
   nextWorkerRequestId += 1;
 

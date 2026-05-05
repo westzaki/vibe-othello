@@ -20,13 +20,10 @@ export function createLightweightPlayPositionAnalysis(
 export function createLightweightPlayPositionAnalysisOptions(
   options: CreatePlayPositionAnalysisOptions | undefined,
 ): CreatePlayPositionAnalysisOptions | undefined {
-  if (!options?.useTeacherGuidanceMove) {
-    return options;
-  }
-
   return {
     ...options,
     includeBestMoveHint: false,
+    skipMoveAnalysis: true,
     useTeacherGuidanceMove: false,
   };
 }
