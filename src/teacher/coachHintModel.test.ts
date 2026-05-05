@@ -5,9 +5,12 @@ import { createMatchPlayerSettings } from "../game/matchSetup";
 import type { PlayerSettings } from "../game/players";
 import {
   endGame,
+  getSessionLegalMoves,
+  placeCurrentDisc,
   startNewGame,
   startPracticeSession,
   type GameSession,
+  type MoveRecord,
 } from "../game/session";
 import { createBoardFixture } from "../test/boardFixtures";
 import {
@@ -19,7 +22,7 @@ import { createPlayPositionAnalysis } from "./createPlayPositionAnalysis";
 
 describe("teacher coach hint model", () => {
   it("allows gentle hints after a long pause in a difficult position", () => {
-    const session = startNewGame();
+    const session = playFirstLegalMoves(4);
     const players = createOnePlayerSettings("black");
 
     expect(
@@ -34,7 +37,7 @@ describe("teacher coach hint model", () => {
   });
 
   it("does not show gentle hints before the player has paused for a while", () => {
-    const session = startNewGame();
+    const session = playFirstLegalMoves(4);
     const players = createOnePlayerSettings("black");
 
     expect(
@@ -49,7 +52,7 @@ describe("teacher coach hint model", () => {
   });
 
   it("does not show gentle hints while the current player is ahead", () => {
-    const session = startNewGame();
+    const session = playFirstLegalMoves(4);
     const players = createOnePlayerSettings("black");
 
     expect(
@@ -64,7 +67,7 @@ describe("teacher coach hint model", () => {
   });
 
   it("allows active hints after a shorter pause regardless of advantage", () => {
-    const session = startNewGame();
+    const session = playFirstLegalMoves(4);
     const players = createOnePlayerSettings("black");
 
     expect(
@@ -79,7 +82,7 @@ describe("teacher coach hint model", () => {
   });
 
   it("does not show active hints before the shorter pause", () => {
-    const session = startNewGame();
+    const session = playFirstLegalMoves(4);
     const players = createOnePlayerSettings("black");
 
     expect(
@@ -109,7 +112,7 @@ describe("teacher coach hint model", () => {
   });
 
   it("does not show hints during two-player games", () => {
-    const session = startNewGame();
+    const session = playFirstLegalMoves(4);
 
     expect(
       canShowCoachHint({
@@ -137,7 +140,7 @@ describe("teacher coach hint model", () => {
   });
 
   it("does not show hints when CPU thinking is active", () => {
-    const session = startNewGame();
+    const session = playFirstLegalMoves(4);
     const players = createOnePlayerSettings("black");
 
     expect(
@@ -167,7 +170,7 @@ describe("teacher coach hint model", () => {
   });
 
   it("waits for teacher guidance before showing play hints", () => {
-    const session = startNewGame();
+    const session = withPlayedMoveCount(startNewGame(), 6);
     const model = createCoachHintModel({
       advantage: createAdvantage({ blackPercent: 50 }),
       analysis: createPlayPositionAnalysis(session.board, "black", {
@@ -184,13 +187,70 @@ describe("teacher coach hint model", () => {
     expect(model).toBeNull();
   });
 
-  it("creates a vague gentle model after a long pause in a difficult position", () => {
-    const session = createPracticeSessionFromBoard(
-      createBoardFixture({
-        1: "white",
-        2: "black",
+  it("does not show hints during the opening warmup", () => {
+    const session = startNewGame();
+
+    expect(
+      canShowCoachHint({
+        advantage: createAdvantage({ blackPercent: 30 }),
+        players: createOnePlayerSettings("black"),
+        session,
+        settings: { mode: "active" },
+        thinkingTimeMs: 5000,
       }),
-      "black",
+    ).toBe(false);
+    expect(
+      createCoachHintModel({
+        advantage: createAdvantage({ blackPercent: 30 }),
+        players: createOnePlayerSettings("black"),
+        session,
+        settings: { mode: "active" },
+        thinkingTimeMs: 5000,
+      }),
+    ).toBeNull();
+  });
+
+  it("can show caution hints after warmup before best-move hints start", () => {
+    const session = withPlayedMoveCount(
+      createPracticeSessionFromBoard(createMobilityRiskBoard(), "white"),
+      4,
+    );
+    const model = createCoachHintModel({
+      advantage: createAdvantage({ blackPercent: 50 }),
+      players: createOnePlayerSettings("white"),
+      session,
+      settings: { mode: "active" },
+      thinkingTimeMs: 1500,
+    });
+
+    expect(model).toEqual(
+      expect.objectContaining({
+        mode: "active",
+        hint: expect.objectContaining({
+          kind: "mobilityRisk",
+          square: 11,
+        }),
+      }),
+    );
+    expect(model?.hints).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "bestMove",
+        }),
+      ]),
+    );
+  });
+
+  it("creates a vague gentle model after a long pause in a difficult position", () => {
+    const session = withPlayedMoveCount(
+      createPracticeSessionFromBoard(
+        createBoardFixture({
+          1: "white",
+          2: "black",
+        }),
+        "black",
+      ),
+      6,
     );
     const model = createCoachHintModel({
       advantage: createAdvantage({ blackPercent: 40 }),
@@ -213,9 +273,9 @@ describe("teacher coach hint model", () => {
   });
 
   it("includes mobility hints in gentle mode when timing and advantage allow it", () => {
-    const session = createPracticeSessionFromBoard(
-      createMobilityBoard(),
-      "black",
+    const session = withPlayedMoveCount(
+      createPracticeSessionFromBoard(createMobilityBoard(), "black"),
+      6,
     );
     const model = createCoachHintModel({
       advantage: createAdvantage({ blackPercent: 40 }),
@@ -238,9 +298,9 @@ describe("teacher coach hint model", () => {
   });
 
   it("includes mobility risk hints as caution in active mode", () => {
-    const session = createPracticeSessionFromBoard(
-      createMobilityRiskBoard(),
-      "white",
+    const session = withPlayedMoveCount(
+      createPracticeSessionFromBoard(createMobilityRiskBoard(), "white"),
+      6,
     );
     const model = createCoachHintModel({
       advantage: createAdvantage({ blackPercent: 50 }),
@@ -271,9 +331,9 @@ describe("teacher coach hint model", () => {
   });
 
   it("creates a specific active model after a shorter pause", () => {
-    const session = createPracticeSessionFromBoard(
-      createMobilityBoard(),
-      "black",
+    const session = withPlayedMoveCount(
+      createPracticeSessionFromBoard(createMobilityBoard(), "black"),
+      6,
     );
     const model = createCoachHintModel({
       advantage: createAdvantage({ blackPercent: 70 }),
@@ -296,9 +356,9 @@ describe("teacher coach hint model", () => {
   });
 
   it("uses a candidate fallback in active mode when no specific hint is found", () => {
-    const session = createPracticeSessionFromBoard(
-      createInitialBoard(),
-      "black",
+    const session = withPlayedMoveCount(
+      createPracticeSessionFromBoard(createInitialBoard(), "black"),
+      6,
     );
     const model = createCoachHintModel({
       advantage: createAdvantage({ blackPercent: 70 }),
@@ -339,6 +399,49 @@ function createAdvantage({
 
 function createOnePlayerSettings(humanDisc: "black" | "white"): PlayerSettings {
   return createMatchPlayerSettings("onePlayer", "level1", humanDisc);
+}
+
+function playFirstLegalMoves(moveCount: number): GameSession {
+  let session = startNewGame();
+
+  for (let moveIndex = 0; moveIndex < moveCount; moveIndex += 1) {
+    const nextMove = getSessionLegalMoves(session)[0];
+
+    if (nextMove === undefined) {
+      return session;
+    }
+
+    session = placeCurrentDisc(session, nextMove).session;
+  }
+
+  return session;
+}
+
+function withPlayedMoveCount(
+  session: GameSession,
+  moveCount: number,
+): GameSession {
+  return {
+    ...session,
+    moveHistory: Array.from({ length: moveCount }, (_, index) =>
+      createMoveRecord(session, index + 1),
+    ),
+  };
+}
+
+function createMoveRecord(
+  session: GameSession,
+  moveNumber: number,
+): MoveRecord {
+  return {
+    boardAfter: session.board,
+    boardBefore: session.board,
+    disc: session.currentDisc,
+    flippedSquares: [],
+    legalMovesBefore: getSessionLegalMoves(session),
+    moveNumber,
+    square: getSessionLegalMoves(session)[0] ?? 0,
+  };
 }
 
 function createPracticeSessionFromBoard(

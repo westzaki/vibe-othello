@@ -9,6 +9,7 @@ import { usePassNoticeVisibility } from "../hooks/usePassNoticeVisibility";
 import { usePlayCoachHintModel } from "../hooks/usePlayCoachHintModel";
 import { usePlayPositionAnalysis } from "../hooks/usePlayPositionAnalysis";
 import {
+  canShowCoachBestMoveHint,
   createCoachPlayPositionAnalysisOptions,
   defaultCoachHintSettings,
   type CoachHintSettings,
@@ -52,8 +53,11 @@ export function GameScreen({
   showAdvantageBar = true,
 }: GameScreenProps) {
   const playPositionAnalysisOptions = useMemo(
-    () => createCoachPlayPositionAnalysisOptions(coachHintSettings.mode),
-    [coachHintSettings.mode],
+    () =>
+      createCoachPlayPositionAnalysisOptions(coachHintSettings.mode, {
+        includeBestMoveHint: canShowCoachBestMoveHint(game.session),
+      }),
+    [coachHintSettings.mode, game.session],
   );
   const playPositionAnalysis = usePlayPositionAnalysis(
     game.session,

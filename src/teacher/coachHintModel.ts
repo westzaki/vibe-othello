@@ -39,6 +39,8 @@ export const defaultCoachHintSettings: CoachHintSettings = {
 const activeHintDelayMs = 1500;
 const gentleHintDelayMs = 4500;
 const gentleDisadvantagePercent = 45;
+const minimumCoachHintMoveCount = 4;
+const minimumBestMoveHintMoveCount = 6;
 const coachGuidanceSearchDepth = 4;
 const teacherGuidanceShallowSearchDepth = 3;
 const teacherGuidanceDeepSearchDepth = 6;
@@ -71,6 +73,10 @@ export function canShowCoachHint({
     return false;
   }
 
+  if (!canShowCoachHintAfterOpening(session)) {
+    return false;
+  }
+
   return canTriggerCoachHint({
     advantage,
     currentDisc: session.currentDisc,
@@ -93,12 +99,15 @@ export function createCoachHintModel(
   }
 
   const legalMoves = getSessionLegalMoves(context.session);
+  const shouldIncludeBestMoveHint = canShowCoachBestMoveHint(context.session);
   const analysis =
     getCurrentAnalysis(context.analysis, context.session, legalMoves) ??
     createPlayPositionAnalysis(
       context.session.board,
       context.session.currentDisc,
-      createCoachPlayPositionAnalysisOptions(mode),
+      createCoachPlayPositionAnalysisOptions(mode, {
+        includeBestMoveHint: shouldIncludeBestMoveHint,
+      }),
     );
 
   if (
@@ -112,9 +121,14 @@ export function createCoachHintModel(
     return null;
   }
 
-  const hints = analysis.coachHints;
+  const hints = getVisibleCoachHints(analysis.coachHints, {
+    includeBestMoveHint: shouldIncludeBestMoveHint,
+  });
 
-  if (requiresTeacherGuidanceHint(mode) && !hasBestMoveHint(hints)) {
+  if (
+    requiresTeacherGuidanceHint(mode, shouldIncludeBestMoveHint) &&
+    !hasBestMoveHint(hints)
+  ) {
     return null;
   }
 
@@ -134,8 +148,9 @@ export function createCoachHintModel(
 
 function requiresTeacherGuidanceHint(
   mode: Exclude<CoachHintMode, "off">,
+  includeBestMoveHint: boolean,
 ): boolean {
-  return mode === "gentle" || mode === "active";
+  return includeBestMoveHint && (mode === "gentle" || mode === "active");
 }
 
 function hasBestMoveHint(hints: CoachHint[]): boolean {
@@ -144,10 +159,15 @@ function hasBestMoveHint(hints: CoachHint[]): boolean {
 
 export function createCoachPlayPositionAnalysisOptions(
   mode: CoachHintMode,
+  {
+    includeBestMoveHint = mode !== "off",
+  }: {
+    includeBestMoveHint?: boolean;
+  } = {},
 ): CreatePlayPositionAnalysisOptions {
   return {
-    includeBestMoveHint: mode !== "off",
-    includeCandidateFallback: mode !== "off",
+    includeBestMoveHint: mode !== "off" && includeBestMoveHint,
+    includeCandidateFallback: mode !== "off" && includeBestMoveHint,
     messageStyle: mode === "gentle" ? "vague" : "specific",
     riskHintLimit: mode === "active" ? 3 : 2,
     searchDepth: mode === "off" ? undefined : coachGuidanceSearchDepth,
@@ -155,8 +175,33 @@ export function createCoachPlayPositionAnalysisOptions(
       mode === "off" ? undefined : teacherGuidanceShallowSearchDepth,
     deepSearchDepth: mode === "off" ? undefined : teacherGuidanceDeepSearchDepth,
     useSelectiveDeepening: mode !== "off",
-    useTeacherGuidanceMove: mode !== "off",
+    useTeacherGuidanceMove: mode !== "off" && includeBestMoveHint,
   };
+}
+
+export function canShowCoachHintAfterOpening(session: GameSession): boolean {
+  return getPlayedMoveCount(session) >= minimumCoachHintMoveCount;
+}
+
+export function canShowCoachBestMoveHint(session: GameSession): boolean {
+  return getPlayedMoveCount(session) >= minimumBestMoveHintMoveCount;
+}
+
+function getVisibleCoachHints(
+  hints: CoachHint[],
+  {
+    includeBestMoveHint,
+  }: {
+    includeBestMoveHint: boolean;
+  },
+): CoachHint[] {
+  if (includeBestMoveHint) {
+    return hints;
+  }
+
+  return hints.filter(
+    (hint) => hint.kind !== "bestMove" && hint.kind !== "candidate",
+  );
 }
 
 function getCurrentAnalysis(
@@ -216,6 +261,10 @@ function canPrepareCoachHint({
     return false;
   }
 
+  if (!canShowCoachHintAfterOpening(session)) {
+    return false;
+  }
+
   if (settings.mode === "active") {
     return thinkingTimeMs >= activeHintDelayMs;
   }
@@ -254,6 +303,13 @@ function getAdvantagePercent(
   disc: GameSession["currentDisc"],
 ): number {
   return disc === "black" ? advantage.blackPercent : advantage.whitePercent;
+}
+
+function getPlayedMoveCount(session: GameSession): number {
+  return Math.max(
+    session.moveHistory.length,
+    Math.max(0, session.discCounts.black + session.discCounts.white - 4),
+  );
 }
 
 function isOnePlayerGame(players: PlayerSettings): boolean {
