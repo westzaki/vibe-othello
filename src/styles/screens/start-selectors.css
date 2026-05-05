@@ -106,13 +106,7 @@
   display: grid;
   min-width: 0;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: clamp(1px, 0.5vw, 4px);
-  border: 1px solid
-    color-mix(in srgb, var(--color-control-border) 62%, transparent);
-  border-radius: var(--radius-md);
-  padding: 4px;
-  background: var(--color-star-bg);
-  overflow: hidden;
+  gap: clamp(4px, 1vw, 8px);
 }
 
 .start-panel__section--inactive .cpu-star-selector {
@@ -125,7 +119,7 @@
   min-height: 40px;
   place-items: center;
   border: 0;
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-round);
   color: var(--color-star-empty);
   background: transparent;
   cursor: pointer;
@@ -147,6 +141,7 @@
 .cpu-star-selector__button--filled {
   color: var(--color-star-active);
   background: transparent;
+  box-shadow: none;
 }
 
 .cpu-star-selector__button:active:not(:disabled),
@@ -169,8 +164,8 @@
 @media (hover: hover) and (pointer: fine) {
   .cpu-star-selector__button:hover:not(:disabled) {
     color: var(--color-bibi-caramel);
-    background: color-mix(in srgb, var(--color-star-bg) 76%, white);
-    box-shadow: inset 0 0 0 1px var(--color-selected-border);
+    background: transparent;
+    box-shadow: none;
     transform: translateY(-1px);
   }
 }
