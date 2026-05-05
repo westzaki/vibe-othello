@@ -38,6 +38,7 @@ type GameScreenProps = {
   onOpenReview: () => void;
   onPlayAgain: () => void;
   practiceFeedbackText?: string | null;
+  showAdvantageBar?: boolean;
 };
 
 export function GameScreen({
@@ -50,6 +51,7 @@ export function GameScreen({
   onOpenReview,
   onPlayAgain,
   practiceFeedbackText = null,
+  showAdvantageBar = true,
 }: GameScreenProps) {
   const playPositionAnalysisOptions = useMemo(
     () =>
@@ -159,10 +161,12 @@ export function GameScreen({
                 winner={game.winner}
               />
 
-              <AdvantageBar
-                advantage={playPositionAnalysis.advantage}
-                players={game.players}
-              />
+              {showAdvantageBar && (
+                <AdvantageBar
+                  advantage={playPositionAnalysis.advantage}
+                  players={game.players}
+                />
+              )}
 
               {mode === "match" && coachHintSettings.mode !== "off" && (
                 <CoachHintPanel model={coachHintModel} />

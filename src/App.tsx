@@ -9,6 +9,7 @@ import { StartScreen } from "./screens/StartScreen";
 export default function App() {
   const {
     settings,
+    updateAdvantageBarEnabled,
     updateCoachHintMode,
     updateSoundEnabled,
     updateUndoEnabled,
@@ -33,6 +34,7 @@ export default function App() {
       ) : screen === "settings" ? (
         <SettingsScreen
           onBackToStart={appFlow.backToStart}
+          onAdvantageBarEnabledChange={updateAdvantageBarEnabled}
           onCoachHintModeChange={updateCoachHintMode}
           onSoundEnabledChange={updateSoundEnabled}
           onUndoEnabledChange={updateUndoEnabled}
@@ -57,6 +59,7 @@ export default function App() {
           onOpenReview={appFlow.backToReview}
           onPlayAgain={appFlow.practicePlayAgain}
           practiceFeedbackText={practiceFeedback?.text ?? null}
+          showAdvantageBar={settings.advantageBarEnabled}
         />
       ) : (
         <GameScreen
@@ -66,6 +69,7 @@ export default function App() {
           onEndGame={appFlow.endGame}
           onOpenReview={appFlow.openReview}
           onPlayAgain={appFlow.playAgain}
+          showAdvantageBar={settings.advantageBarEnabled}
         />
       )}
     </main>
