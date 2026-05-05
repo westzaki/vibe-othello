@@ -25,6 +25,9 @@ describe("createPlayPositionAnalysis", () => {
     );
     expect(analysis.legalMoves).toHaveLength(4);
     expect(analysis.candidateMoves).toHaveLength(4);
+    expect(
+      Math.max(analysis.advantage.blackPercent, analysis.advantage.whitePercent),
+    ).toBeLessThan(56);
     expect(analysis.coachHints).toEqual([
       expect.objectContaining({
         kind: "candidate",

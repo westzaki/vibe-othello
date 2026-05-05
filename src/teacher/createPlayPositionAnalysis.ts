@@ -20,6 +20,7 @@ import type {
   CandidateMoveReview,
   ReviewEvaluationSource,
 } from "./reviewTypes";
+import { calibratePlayPositionAdvantage } from "./playAdvantageCalibration";
 import { createShapeSignals } from "./playPositionShapeSignals";
 import { selectTeacherGuidanceSelection } from "./teacherGuidanceMove";
 import type { CoachHintGuidance, TeacherGuidanceOptions } from "./coachHintTypes";
@@ -159,6 +160,7 @@ export function createPlayPositionAnalysis(
   const advantage = getPlayPositionAdvantage({
     baseAdvantage,
     bestCandidate: teacherGuidanceCandidate ?? candidateMoves[0] ?? null,
+    candidateMoves,
     currentDisc,
     phase,
     source: advantageSource,
@@ -274,12 +276,14 @@ function getPlayAdvantageSource(
 function getPlayPositionAdvantage({
   baseAdvantage,
   bestCandidate,
+  candidateMoves,
   currentDisc,
   phase,
   source,
 }: {
   baseAdvantage: Advantage;
   bestCandidate: CandidateMoveReview | null;
+  candidateMoves: CandidateMoveReview[];
   currentDisc: DiscColor;
   phase: PlayPositionPhase;
   source: PlayPositionAdvantageSource;
@@ -305,11 +309,18 @@ function getPlayPositionAdvantage({
   );
   const whitePercent = 100 - blackPercent;
 
-  return {
-    blackPercent,
-    leadingDisc: getLeadingDisc(blackPercent, whitePercent),
-    whitePercent,
-  };
+  return calibratePlayPositionAdvantage({
+    advantage: {
+      blackPercent,
+      leadingDisc: getLeadingDisc(blackPercent, whitePercent),
+      whitePercent,
+    },
+    bestCandidate,
+    candidateMoves,
+    currentDisc,
+    phase,
+    source,
+  });
 }
 
 function getSearchBlend(phase: PlayPositionPhase): number {
