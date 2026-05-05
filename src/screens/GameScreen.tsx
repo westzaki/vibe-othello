@@ -51,7 +51,19 @@ export function GameScreen({
   onPlayAgain,
   practiceFeedbackText = null,
 }: GameScreenProps) {
-  const playPositionAnalysis = usePlayPositionAnalysis(game.session);
+  const playPositionAnalysisOptions = useMemo(
+    () =>
+      ({
+        includeCandidateFallback: coachHintSettings.mode === "active",
+        messageStyle:
+          coachHintSettings.mode === "gentle" ? "vague" : "specific",
+      }) as const,
+    [coachHintSettings.mode],
+  );
+  const playPositionAnalysis = usePlayPositionAnalysis(
+    game.session,
+    playPositionAnalysisOptions,
+  );
   const { isPassNoticeVisible, passNotice } = usePassNoticeVisibility({
     lastMove: game.lastMove,
     moveCount: game.moveHistory.length,
@@ -59,6 +71,7 @@ export function GameScreen({
   });
   const coachHintModel = usePlayCoachHintModel({
     advantage: playPositionAnalysis.advantage,
+    analysis: playPositionAnalysis,
     enabled: mode === "match",
     isCpuThinking: game.isCpuThinking,
     players: game.players,

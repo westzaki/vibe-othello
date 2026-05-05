@@ -7,12 +7,14 @@ import {
   type CoachHint,
   type CoachHintModel,
   type CoachHintSettings,
+  type PlayPositionAnalysis,
 } from "../teacher";
 
 const coachHintPollMs = 250;
 
 type UsePlayCoachHintModelParams = {
   advantage?: Advantage;
+  analysis?: PlayPositionAnalysis;
   enabled: boolean;
   isCpuThinking: boolean;
   players: PlayerSettings;
@@ -22,6 +24,7 @@ type UsePlayCoachHintModelParams = {
 
 export function usePlayCoachHintModel({
   advantage,
+  analysis,
   enabled,
   isCpuThinking,
   players,
@@ -64,6 +67,7 @@ export function usePlayCoachHintModel({
     const intervalId = window.setInterval(() => {
       const nextModel = createCoachHintModel({
         advantage,
+        analysis,
         isCpuThinking,
         players,
         session,
@@ -79,8 +83,7 @@ export function usePlayCoachHintModel({
         const riskHintKey = createRiskHintKey(hint);
 
         return (
-          riskHintKey === null ||
-          !shownRiskHintKeysRef.current.has(riskHintKey)
+          riskHintKey === null || !shownRiskHintKeysRef.current.has(riskHintKey)
         );
       });
 
@@ -113,6 +116,7 @@ export function usePlayCoachHintModel({
     };
   }, [
     advantage,
+    analysis,
     enabled,
     hintKey,
     isCpuThinking,
