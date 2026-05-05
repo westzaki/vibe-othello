@@ -70,6 +70,7 @@ export {
 } from "./reviewLessonSelection";
 export type {
   CandidateMoveReview,
+  CandidateMoveMetrics,
   EvaluationTimelineEntry,
   GameReview,
   GameReviewMessages,

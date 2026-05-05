@@ -2,7 +2,6 @@ import {
   countEmptySquares,
   getExactEndgameMoveScores as getCpuExactEndgameMoveScores,
   getMinimaxMoveScores,
-  getMobilityDifference,
   type MinimaxMoveScore,
 } from "../cpu";
 import {
@@ -15,6 +14,7 @@ import {
   type SquareIndex,
 } from "../game/othello";
 import type {
+  CandidateMoveMetrics,
   CandidateMoveReview,
   MoveReviewReason,
   ReviewContext,
@@ -47,22 +47,27 @@ export function analyzeMoveCandidates(
   { searchDepth }: AnalyzeMoveCandidatesOptions,
 ): MoveCandidateAnalysis {
   const moveScores = getMoveScores(board, disc, searchDepth);
+  const bestScore = moveScores.scores[0]?.score ?? 0;
 
   return {
     candidateMoves: moveScores.scores.map<CandidateMoveReview>(
       ({ move: square, score }, index) => {
         const boardAfter = placeDisc(board, square, disc);
+        const metrics = getMoveCandidateMetrics({
+          bestScore,
+          boardAfter,
+          boardBefore: board,
+          disc,
+          score,
+          square,
+        });
 
         return {
-          square,
-          score,
+          metrics,
           rank: index + 1,
-          reasons: getMoveCandidateReasons({
-            boardAfter,
-            boardBefore: board,
-            disc,
-            square,
-          }),
+          reasons: getMoveCandidateReasonsFromMetrics(metrics),
+          score,
+          square,
         };
       },
     ),
@@ -131,33 +136,84 @@ function getWeightedExactEndgameMoveScores(
 export function getMoveCandidateReasons(
   context: ReviewContext,
 ): MoveReviewReason[] {
+  return getMoveCandidateReasonsFromMetrics(
+    getMoveCandidateMetrics({
+      bestScore: 0,
+      boardAfter: context.boardAfter,
+      boardBefore: context.boardBefore,
+      disc: context.disc,
+      score: 0,
+      square: context.square,
+    }),
+  );
+}
+
+function getMoveCandidateReasonsFromMetrics(
+  metrics: CandidateMoveMetrics,
+): MoveReviewReason[] {
   const reasons: MoveReviewReason[] = [];
 
-  if (isCorner(context.square)) {
+  if (metrics.isCorner) {
     reasons.push("corner");
   }
 
-  if (isDangerSquare(context.boardBefore, context.square)) {
+  if (metrics.isDangerSquare) {
     reasons.push("dangerSquare");
   }
 
-  if (newlyGivesCorner(context.boardBefore, context.boardAfter, context.disc)) {
+  if (metrics.givesOpponentCorner) {
     reasons.push("cornerGiven");
   }
 
-  const mobilitySwing =
-    getMobilityDifference(context.boardAfter, context.disc) -
-    getMobilityDifference(context.boardBefore, context.disc);
-
-  if (mobilitySwing >= mobilitySwingThreshold) {
+  if (metrics.mobilitySwing >= mobilitySwingThreshold) {
     reasons.push("mobilityGain");
   }
 
-  if (mobilitySwing <= -mobilitySwingThreshold) {
+  if (metrics.mobilitySwing <= -mobilitySwingThreshold) {
     reasons.push("mobilityLoss");
   }
 
   return reasons;
+}
+
+function getMoveCandidateMetrics({
+  bestScore,
+  boardAfter,
+  boardBefore,
+  disc,
+  score,
+  square,
+}: ReviewContext & {
+  bestScore: number;
+  score: number;
+}): CandidateMoveMetrics {
+  const opponentDisc = getNextDisc(disc);
+  const playerMobilityBefore = getLegalMoves(boardBefore, disc).length;
+  const playerMobilityAfter = getLegalMoves(boardAfter, disc).length;
+  const opponentMobilityBefore = getLegalMoves(
+    boardBefore,
+    opponentDisc,
+  ).length;
+  const opponentMobilityAfter = getLegalMoves(boardAfter, opponentDisc).length;
+  const mobilityDifferenceBefore =
+    playerMobilityBefore - opponentMobilityBefore;
+  const mobilityDifferenceAfter = playerMobilityAfter - opponentMobilityAfter;
+
+  return {
+    givesOpponentCorner: newlyGivesCorner(boardBefore, boardAfter, disc),
+    isCorner: isCorner(square),
+    isDangerSquare: isDangerSquare(boardBefore, square),
+    mobilityDifferenceAfter,
+    mobilityDifferenceBefore,
+    mobilitySwing: mobilityDifferenceAfter - mobilityDifferenceBefore,
+    opponentMobilityAfter,
+    opponentMobilityBefore,
+    opponentMobilityDelta: opponentMobilityAfter - opponentMobilityBefore,
+    playerMobilityAfter,
+    playerMobilityBefore,
+    playerMobilityDelta: playerMobilityAfter - playerMobilityBefore,
+    scoreGapFromBest: Math.max(0, bestScore - score),
+  };
 }
 
 function newlyGivesCorner(
