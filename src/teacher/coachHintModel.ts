@@ -1,4 +1,5 @@
 import type { Advantage } from "../cpu";
+import type { SquareIndex } from "../game/othello";
 import type { PlayerSettings } from "../game/players";
 import { getSessionLegalMoves, type GameSession } from "../game/session";
 import type { CoachHint } from "./createCoachHint";
@@ -22,6 +23,7 @@ export type CoachHintModel = {
 
 export type CoachHintVisibilityContext = {
   advantage?: Advantage;
+  analysis?: PlayPositionAnalysis;
   isCpuThinking?: boolean;
   players: PlayerSettings;
   session: GameSession;
@@ -86,14 +88,17 @@ export function createCoachHintModel(
     return null;
   }
 
-  const analysis = createPlayPositionAnalysis(
-    context.session.board,
-    context.session.currentDisc,
-    {
-      includeCandidateFallback: mode === "active",
-      messageStyle: mode === "gentle" ? "vague" : "specific",
-    },
-  );
+  const legalMoves = getSessionLegalMoves(context.session);
+  const analysis =
+    getCurrentAnalysis(context.analysis, context.session, legalMoves) ??
+    createPlayPositionAnalysis(
+      context.session.board,
+      context.session.currentDisc,
+      {
+        includeCandidateFallback: mode === "active",
+        messageStyle: mode === "gentle" ? "vague" : "specific",
+      },
+    );
 
   if (
     !canTriggerCoachHint({
@@ -119,6 +124,36 @@ export function createCoachHintModel(
     hints,
     mode,
   };
+}
+
+function getCurrentAnalysis(
+  analysis: PlayPositionAnalysis | undefined,
+  session: GameSession,
+  legalMoves: SquareIndex[],
+): PlayPositionAnalysis | null {
+  if (analysis === undefined) {
+    return null;
+  }
+
+  if (analysis.currentDisc !== session.currentDisc) {
+    return null;
+  }
+
+  if (!areLegalMovesEqual(analysis.legalMoves, legalMoves)) {
+    return null;
+  }
+
+  return analysis;
+}
+
+function areLegalMovesEqual(
+  firstMoves: SquareIndex[],
+  secondMoves: SquareIndex[],
+): boolean {
+  return (
+    firstMoves.length === secondMoves.length &&
+    firstMoves.every((move, index) => move === secondMoves[index])
+  );
 }
 
 function canPrepareCoachHint({
