@@ -4,7 +4,9 @@ import { analyzePlayPositionAsync } from "../services/playPositionAnalysisServic
 import {
   createPlayPositionAnalysisKey,
   createPlayPositionAnalysisState,
+  createSynchronousPlayPositionAnalysis,
   getCurrentPlayPositionAnalysis,
+  shouldUseSynchronousPlayPositionAnalysis,
   type PlayPositionAnalysisSources,
 } from "../services/playPositionAnalysisState";
 import {
@@ -33,12 +35,23 @@ export function usePlayPositionAnalysis(
   const [analysisState, setAnalysisState] = useState(() =>
     createPlayPositionAnalysisState(sources),
   );
+  const synchronousAnalysis = useMemo(
+    () => createSynchronousPlayPositionAnalysis(sources),
+    [sources],
+  );
+  const shouldUseSynchronousAnalysis = shouldUseSynchronousPlayPositionAnalysis(
+    sources.options,
+  );
   const currentAnalysis = getCurrentPlayPositionAnalysis(
     analysisState,
     sources,
   );
 
   useEffect(() => {
+    if (shouldUseSynchronousAnalysis) {
+      return;
+    }
+
     let cancelled = false;
     const requestId = `play-position-${nextPlayPositionAnalysisRequestId}`;
     nextPlayPositionAnalysisRequestId += 1;
@@ -66,7 +79,7 @@ export function usePlayPositionAnalysis(
     return () => {
       cancelled = true;
     };
-  }, [positionKey, sources]);
+  }, [positionKey, shouldUseSynchronousAnalysis, sources]);
 
-  return currentAnalysis;
+  return shouldUseSynchronousAnalysis ? synchronousAnalysis : currentAnalysis;
 }
