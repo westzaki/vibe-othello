@@ -28,8 +28,40 @@ describe("coach hint markers", () => {
         tone: "risk",
       },
       {
-        severity: undefined,
+        severity: "medium",
         square: 0,
+        tone: "helpful",
+      },
+    ]);
+  });
+
+  it("marks best move hints stronger than secondary helpful hints", () => {
+    const bestMoveHint = createHint({
+      kind: "bestMove",
+      severity: "medium",
+      square: 26,
+    });
+    const candidateHint = createHint({
+      kind: "candidate",
+      severity: "medium",
+      square: 19,
+    });
+    const model: CoachHintModel = {
+      analysis: {} as CoachHintModel["analysis"],
+      hint: bestMoveHint,
+      hints: [bestMoveHint, candidateHint],
+      mode: "active",
+    };
+
+    expect(createCoachHintMarkers(model)).toEqual([
+      {
+        severity: "high",
+        square: 26,
+        tone: "helpful",
+      },
+      {
+        severity: "medium",
+        square: 19,
         tone: "helpful",
       },
     ]);

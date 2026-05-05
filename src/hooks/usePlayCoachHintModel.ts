@@ -9,6 +9,7 @@ import {
   type CoachHintSettings,
   type PlayPositionAnalysis,
 } from "../teacher";
+import { shouldContinuePollingForBestMoveHint } from "./playCoachHintPolling";
 
 const coachHintPollMs = 250;
 
@@ -110,7 +111,15 @@ export function usePlayCoachHintModel({
       });
 
       if (visibleHints.length === 0) {
-        window.clearInterval(intervalId);
+        if (
+          !shouldContinuePollingForBestMoveHint({
+            hints: nextModel.hints,
+            session: latestContext.session,
+          })
+        ) {
+          window.clearInterval(intervalId);
+        }
+
         return;
       }
 
@@ -130,7 +139,15 @@ export function usePlayCoachHintModel({
           hints: visibleHints,
         },
       });
-      window.clearInterval(intervalId);
+
+      if (
+        !shouldContinuePollingForBestMoveHint({
+          hints: visibleHints,
+          session: latestContext.session,
+        })
+      ) {
+        window.clearInterval(intervalId);
+      }
     }, coachHintPollMs);
 
     return () => {

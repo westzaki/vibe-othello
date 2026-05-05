@@ -26,7 +26,7 @@ export type PlayPositionAnalysisResponse = {
   requestId: string;
 };
 
-const playPositionAnalysisWorkerTimeoutMs = 2500;
+const playPositionAnalysisWorkerTimeoutMs = 5000;
 
 const runPlayPositionAnalysisWorkerRequest = createWorkerFallbackRunner<
   PlayPositionAnalysisWorkerRequest,

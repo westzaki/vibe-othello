@@ -70,6 +70,12 @@
   background: var(--color-accent-wash);
 }
 
+.coach-hint__item--best .coach-hint__label {
+  color: var(--color-accent-strong);
+  background: color-mix(in srgb, var(--color-accent-wash) 76%, white);
+  box-shadow: 0 0 0 2px rgba(243, 200, 98, 0.24);
+}
+
 .coach-hint__item--risk .coach-hint__label {
   color: var(--color-peach-strong);
   background: rgba(255, 222, 210, 0.72);
