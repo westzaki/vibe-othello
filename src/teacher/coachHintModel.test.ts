@@ -33,8 +33,17 @@ describe("teacher coach hint model", () => {
     ).toEqual(
       expect.objectContaining({
         guidanceMode: "auto",
+        messageStyle: "direct",
         skipMoveAnalysis: false,
         useTeacherGuidanceMove: true,
+      }),
+    );
+  });
+
+  it("keeps gentle hint messages vague", () => {
+    expect(createCoachPlayPositionAnalysisOptions("gentle")).toEqual(
+      expect.objectContaining({
+        messageStyle: "vague",
       }),
     );
   });

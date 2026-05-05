@@ -2,7 +2,7 @@ import type { Advantage } from "../cpu";
 import type { SquareIndex } from "../game/othello";
 import type { PlayerSettings } from "../game/players";
 import { getSessionLegalMoves, type GameSession } from "../game/session";
-import type { CoachHint } from "./createCoachHint";
+import type { CoachHint, CoachHintMessageStyle } from "./createCoachHint";
 import {
   createPlayPositionAnalysis,
   type CreatePlayPositionAnalysisOptions,
@@ -209,7 +209,7 @@ export function createCoachPlayPositionAnalysisOptions(
     includeBestMoveHint: mode !== "off" && includeBestMoveHint,
     includeCandidateFallback: mode !== "off" && includeBestMoveHint,
     guidanceMode: mode === "off" ? undefined : "auto",
-    messageStyle: mode === "gentle" ? "vague" : "specific",
+    messageStyle: getCoachHintMessageStyle(mode),
     riskHintLimit: mode === "active" ? 3 : 2,
     searchDepth: mode === "off" ? undefined : coachGuidanceSearchDepth,
     shallowSearchDepth:
@@ -219,6 +219,18 @@ export function createCoachPlayPositionAnalysisOptions(
     useSelectiveDeepening: mode !== "off",
     useTeacherGuidanceMove: mode !== "off" && includeBestMoveHint,
   };
+}
+
+function getCoachHintMessageStyle(mode: CoachHintMode): CoachHintMessageStyle {
+  if (mode === "gentle") {
+    return "vague";
+  }
+
+  if (mode === "active") {
+    return "direct";
+  }
+
+  return "specific";
 }
 
 export function getCoachHintDelayMs(mode: CoachHintMode): number | null {
