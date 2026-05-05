@@ -25,13 +25,6 @@ export function StartMatchSetupPanel({
 
   return (
     <div className="start-panel" aria-label="Match setup">
-      <div className="start-panel__header">
-        <p className="start-panel__eyebrow">対局の準備</p>
-        <p className="start-panel__lead">
-          あそびかたと色をえらんだら、すぐにはじめられます
-        </p>
-      </div>
-
       <ModeSelector mode={mode} onModeChange={setMode} />
 
       <div className="start-panel__match-options">
@@ -77,7 +70,9 @@ function ModeSelector({ mode, onModeChange }: ModeSelectorProps) {
   return (
     <div className="start-panel__section start-panel__section--mode">
       <h2 className="start-panel__title">
-        <span className="start-panel__step">1</span>
+        <span className="start-panel__icon" aria-hidden="true">
+          ▦
+        </span>
         対戦モード
       </h2>
       <div className="mode-selector">
@@ -125,14 +120,16 @@ function CpuLevelSelector({
     >
       <div className="start-panel__section-header">
         <h2 className="start-panel__title">
-          <span className="start-panel__step">2</span>
+          <span className="start-panel__icon" aria-hidden="true">
+            ★
+          </span>
           CPUの強さ
         </h2>
-        <p className="start-panel__helper">
-          {isOnePlayer
-            ? "星が多いほど強くなります"
-            : "ふたりであそぶ時は使いません"}
-        </p>
+        {!isOnePlayer && (
+          <p className="start-panel__helper">
+            ふたりであそぶ時は使いません
+          </p>
+        )}
       </div>
       <div className="cpu-star-selector" aria-label="CPUの強さ">
         {cpuLevels.map((level, index) => (
@@ -150,7 +147,7 @@ function CpuLevelSelector({
             onClick={() => onCpuLevelChange(level)}
             type="button"
           >
-            ★
+            {index <= cpuLevelIndex ? "★" : "☆"}
           </button>
         ))}
       </div>
@@ -167,7 +164,9 @@ function DiscSelector({ humanDisc, onHumanDiscChange }: DiscSelectorProps) {
   return (
     <div className="start-panel__section start-panel__section--disc">
       <h2 className="start-panel__title">
-        <span className="start-panel__step">3</span>
+        <span className="start-panel__icon" aria-hidden="true">
+          ●
+        </span>
         あなたの色
       </h2>
       <div className="disc-selector">

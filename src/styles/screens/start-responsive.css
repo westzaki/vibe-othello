@@ -40,6 +40,10 @@
 }
 
 @media (max-width: 680px) {
+  .start-panel__section {
+    grid-template-columns: 1fr;
+  }
+
   .start-panel__match-options {
     grid-template-columns: 1fr;
   }
